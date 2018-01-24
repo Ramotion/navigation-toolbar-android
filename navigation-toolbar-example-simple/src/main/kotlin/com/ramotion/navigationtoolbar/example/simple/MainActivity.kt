@@ -5,6 +5,7 @@ import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
+import com.ramotion.navigationtoolbar.NavigationToolBarLayout
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
@@ -17,6 +18,8 @@ class MainActivity : AppCompatActivity() {
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show()
         }
+
+        initHeader()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -31,9 +34,15 @@ class MainActivity : AppCompatActivity() {
         // as you specify a parent activity in AndroidManifest.xml.
 
         return when (item.itemId) {
-            R.id.action_settings ->
-                return true
+            R.id.action_settings -> true
             else -> super.onOptionsItemSelected(item)
         }
     }
+
+    private fun initHeader() {
+        val toolbar = findViewById<NavigationToolBarLayout>(R.id.navigation_toolbar_layout)
+        toolbar.setAdapter(HeaderAdapter(20))
+        toolbar.setCurrentPosition(3)
+    }
+
 }

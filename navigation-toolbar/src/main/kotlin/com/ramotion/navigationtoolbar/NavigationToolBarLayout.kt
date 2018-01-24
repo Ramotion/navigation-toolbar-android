@@ -7,15 +7,30 @@ import android.support.v7.widget.Toolbar
 import android.util.AttributeSet
 import android.view.LayoutInflater
 
+
 class NavigationToolBarLayout : CoordinatorLayout {
 
-    val mToolBar: Toolbar
+    val mToolBar: Toolbar // TODO: remove
+
+    private val mHeaderLayout: HeaderLayout
+    private val mHeaderLayoutManager: HeaderLayoutManager
 
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
 
     constructor(context: Context, attrs: AttributeSet?, @AttrRes defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
         LayoutInflater.from(context).inflate(R.layout.navigation_layout, this, true)
+
         mToolBar = findViewById(R.id.com_ramotion_toolbar)
+        mHeaderLayout = findViewById(R.id.com_ramotion_header_layout)
+        mHeaderLayoutManager = (mHeaderLayout.layoutParams as CoordinatorLayout.LayoutParams).behavior as HeaderLayoutManager
+    }
+
+    fun setAdapter(adapter: HeaderLayout.Adapter<out HeaderLayout.ViewHolder>) {
+        mHeaderLayout.setAdapter(adapter)
+    }
+
+    fun setCurrentPosition(pos: Int) {
+        mHeaderLayout.mAdapter?.setCurrentPosition(pos)
     }
 
 }
