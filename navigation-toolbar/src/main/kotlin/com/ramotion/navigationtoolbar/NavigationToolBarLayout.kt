@@ -2,6 +2,7 @@ package com.ramotion.navigationtoolbar
 
 import android.content.Context
 import android.support.annotation.AttrRes
+import android.support.design.widget.AppBarLayout
 import android.support.design.widget.CoordinatorLayout
 import android.support.v7.widget.Toolbar
 import android.util.AttributeSet
@@ -14,6 +15,7 @@ class NavigationToolBarLayout : CoordinatorLayout {
 
     private val mHeaderLayout: HeaderLayout
     private val mHeaderLayoutManager: HeaderLayoutManager
+    private val mAppBarLayout: AppBarLayout
 
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
 
@@ -23,6 +25,9 @@ class NavigationToolBarLayout : CoordinatorLayout {
         mToolBar = findViewById(R.id.com_ramotion_toolbar)
         mHeaderLayout = findViewById(R.id.com_ramotion_header_layout)
         mHeaderLayoutManager = (mHeaderLayout.layoutParams as CoordinatorLayout.LayoutParams).behavior as HeaderLayoutManager
+
+        mAppBarLayout = findViewById(R.id.com_ramotion_app_bar)
+        (mAppBarLayout.layoutParams as CoordinatorLayout.LayoutParams).behavior = AppBarBehavior()
     }
 
     fun setAdapter(adapter: HeaderLayout.Adapter<out HeaderLayout.ViewHolder>) {

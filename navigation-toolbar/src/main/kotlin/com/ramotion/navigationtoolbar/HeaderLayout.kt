@@ -1,10 +1,7 @@
 package com.ramotion.navigationtoolbar
 
 import android.content.Context
-import android.support.v4.view.GestureDetectorCompat
 import android.util.AttributeSet
-import android.view.GestureDetector
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
@@ -26,12 +23,7 @@ class HeaderLayout : FrameLayout {
         }
     }
 
-    private val mTouchGestureDetector: GestureDetectorCompat
-    private val mInterceptGestureDetector: GestureDetectorCompat
-
     internal val mRecycler = Recycler()
-
-    internal var mGestureListener: GestureDetector.SimpleOnGestureListener? = null
 
     var mAdapter: Adapter<ViewHolder>? = null
         private set
@@ -39,15 +31,10 @@ class HeaderLayout : FrameLayout {
     constructor(context: Context, attrs: AttributeSet) : this(context, attrs, 0)
 
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
-        mInterceptGestureDetector = GestureDetectorCompat(context, InterceptGestureListener())
-        mTouchGestureDetector = GestureDetectorCompat(context, TouchGestureListener())
     }
 
-    override fun generateLayoutParams(lp: ViewGroup.LayoutParams) = LayoutParams(lp)
-
-    override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
-        // Do nothing here. Layout children in HeaderLayoutManager
-    }
+    // Do nothing here. Layout children in HeaderLayoutManager
+    override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {}
 
     fun getAdapterPosition(view: View) = (view.layoutParams as LayoutParams).getViewAdapterPosition()
 
@@ -57,26 +44,6 @@ class HeaderLayout : FrameLayout {
 
     internal fun setAdapter(adapter: Adapter<out ViewHolder>) {
         mAdapter = adapter as Adapter<ViewHolder> // TODO: fix?
-    }
-
-    private inner class InterceptGestureListener : GestureDetector.SimpleOnGestureListener() {
-        override fun onScroll(e1: MotionEvent?, e2: MotionEvent?, distanceX: Float, distanceY: Float): Boolean = true
-        override fun onFling(e1: MotionEvent?, e2: MotionEvent?, velocityX: Float, velocityY: Float): Boolean = true
-        override fun onDown(e: MotionEvent?): Boolean {
-            mGestureListener?.onDown(e)
-            return super.onDown(e)
-        }
-    }
-
-    private inner class TouchGestureListener : GestureDetector.SimpleOnGestureListener() {
-        override fun onScroll(e1: MotionEvent?, e2: MotionEvent?, distanceX: Float, distanceY: Float): Boolean {
-            mGestureListener?.onScroll(e1, e2, distanceX, distanceY)
-            return false
-        }
-        override fun onFling(e1: MotionEvent?, e2: MotionEvent?, velocityX: Float, velocityY: Float): Boolean {
-            mGestureListener?.onFling(e1, e2, velocityX, velocityY)
-            return false
-        }
     }
 
     open class ViewHolder(val view: View) {

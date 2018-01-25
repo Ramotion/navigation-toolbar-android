@@ -7,8 +7,6 @@ import android.support.design.widget.CoordinatorLayout
 import android.util.AttributeSet
 import android.util.Log
 import android.util.SparseArray
-import android.view.GestureDetector
-import android.view.MotionEvent
 import android.view.View
 
 /**
@@ -45,7 +43,6 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
 
     private val mHPoints = mutableListOf<PointF>()
     private val mVPoints = mutableListOf<PointF>()
-    private val mGestureDetector = TouchGestureListener()
     private val mViewCache = SparseArray<View?>()
 
     private lateinit var mAppBar: AppBarLayout
@@ -58,7 +55,6 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
     override fun onLayoutChild(parent: CoordinatorLayout, header: HeaderLayout, layoutDirection: Int): Boolean {
         if (!parent.isLaidOut) {
             parent.onLayoutChild(header, layoutDirection)
-            header.mGestureListener = mGestureDetector
 
             mAppBar = parent.findViewById(R.id.com_ramotion_app_bar)
             mHeaderLayout = header
@@ -235,20 +231,6 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
         view.layout(x, y, x + w, y + h)
         header.addView(view)
         return view
-    }
-
-    private inner class TouchGestureListener: GestureDetector.SimpleOnGestureListener() {
-        override fun onDown(e: MotionEvent?): Boolean {
-            return super.onDown(e)
-        }
-
-        override fun onScroll(e1: MotionEvent?, e2: MotionEvent?, distanceX: Float, distanceY: Float): Boolean {
-            return super.onScroll(e1, e2, distanceX, distanceY)
-        }
-
-        override fun onFling(e1: MotionEvent?, e2: MotionEvent?, velocityX: Float, velocityY: Float): Boolean {
-            return super.onFling(e1, e2, velocityX, velocityY)
-        }
     }
 
 }
