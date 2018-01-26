@@ -2,6 +2,7 @@ package com.ramotion.navigationtoolbar
 
 import android.content.Context
 import android.graphics.PointF
+import android.os.Looper
 import android.support.design.widget.AppBarLayout
 import android.support.design.widget.CoordinatorLayout
 import android.util.AttributeSet
@@ -13,13 +14,14 @@ import android.view.View
  * Moves header's views
  */
 class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
-    : CoordinatorLayout.Behavior<HeaderLayout>(context, attrs) {
+    : CoordinatorLayout.Behavior<HeaderLayout>(context, attrs), AppBarLayout.OnOffsetChangedListener {
 
     private companion object {
         val TAB_ON_SCREEN_COUNT = 5
         val TAB_OFF_SCREEN_COUNT = 1
         val VERTICAL_TAB_HEIGHT_RATIO = 1f / TAB_ON_SCREEN_COUNT
         val VERTICAL_TAB_WIDTH_RATIO = 4f / 5f
+        val SCROLL_STOP_CHECK_DELAY = 300L
     }
 
     private enum class Orientation {
@@ -45,8 +47,23 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
     private val mVPoints = mutableListOf<PointF>()
     private val mViewCache = SparseArray<View?>()
 
+    internal val mAppBarBehavior = AppBarBehavior()
+
     private lateinit var mAppBar: AppBarLayout
     private lateinit var mHeaderLayout: HeaderLayout
+
+    private var mCanDrag = true
+    private var mOffsetChanged = false
+    private var mIsCheckingScrollStop =false
+
+    init {
+        Looper.myQueue().addIdleHandler {
+            if (mOffsetChanged && !mIsCheckingScrollStop) {
+                checkIfScrollStopped()
+            }
+            true
+        }
+    }
 
     override fun layoutDependsOn(parent: CoordinatorLayout, child: HeaderLayout, dependency: View): Boolean {
         return dependency is AppBarLayout
@@ -72,6 +89,12 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
         header.y = (dependency.bottom - header.height).toFloat()
 
         return true
+    }
+
+    override fun onOffsetChanged(appBarLayout: AppBarLayout?, verticalOffset: Int) {
+        mOffsetChanged = true
+        val offset = verticalOffset
+        Log.d("D", "onOffsetChanged| offset: $offset")
     }
 
     private fun initPoints(header: HeaderLayout) {
@@ -231,6 +254,49 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
         view.layout(x, y, x + w, y + h)
         header.addView(view)
         return view
+    }
+
+    private fun checkIfScrollStopped() {
+        mOffsetChanged = false
+        mIsCheckingScrollStop = true
+
+        val startOffset = mAppBarBehavior.topAndBottomOffset
+        mHeaderLayout.postOnAnimationDelayed({
+            mIsCheckingScrollStop = false
+            val currentOffset = mAppBarBehavior.topAndBottomOffset
+            val scrollStopped = currentOffset == startOffset
+            if (scrollStopped) {
+                onScrollStopped(currentOffset)
+            }
+            Log.d("D","checkIfScrollStopped| startOffset: $startOffset, currentOffset: $currentOffset, scrollStopped: $scrollStopped")
+        }, SCROLL_STOP_CHECK_DELAY)
+    }
+
+    private fun onScrollStopped(offset: Int) {
+        Log.d("D","onScrollStopped| offset: $offset")
+        var hScroll = false
+        var vScroll = false
+        if (offset == 0) {
+            vScroll = true
+            // TODO: disable dragging
+        } else if (offset == mScreenHalf.toInt()) {
+            hScroll = true
+        } else {
+            // TODO: check if near and offset (scroll) header if needed
+        }
+
+        mHeaderLayout.mEnableHorizontalScroll = hScroll
+        mHeaderLayout.mEnableVerticalScroll = vScroll
+    }
+
+    inner class AppBarBehavior : AppBarLayout.Behavior() {
+
+        init {
+            setDragCallback(object : AppBarLayout.Behavior.DragCallback() {
+                override fun canDrag(appBarLayout: AppBarLayout) = mCanDrag
+            })
+        }
+
     }
 
 }

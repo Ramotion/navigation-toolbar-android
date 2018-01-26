@@ -27,7 +27,8 @@ class NavigationToolBarLayout : CoordinatorLayout {
         mHeaderLayoutManager = (mHeaderLayout.layoutParams as CoordinatorLayout.LayoutParams).behavior as HeaderLayoutManager
 
         mAppBarLayout = findViewById(R.id.com_ramotion_app_bar)
-        (mAppBarLayout.layoutParams as CoordinatorLayout.LayoutParams).behavior = AppBarBehavior()
+        mAppBarLayout.addOnOffsetChangedListener(mHeaderLayoutManager)
+        (mAppBarLayout.layoutParams as CoordinatorLayout.LayoutParams).behavior = mHeaderLayoutManager.mAppBarBehavior
     }
 
     fun setAdapter(adapter: HeaderLayout.Adapter<out HeaderLayout.ViewHolder>) {
