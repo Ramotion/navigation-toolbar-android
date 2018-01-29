@@ -17,11 +17,11 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
     : CoordinatorLayout.Behavior<HeaderLayout>(context, attrs), AppBarLayout.OnOffsetChangedListener {
 
     private companion object {
-        val TAB_ON_SCREEN_COUNT = 5
-        val TAB_OFF_SCREEN_COUNT = 1
-        val VERTICAL_TAB_HEIGHT_RATIO = 1f / TAB_ON_SCREEN_COUNT
-        val VERTICAL_TAB_WIDTH_RATIO = 4f / 5f
-        val SCROLL_STOP_CHECK_DELAY = 300L
+        const val TAB_ON_SCREEN_COUNT = 5
+        const val TAB_OFF_SCREEN_COUNT = 1
+        const val VERTICAL_TAB_HEIGHT_RATIO = 1f / TAB_ON_SCREEN_COUNT
+        const val VERTICAL_TAB_WIDTH_RATIO = 4f / 5f
+        const val SCROLL_STOP_CHECK_DELAY = 300L
     }
 
     private enum class Orientation {
@@ -52,14 +52,17 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
     private lateinit var mAppBar: AppBarLayout
     private lateinit var mHeaderLayout: HeaderLayout
 
+    private var mInitialized = false
     private var mCanDrag = true
     private var mOffsetChanged = false
     private var mIsCheckingScrollStop =false
 
+    private var mScrollToPosition = HeaderLayout.INVALID_POSITION
+
     init {
         Looper.myQueue().addIdleHandler {
             if (mOffsetChanged && !mIsCheckingScrollStop) {
-                checkIfScrollStopped()
+                checkIfOffsetChangingStopped()
             }
             true
         }
@@ -76,8 +79,10 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
             mAppBar = parent.findViewById(R.id.com_ramotion_app_bar)
             mHeaderLayout = header
 
-            initPoints(header) // TODO: remove header parameter
-            fill(header) // TODO: remove header parameter
+            initPoints(header)
+            fill(header)
+
+            mInitialized = true
 
             return true
         }
@@ -93,8 +98,17 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
 
     override fun onOffsetChanged(appBarLayout: AppBarLayout?, verticalOffset: Int) {
         mOffsetChanged = true
-        val offset = verticalOffset
-        Log.d("D", "onOffsetChanged| offset: $offset")
+    }
+
+    fun scrollToPosition(pos: Int) {
+        if (!mInitialized) {
+            return
+        }
+
+        if (pos < 0 || mHeaderLayout.mAdapter?.run { pos >= getItemCount() } == true) {
+            mScrollToPosition = pos
+            fill(mHeaderLayout)
+        }
     }
 
     private fun initPoints(header: HeaderLayout) {
@@ -119,13 +133,12 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
     }
 
     private fun getAnchorPos(header: HeaderLayout, points: List<PointF>): Int {
-        val currentPosition = header.mAdapter?.mCurrentPosition ?: HeaderLayout.INVALID_POSITION
-        if (currentPosition != HeaderLayout.INVALID_POSITION) {
-            return currentPosition
+        if (mScrollToPosition != HeaderLayout.INVALID_POSITION) {
+            return mScrollToPosition
         } else {
             val centerLeft = points[mCenterIndex].x
 
-            var result = HeaderLayout.INVALID_POSITION
+            var result = 0
             var lastDiff = Int.MAX_VALUE
 
             for (i in 0 until header.childCount) {
@@ -256,7 +269,7 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
         return view
     }
 
-    private fun checkIfScrollStopped() {
+    private fun checkIfOffsetChangingStopped() {
         mOffsetChanged = false
         mIsCheckingScrollStop = true
 
@@ -266,27 +279,25 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
             val currentOffset = mAppBarBehavior.topAndBottomOffset
             val scrollStopped = currentOffset == startOffset
             if (scrollStopped) {
-                onScrollStopped(currentOffset)
+                onOffsetChangingStopped(currentOffset)
             }
-            Log.d("D","checkIfScrollStopped| startOffset: $startOffset, currentOffset: $currentOffset, scrollStopped: $scrollStopped")
         }, SCROLL_STOP_CHECK_DELAY)
     }
 
-    private fun onScrollStopped(offset: Int) {
-        Log.d("D","onScrollStopped| offset: $offset")
-        var hScroll = false
-        var vScroll = false
+    private fun onOffsetChangingStopped(offset: Int) {
+        var hScrollEnable = false
+        var vScrollEnable = false
         if (offset == 0) {
-            vScroll = true
-            // TODO: disable dragging
+            vScrollEnable = true
+            mCanDrag = false
         } else if (offset == mScreenHalf.toInt()) {
-            hScroll = true
+            hScrollEnable = true
         } else {
             // TODO: check if near and offset (scroll) header if needed
         }
 
-        mHeaderLayout.mEnableHorizontalScroll = hScroll
-        mHeaderLayout.mEnableVerticalScroll = vScroll
+        mHeaderLayout.mIsHorizontalScrollEnabled = hScrollEnable
+        mHeaderLayout.mIsVerticalScrollEnabled = vScrollEnable
     }
 
     inner class AppBarBehavior : AppBarLayout.Behavior() {

@@ -42,7 +42,7 @@ class MainActivity : AppCompatActivity() {
     private fun initHeader() {
         val toolbar = findViewById<NavigationToolBarLayout>(R.id.navigation_toolbar_layout)
         toolbar.setAdapter(HeaderAdapter(20))
-        toolbar.setCurrentPosition(3)
+//        toolbar.setCurrentPosition(3)
     }
 
 }

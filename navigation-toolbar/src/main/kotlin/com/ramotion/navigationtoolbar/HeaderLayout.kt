@@ -16,7 +16,7 @@ import android.widget.FrameLayout
 class HeaderLayout : FrameLayout {
 
     companion object {
-        val INVALID_POSITION = -1
+        const val INVALID_POSITION = -1
 
         fun getChildViewHolder(child: View): ViewHolder? {
             val lp = child.layoutParams
@@ -31,8 +31,8 @@ class HeaderLayout : FrameLayout {
 
     internal val mRecycler = Recycler()
 
-    internal var mEnableHorizontalScroll = false
-    internal var mEnableVerticalScroll = false
+    internal var mIsHorizontalScrollEnabled = false
+    internal var mIsVerticalScrollEnabled = false
 
     var mAdapter: Adapter<ViewHolder>? = null
         private set
@@ -61,19 +61,29 @@ class HeaderLayout : FrameLayout {
         mAdapter = adapter as Adapter<ViewHolder> // TODO: fix?
     }
 
+    // TODO: move to layout
+    private fun horizontalScroll(distanceX: Float) {
+        Log.d("D", "horizontalScroll| distanceX: $distanceX")
+    }
+
+    // TODO: move to layout
+    private fun verticalScroll(distanceY: Float) {
+        Log.d("D", "verticalScroll| distanceY: $distanceY")
+    }
+
     private inner class TouchGestureListener : GestureDetector.SimpleOnGestureListener() {
-        override fun onDown(e: MotionEvent?): Boolean {
-            Log.d("D", "gesture onDown")
-            return true
-        }
+        override fun onDown(e: MotionEvent?): Boolean = true
 
         override fun onScroll(e1: MotionEvent?, e2: MotionEvent?, distanceX: Float, distanceY: Float): Boolean {
-            Log.d("D", "gesture onScroll")
+            when {
+                mIsHorizontalScrollEnabled -> horizontalScroll(distanceX)
+                mIsVerticalScrollEnabled -> verticalScroll(distanceY)
+            }
             return super.onScroll(e1, e2, distanceX, distanceY)
         }
 
         override fun onFling(e1: MotionEvent?, e2: MotionEvent?, velocityX: Float, velocityY: Float): Boolean {
-            Log.d("D", "gesture onScroll")
+            Log.d("D", "gesture onFling")
             return super.onFling(e1, e2, velocityX, velocityY)
         }
     }
@@ -106,8 +116,6 @@ class HeaderLayout : FrameLayout {
     // TODO: use ViewHolder pattern
     abstract class Adapter<VH : ViewHolder> {
 
-        internal var mCurrentPosition: Int = INVALID_POSITION
-
         abstract fun getItemCount(): Int
 
         abstract fun onCreateViewHolder(parent: ViewGroup): VH
@@ -132,13 +140,6 @@ class HeaderLayout : FrameLayout {
         }
 
         fun onViewRecycled(holder: VH) {}
-
-
-        internal fun setCurrentPosition(pos: Int) {
-            if (pos in 0 .. getItemCount()) {
-                mCurrentPosition = pos
-            }
-        }
 
     }
 

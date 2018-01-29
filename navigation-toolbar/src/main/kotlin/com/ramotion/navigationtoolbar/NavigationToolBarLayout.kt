@@ -36,7 +36,7 @@ class NavigationToolBarLayout : CoordinatorLayout {
     }
 
     fun setCurrentPosition(pos: Int) {
-        mHeaderLayout.mAdapter?.setCurrentPosition(pos)
+        mHeaderLayoutManager.scrollToPosition(pos)
     }
 
 }
