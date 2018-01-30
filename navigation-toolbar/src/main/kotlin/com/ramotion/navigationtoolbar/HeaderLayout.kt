@@ -27,12 +27,20 @@ class HeaderLayout : FrameLayout {
         }
     }
 
+    internal interface ScrollListener {
+        fun onHeaderHorizontalScroll(header: HeaderLayout, distance: Float)
+        fun onHeaderVerticalScroll(header: HeaderLayout, distance: Float)
+        // TODO: onFling
+    }
+
     private val mTouchGestureDetector: GestureDetectorCompat
 
     internal val mRecycler = Recycler()
 
     internal var mIsHorizontalScrollEnabled = false
     internal var mIsVerticalScrollEnabled = false
+
+    internal var mScrollListener: ScrollListener? = null
 
     var mAdapter: Adapter<ViewHolder>? = null
         private set
@@ -61,23 +69,17 @@ class HeaderLayout : FrameLayout {
         mAdapter = adapter as Adapter<ViewHolder> // TODO: fix?
     }
 
-    // TODO: move to layout
-    private fun horizontalScroll(distanceX: Float) {
-        Log.d("D", "horizontalScroll| distanceX: $distanceX")
-    }
-
-    // TODO: move to layout
-    private fun verticalScroll(distanceY: Float) {
-        Log.d("D", "verticalScroll| distanceY: $distanceY")
-    }
-
     private inner class TouchGestureListener : GestureDetector.SimpleOnGestureListener() {
-        override fun onDown(e: MotionEvent?): Boolean = true
+        override fun onDown(e: MotionEvent?): Boolean {
+            return childCount != 0 // Do nothing if child count == 0
+        }
 
         override fun onScroll(e1: MotionEvent?, e2: MotionEvent?, distanceX: Float, distanceY: Float): Boolean {
-            when {
-                mIsHorizontalScrollEnabled -> horizontalScroll(distanceX)
-                mIsVerticalScrollEnabled -> verticalScroll(distanceY)
+            mScrollListener?.let {
+                when {
+                    mIsHorizontalScrollEnabled -> it.onHeaderHorizontalScroll(this@HeaderLayout, distanceX)
+                    mIsVerticalScrollEnabled -> it.onHeaderVerticalScroll(this@HeaderLayout, distanceY)
+                }
             }
             return super.onScroll(e1, e2, distanceX, distanceY)
         }
