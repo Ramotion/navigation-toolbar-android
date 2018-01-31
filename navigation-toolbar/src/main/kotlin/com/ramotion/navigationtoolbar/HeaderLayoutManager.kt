@@ -5,6 +5,7 @@ import android.graphics.PointF
 import android.os.Looper
 import android.support.design.widget.AppBarLayout
 import android.support.design.widget.CoordinatorLayout
+import android.support.v4.view.ViewCompat
 import android.util.AttributeSet
 import android.util.SparseArray
 import android.view.View
@@ -100,19 +101,31 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
         mOffsetChanged = true
     }
 
-    override fun onHeaderHorizontalScroll(header: HeaderLayout, distance: Float) {
+    override fun onHeaderDown(header: HeaderLayout): Boolean {
+        if (header.childCount == 0) {
+            return false
+        }
+
+        header.mScroller.forceFinished(true);
+        ViewCompat.postInvalidateOnAnimation(header);
+        return true
+    }
+
+    override fun onHeaderHorizontalScroll(header: HeaderLayout, distance: Float): Boolean {
         val childCount = header.childCount
         if (childCount == 0) {
-            return
+            return false
         }
 
         mScrollToPosition = HeaderLayout.INVALID_POSITION
+
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun onHeaderVerticalScroll(header: HeaderLayout, distance: Float) {
+    override fun onHeaderVerticalScroll(header: HeaderLayout, distance: Float): Boolean {
         val childCount = header.childCount
         if (childCount == 0) {
-            return
+            return false
         }
 
         mScrollToPosition = HeaderLayout.INVALID_POSITION
@@ -137,6 +150,59 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
         }
 
         fill(header)
+        return true
+    }
+
+    override fun onHeaderHorizontalFling(header: HeaderLayout, velocity: Float): Boolean {
+        val childCount = header.childCount
+        if (childCount == 0) {
+            return false
+        }
+
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun onHeaderVerticalFling(header: HeaderLayout, velocity: Float): Boolean {
+        val childCount = header.childCount
+        if (childCount == 0) {
+            return false
+        }
+
+        val itemCount = header.mAdapter?.getItemCount() ?: return false
+        val first = header.getChildAt(0)
+        val firstPos = HeaderLayout.getChildViewHolder(first)!!.mPosition
+        val start = first.top - firstPos * mVerticalTabHeight
+        val min = -itemCount * mVerticalTabHeight + header.height
+        val max = 0
+
+        header.mScroller.apply {
+            forceFinished(true)
+            fling(0, start, 0, velocity.toInt(), 0, 0, min, max)
+        }
+        ViewCompat.postInvalidateOnAnimation(header)
+
+        return true
+    }
+
+    override fun computeScroll(header: HeaderLayout) {
+        val x = header.mScroller.currX
+        val y = header.mScroller.currY
+
+        if (!header.mScroller.computeScrollOffset()) {
+            return
+        }
+
+        for (i in 0 until header.childCount) {
+            val diffX = header.mScroller.currX - x
+            val diffY = header.mScroller.currY - y
+            val child = header.getChildAt(i)
+            child.offsetLeftAndRight(diffX)
+            child.offsetTopAndBottom(diffY)
+        }
+
+        fill(header)
+
+        ViewCompat.postInvalidateOnAnimation(header)
     }
 
     fun scrollToPosition(pos: Int) {

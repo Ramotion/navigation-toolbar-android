@@ -3,12 +3,12 @@ package com.ramotion.navigationtoolbar
 import android.content.Context
 import android.support.v4.view.GestureDetectorCompat
 import android.util.AttributeSet
-import android.util.Log
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import android.widget.OverScroller
 
 /**
  * Header views container and producer with cache (recycler).
@@ -18,23 +18,21 @@ class HeaderLayout : FrameLayout {
     companion object {
         const val INVALID_POSITION = -1
 
-        fun getChildViewHolder(child: View): ViewHolder? {
-            val lp = child.layoutParams
-            return when (lp) {
-                is LayoutParams -> lp.mViewHolder
-                else -> null
-            }
-        }
+        fun getChildViewHolder(child: View): ViewHolder? = (child.layoutParams as LayoutParams).mViewHolder
     }
 
     internal interface ScrollListener {
-        fun onHeaderHorizontalScroll(header: HeaderLayout, distance: Float)
-        fun onHeaderVerticalScroll(header: HeaderLayout, distance: Float)
-        // TODO: onFling
+        fun onHeaderDown(header: HeaderLayout): Boolean
+        fun onHeaderHorizontalScroll(header: HeaderLayout, distance: Float): Boolean
+        fun onHeaderVerticalScroll(header: HeaderLayout, distance: Float): Boolean
+        fun onHeaderHorizontalFling(header: HeaderLayout, velocity: Float): Boolean
+        fun onHeaderVerticalFling(header: HeaderLayout, velocity: Float): Boolean
+        fun computeScroll(header: HeaderLayout)
     }
 
     private val mTouchGestureDetector: GestureDetectorCompat
 
+    internal val mScroller: OverScroller
     internal val mRecycler = Recycler()
 
     internal var mIsHorizontalScrollEnabled = false
@@ -49,6 +47,7 @@ class HeaderLayout : FrameLayout {
 
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
         mTouchGestureDetector = GestureDetectorCompat(context, TouchGestureListener())
+        mScroller = OverScroller(context)
     }
 
     // Do nothing here. Layout children in HeaderLayoutManager
@@ -57,6 +56,11 @@ class HeaderLayout : FrameLayout {
     // TODO: performClick stuff
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         return mTouchGestureDetector.onTouchEvent(event)
+    }
+
+    override fun computeScroll() {
+        super.computeScroll()
+        mScrollListener?.computeScroll(this)
     }
 
     fun getAdapterPosition(view: View) = (view.layoutParams as LayoutParams).getViewAdapterPosition()
@@ -71,22 +75,31 @@ class HeaderLayout : FrameLayout {
 
     private inner class TouchGestureListener : GestureDetector.SimpleOnGestureListener() {
         override fun onDown(e: MotionEvent?): Boolean {
-            return childCount != 0 // Do nothing if child count == 0
+            return mScrollListener?.onHeaderDown(this@HeaderLayout) ?: false
         }
 
         override fun onScroll(e1: MotionEvent?, e2: MotionEvent?, distanceX: Float, distanceY: Float): Boolean {
-            mScrollListener?.let {
-                when {
-                    mIsHorizontalScrollEnabled -> it.onHeaderHorizontalScroll(this@HeaderLayout, distanceX)
-                    mIsVerticalScrollEnabled -> it.onHeaderVerticalScroll(this@HeaderLayout, distanceY)
+            return mScrollListener?.run {
+                if (mIsHorizontalScrollEnabled) {
+                    onHeaderHorizontalScroll(this@HeaderLayout, distanceX)
+                } else if (mIsVerticalScrollEnabled) {
+                    onHeaderVerticalScroll(this@HeaderLayout, distanceY)
+                } else {
+                    false
                 }
-            }
-            return super.onScroll(e1, e2, distanceX, distanceY)
+            } ?: false
         }
 
         override fun onFling(e1: MotionEvent?, e2: MotionEvent?, velocityX: Float, velocityY: Float): Boolean {
-            Log.d("D", "gesture onFling")
-            return super.onFling(e1, e2, velocityX, velocityY)
+            return mScrollListener?.run {
+                if (mIsHorizontalScrollEnabled) {
+                    onHeaderHorizontalFling(this@HeaderLayout, velocityX)
+                } else if (mIsVerticalScrollEnabled) {
+                    onHeaderVerticalFling(this@HeaderLayout, velocityY)
+                } else {
+                    false
+                }
+            } ?: false
         }
     }
 
