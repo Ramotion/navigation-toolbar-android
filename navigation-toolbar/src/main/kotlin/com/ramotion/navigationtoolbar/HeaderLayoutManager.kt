@@ -7,6 +7,7 @@ import android.support.design.widget.AppBarLayout
 import android.support.design.widget.CoordinatorLayout
 import android.support.v4.view.ViewCompat
 import android.util.AttributeSet
+import android.util.Log
 import android.util.SparseArray
 import android.view.View
 
@@ -99,6 +100,11 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
 
     override fun onOffsetChanged(appBarLayout: AppBarLayout?, verticalOffset: Int) {
         mOffsetChanged = true
+    }
+
+    override fun onItemClick(header: HeaderLayout, viewHolder: HeaderLayout.ViewHolder): Boolean {
+        Log.d("D", "onItemClicked| pos: ${viewHolder.mPosition}")
+        return true
     }
 
     override fun onHeaderDown(header: HeaderLayout): Boolean {

@@ -1,6 +1,7 @@
 package com.ramotion.navigationtoolbar
 
 import android.content.Context
+import android.graphics.Rect
 import android.support.v4.view.GestureDetectorCompat
 import android.util.AttributeSet
 import android.view.GestureDetector
@@ -22,6 +23,7 @@ class HeaderLayout : FrameLayout {
     }
 
     internal interface ScrollListener {
+        fun onItemClick(header: HeaderLayout, viewHolder: ViewHolder): Boolean
         fun onHeaderDown(header: HeaderLayout): Boolean
         fun onHeaderHorizontalScroll(header: HeaderLayout, distance: Float): Boolean
         fun onHeaderVerticalScroll(header: HeaderLayout, distance: Float): Boolean
@@ -74,6 +76,25 @@ class HeaderLayout : FrameLayout {
     }
 
     private inner class TouchGestureListener : GestureDetector.SimpleOnGestureListener() {
+        override fun onSingleTapUp(e: MotionEvent): Boolean {
+            val listener = mScrollListener ?: return false
+
+            val rect = Rect()
+            val location = IntArray(2)
+
+            for (i in 0 until childCount) {
+                val child = getChildAt(i)
+                child.getDrawingRect(rect)
+                child.getLocationOnScreen(location)
+                rect.offset(location[0], location[1])
+                val contains = rect.contains(e.rawX.toInt(), e.rawY.toInt())
+                if (contains) {
+                    return listener.onItemClick(this@HeaderLayout, getChildViewHolder(child)!!)
+                }
+            }
+            return false
+        }
+
         override fun onDown(e: MotionEvent?): Boolean {
             return mScrollListener?.onHeaderDown(this@HeaderLayout) ?: false
         }
