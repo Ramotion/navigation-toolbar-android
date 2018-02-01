@@ -1,5 +1,6 @@
 package com.ramotion.navigationtoolbar
 
+import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.PointF
 import android.os.Looper
@@ -47,6 +48,7 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
     private val mHPoints = mutableListOf<PointF>()
     private val mVPoints = mutableListOf<PointF>()
     private val mViewCache = SparseArray<View?>()
+    private val mOffsetAnimator = ValueAnimator() // TODO: add duration attribute
 
     internal val mAppBarBehavior = AppBarBehavior()
 
@@ -104,6 +106,7 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
 
     override fun onItemClick(header: HeaderLayout, viewHolder: HeaderLayout.ViewHolder): Boolean {
         Log.d("D", "onItemClicked| pos: ${viewHolder.mPosition}")
+        smoothOffset(mScreenHalf.toInt())
         return true
     }
 
@@ -441,6 +444,18 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
 
         mHeaderLayout.mIsHorizontalScrollEnabled = hScrollEnable
         mHeaderLayout.mIsVerticalScrollEnabled = vScrollEnable
+    }
+
+    private fun smoothOffset(offset: Int) {
+        mOffsetAnimator.cancel()
+        mOffsetAnimator.setIntValues(mAppBarBehavior.topAndBottomOffset, -offset)
+        mOffsetAnimator.addUpdateListener {
+            val value = it.animatedValue as Int
+            mAppBarBehavior.topAndBottomOffset = value
+            Log.d("D", "value: $value")
+        }
+        mOffsetAnimator.start()
+
     }
 
     inner class AppBarBehavior : AppBarLayout.Behavior() {
