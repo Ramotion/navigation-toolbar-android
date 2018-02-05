@@ -24,7 +24,9 @@ class NavigationToolBarLayout : CoordinatorLayout {
 
         mToolBar = findViewById(R.id.com_ramotion_toolbar)
         mHeaderLayout = findViewById(R.id.com_ramotion_header_layout)
+
         mHeaderLayoutManager = (mHeaderLayout.layoutParams as CoordinatorLayout.LayoutParams).behavior as HeaderLayoutManager
+        mHeaderLayoutManager.mItemsTransformer = HeaderTransformer()
 
         mAppBarLayout = findViewById(R.id.com_ramotion_app_bar)
         mAppBarLayout.addOnOffsetChangedListener(mHeaderLayoutManager)
@@ -38,5 +40,7 @@ class NavigationToolBarLayout : CoordinatorLayout {
     fun setCurrentPosition(pos: Int) {
         mHeaderLayoutManager.scrollToPosition(pos)
     }
+
+    // TODO: set header items transformer
 
 }
