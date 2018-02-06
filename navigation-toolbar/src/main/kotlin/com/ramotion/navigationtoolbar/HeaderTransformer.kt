@@ -8,40 +8,30 @@ import com.ramotion.navigationtoolbar.HeaderLayoutManager.Orientation
 class HeaderTransformer : HeaderLayoutManager.DefaultItemsTransformer() {
 
     private var mIsEmptyHeader = false
-    private var mOffset: Float = 0f
-    private var mHPoints: List<PointF> = emptyList()
-    private var mVPoints: List<PointF> = mHPoints
+    private var mHPoints: MutableList<PointF> = mutableListOf()
+    private var mVPoints: MutableList<PointF> = mutableListOf()
 
     override fun onOffsetChangeStarted(header: HeaderLayout, lm: HeaderLayoutManager, ratio: Float, orientRatio: Float) {
         super.onOffsetChangeStarted(header, lm, ratio, orientRatio)
-        Log.d("D", "onOffsetChangeStarted| ratio: $ratio, orientRatio: $orientRatio")
 
         mIsEmptyHeader = header.childCount == 0
         if (mIsEmptyHeader) {
             return
         }
 
-        lm.getPoints().let {
-            mHPoints = it.first
-            mVPoints = it.second
-        }
-
         if (mStartOrientation == Orientation.VERTICAL) {
-            val clickIndex = lm.getClickedChildIndex()
-            val index = if (clickIndex != HeaderLayout.INVALID_POSITION) {
-                clickIndex
-            } else {
-                lm.getVerticalAnchorView(header)?.let { header.indexOfChild(it) } ?: HeaderLayout.INVALID_POSITION
-            }
-
+            val index = getVerticalAnchorChildIndex(header, lm)
             if (index == HeaderLayout.INVALID_POSITION) {
                 mIsEmptyHeader = true
                 return
             }
 
-            // TODO: get offset of index view position to... to points[mCenterIndex]
-            mOffset = mVPoints[lm.getCenterIndex()].y - header.getChildAt(clickIndex).y
-            Log.d("D", "mOffset: $mOffset")
+            val left = -index * lm.mHorizontalTabWidth
+            val hp = lm.getPoints().first
+            for (i in 0 until header.childCount) {
+                mVPoints.add(header.getChildAt(i).let { PointF(it.x, it.y) })
+                mHPoints.add(PointF(hp.x + left + i * lm.mHorizontalTabWidth, hp.y))
+            }
         }
 
         if (mStartOrientation == Orientation.HORIZONTAL) {
@@ -51,11 +41,9 @@ class HeaderTransformer : HeaderLayoutManager.DefaultItemsTransformer() {
 
     override fun onOffsetChangeStopped(header: HeaderLayout, lm: HeaderLayoutManager, ratio: Float, orientRatio: Float) {
         super.onOffsetChangeStopped(header, lm, ratio, orientRatio)
-        Log.d("D", "onOffsetChangeStopped| r: $ratio, or: $orientRatio, sp: $mStartOrientation")
 
-        mOffset = 0f
-        mHPoints = emptyList()
-        mVPoints = mHPoints
+        mHPoints.clear()
+        mVPoints.clear()
 
         if (mIsEmptyHeader) {
             return
@@ -64,10 +52,43 @@ class HeaderTransformer : HeaderLayoutManager.DefaultItemsTransformer() {
 
     override fun onOffsetChanged(header: HeaderLayout, lm: HeaderLayoutManager, ratio: Float, orientRatio: Float) {
         super.onOffsetChanged(header, lm, ratio, orientRatio)
-        Log.d("D", "onOffsetChanged| ratio: $ratio, orientRatio: $orientRatio")
 
         if (mIsEmptyHeader) {
             return
+        }
+
+        val hw = lm.mHorizontalTabWidth
+        val hh = lm.mHorizontalTabHeight
+        val vw = lm.mVerticalTabWidth
+        val vh = lm.mVerticalTabHeight
+
+        val newWidth = hw - (hw - vw) * orientRatio
+        val newHeight = hh - (hh - vh) * orientRatio
+
+        if (mStartOrientation == Orientation.VERTICAL) {
+            for (i in 0 until mHPoints.size) {
+                val hp = mHPoints[i]
+                val vp = mVPoints[i]
+                val hDiff = (vp.x - hp.x) * orientRatio
+                val vDiff = (vp.y - hp.y) * orientRatio
+
+                val x = (hp.x + hDiff).toInt()
+                val y = (hp.y + vDiff).toInt()
+                lm.layoutChild(header.getChildAt(i), x, y, newWidth.toInt(), newHeight.toInt())
+            }
+        }
+
+        if (mStartOrientation == Orientation.HORIZONTAL) {
+            // TODO: implement
+        }
+    }
+
+    private fun getVerticalAnchorChildIndex(header: HeaderLayout, lm: HeaderLayoutManager): Int {
+        val clickIndex = lm.getClickedChildIndex()
+        return if (clickIndex != HeaderLayout.INVALID_POSITION) {
+            clickIndex
+        } else {
+            lm.getVerticalAnchorView(header)?.let { header.indexOfChild(it) } ?: HeaderLayout.INVALID_POSITION
         }
     }
 

@@ -66,6 +66,7 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
         const val VERTICAL_TAB_HEIGHT_RATIO = 1f / TAB_ON_SCREEN_COUNT
         const val VERTICAL_TAB_WIDTH_RATIO = 4f / 5f
         const val SCROLL_STOP_CHECK_DELAY = 300L
+        const val SCROLL_UP_ANIMATION_DURATION = 1000L
     }
 
     private val mScreenWidth = context.resources.displayMetrics.widthPixels
@@ -77,13 +78,12 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
     private val mTabOnScreenCount = TAB_ON_SCREEN_COUNT
     private val mTabCount = mTabOnScreenCount + mTabOffsetCount * 2
 
-    private val mHorizontalTabWidth = mScreenWidth
-    private val mHorizontalTabHeight = mScreenHalf.toInt()
-    private val mVerticalTabHeight = (mScreenHeight * VERTICAL_TAB_HEIGHT_RATIO).toInt()
-    private val mVerticalTabWidth = (mScreenWidth * VERTICAL_TAB_WIDTH_RATIO).toInt()
+    // TODO: add getters
+    val mHorizontalTabWidth = mScreenWidth
+    val mHorizontalTabHeight = mScreenHalf.toInt()
+    val mVerticalTabHeight = (mScreenHeight * VERTICAL_TAB_HEIGHT_RATIO).toInt()
+    val mVerticalTabWidth = (mScreenWidth * VERTICAL_TAB_WIDTH_RATIO).toInt()
 
-    private val mHPoints = mutableListOf<PointF>() // TODO: leace only center point
-    private val mVPoints = mutableListOf<PointF>() // TODO: leace only center point
     private val mViewCache = SparseArray<View?>()
     private val mOffsetAnimator = ValueAnimator() // TODO: add duration attribute
     private val mCenterIndex = mTabOnScreenCount % 2 + mTabOffsetCount
@@ -92,6 +92,8 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
 
     private lateinit var mAppBar: AppBarLayout
     private lateinit var mHeaderLayout: HeaderLayout
+    private lateinit var mHPoint: PointF // TODO: replace with data class
+    private lateinit var mVPoint: PointF // TODO: replace with data class
 
     private var mInitialized = false
     private var mCanDrag = true
@@ -128,11 +130,9 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
             fill(header)
 
             mInitialized = true
-
-            return true
         }
 
-        return super.onLayoutChild(parent, header, layoutDirection)
+        return true
     }
 
     override fun onDependentViewChanged(parent: CoordinatorLayout, header: HeaderLayout, dependency: View): Boolean {
@@ -272,10 +272,10 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
 
     fun getCenterIndex(): Int = mCenterIndex
 
-    fun getPoints(): Pair<List<PointF>, List<PointF>> = Pair(mHPoints.toList(), mVPoints.toList())
+    fun getPoints(): Pair<PointF, PointF> = Pair(PointF(mHPoint.x, mHPoint.y), PointF(mVPoint.x, mVPoint.y))
 
     fun getHorizontalAnchorView(header: HeaderLayout): View? {
-        val centerLeft = mHPoints[mCenterIndex].x
+        val centerLeft = mHPoint.x
 
         var result: View? = null
         var lastDiff = Int.MAX_VALUE
@@ -293,7 +293,7 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
     }
 
     fun getVerticalAnchorView(header: HeaderLayout): View? {
-        val centerTop = mVPoints[mCenterIndex].y
+        val centerTop = mVPoint.y
 
         var result: View? = null
         var lastDiff = Int.MAX_VALUE
@@ -328,17 +328,21 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
 
     fun getClickedChildIndex() = mClickedChildIndex
 
+    fun layoutChild(child: View, x: Int, y: Int, w: Int, h: Int) {
+        val ws = View.MeasureSpec.makeMeasureSpec(w, View.MeasureSpec.AT_MOST)
+        val hs = View.MeasureSpec.makeMeasureSpec(h, View.MeasureSpec.AT_MOST)
+        child.measure(ws, hs)
+        child.layout(x, y, x + w, y + h)
+    }
+
     private fun initPoints(header: HeaderLayout) {
         val hx = 0f
         val hy = mScreenHalf
         val vx = (header.width - mVerticalTabWidth).toFloat()
         val vy = ((1f * mScreenHeight) / mTabOnScreenCount) * mCenterIndex
 
-        for (i in 0 .. mTabCount) {
-            val diff = i - mCenterIndex
-            mHPoints += PointF(hx + diff * mHorizontalTabWidth, hy)
-            mVPoints += PointF(vx, vy + diff * mVerticalTabHeight)
-        }
+        mHPoint = PointF(hx, hy)
+        mVPoint = PointF(vx, vy)
     }
 
     private fun getPositionRatio(): Float {
@@ -394,8 +398,8 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
             return
         }
 
-        val top = mHPoints[mCenterIndex].y.toInt()
-        var left = mHPoints[mCenterIndex].x.toInt() -(mCenterIndex - 1) * mHorizontalTabWidth
+        val top = mHPoint.y.toInt()
+        var left = mHPoint.x.toInt() -(mCenterIndex - 1) * mHorizontalTabWidth
         var pos = Math.max(0, anchorPos - mCenterIndex - 1)
 
         while (pos < anchorPos) {
@@ -410,9 +414,9 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
             return
         }
 
-        val maxPos = Math.min(header.mAdapter?.getItemCount() ?: 0, anchorPos + (mHPoints.size - mCenterIndex))
-        val top = mHPoints[mCenterIndex].y.toInt()
-        var left = mHPoints[mCenterIndex].x.toInt()
+        val maxPos = Math.min(header.mAdapter?.getItemCount() ?: 0, anchorPos + (mTabCount - mCenterIndex))
+        val top = mHPoint.y.toInt()
+        var left = mHPoint.x.toInt()
         var pos = anchorPos
 
         while (pos <  maxPos) {
@@ -427,11 +431,11 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
             return
         }
 
-        val topDiff = mVPoints[mCenterIndex].y.toInt() - (mViewCache.get(anchorPos)?.top ?: 0)
-        val left = mVPoints[mCenterIndex].x.toInt()
+        val topDiff = mVPoint.y.toInt() - (mViewCache.get(anchorPos)?.top ?: 0)
+        val left = mVPoint.x.toInt()
 
         var pos = Math.max(0, anchorPos - mCenterIndex - mTabOffsetCount)
-        var top = (mVPoints[mCenterIndex].y.toInt() -(anchorPos - pos) * mVerticalTabHeight) - topDiff
+        var top = (mVPoint.y.toInt() -(anchorPos - pos) * mVerticalTabHeight) - topDiff
 
         while (pos < anchorPos) {
             val view = getPlacedChildForPosition(header, pos, left, top, mVerticalTabWidth, mVerticalTabHeight)
@@ -446,13 +450,13 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
         }
 
         val maxPos = Math.min(header.mAdapter?.run { getItemCount() } ?: 0, anchorPos + mCenterIndex + 1 + mTabOffsetCount)
-        val left = mVPoints[mCenterIndex].x.toInt()
+        val left = mVPoint.x.toInt()
         var pos = anchorPos
 
         var top  = if (header.childCount > 0) {
             header.getChildAt(header.childCount - 1).bottom
         } else {
-            mVPoints[mCenterIndex].y.toInt()
+            mVPoint.y.toInt()
         }
 
         while (pos <  maxPos) {
@@ -471,11 +475,8 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
         }
 
         val view = header.mRecycler.getViewForPosition(pos)
-        val ws = View.MeasureSpec.makeMeasureSpec(w, View.MeasureSpec.EXACTLY)
-        val hs = View.MeasureSpec.makeMeasureSpec(h, View.MeasureSpec.EXACTLY)
-        view.measure(ws, hs)
-        view.layout(x, y, x + w, y + h)
         header.addView(view)
+        layoutChild(view, x, y, w, h)
         return view
     }
 
@@ -512,6 +513,7 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
 
     private fun smoothOffset(offset: Int) {
         mOffsetAnimator.cancel()
+        mOffsetAnimator.setDuration(SCROLL_UP_ANIMATION_DURATION)
         mOffsetAnimator.setIntValues(mAppBarBehavior.topAndBottomOffset, -offset)
         mOffsetAnimator.addUpdateListener {
             val value = it.animatedValue as Int
