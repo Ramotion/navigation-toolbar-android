@@ -54,6 +54,7 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
         open fun onOffsetChangeStopped(header: HeaderLayout, lm: HeaderLayoutManager, ratio: Float, orientRatio: Float) {
             mOffsetChangeStarted = false
             mStartOrientation = Orientation.TRANSITIONAL
+            lm.fill(header)
         }
 
         open fun onOffsetChanged(header: HeaderLayout, lm: HeaderLayoutManager, ratio: Float, orientRatio: Float) {}
@@ -369,29 +370,7 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
         child.layout(x, y, x + w, y + h)
     }
 
-    private fun initPoints(header: HeaderLayout) {
-        val hx = 0f
-        val hy = mScreenHalf
-        val vx = (header.width - mVerticalTabWidth).toFloat()
-        val vy = ((1f * mScreenHeight) / mTabOnScreenCount) * mCenterIndex
-
-        mHPoint = PointF(hx, hy)
-        mVPoint = PointF(vx, vy)
-    }
-
-    private fun getPositionRatio(): Float {
-        return Math.max(0f, mAppBar.bottom / mScreenHeight.toFloat())
-    }
-
-    private fun getOrientation(ratio: Float): Orientation {
-        return when {
-            ratio <= 0.5f -> Orientation.HORIZONTAL
-            ratio < 1 -> Orientation.TRANSITIONAL
-            else -> Orientation.VERTICAL
-        }
-    }
-
-    private fun fill(header: HeaderLayout) {
+    fun fill(header: HeaderLayout) {
         // TODO: optimize
         val orientation = getOrientation(getPositionRatio())
         val pos = when (orientation) {
@@ -424,6 +403,28 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
 
         for (i in 0 until mViewCache.size()) {
             header.mRecycler.recycleView(mViewCache.valueAt(i)!!)
+        }
+    }
+
+    private fun initPoints(header: HeaderLayout) {
+        val hx = 0f
+        val hy = mScreenHalf
+        val vx = (header.width - mVerticalTabWidth).toFloat()
+        val vy = ((1f * mScreenHeight) / mTabOnScreenCount) * mCenterIndex
+
+        mHPoint = PointF(hx, hy)
+        mVPoint = PointF(vx, vy)
+    }
+
+    private fun getPositionRatio(): Float {
+        return Math.max(0f, mAppBar.bottom / mScreenHeight.toFloat())
+    }
+
+    private fun getOrientation(ratio: Float): Orientation {
+        return when {
+            ratio <= 0.5f -> Orientation.HORIZONTAL
+            ratio < 1 -> Orientation.TRANSITIONAL
+            else -> Orientation.VERTICAL
         }
     }
 
@@ -571,7 +572,6 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
                 mHeaderLayout.mIsVerticalScrollEnabled = false
             }
             override fun onAnimationEnd(animation: Animator?) {
-                fill(mHeaderLayout)
                 this@HeaderLayoutManager.onOffsetChangingStopped(-offset)
             }
         })

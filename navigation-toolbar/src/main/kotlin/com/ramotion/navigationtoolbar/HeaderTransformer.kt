@@ -32,10 +32,23 @@ class HeaderTransformer : HeaderLayoutManager.DefaultItemsTransformer() {
                 mVPoints.add(header.getChildAt(i).let { PointF(it.x, it.y) })
                 mHPoints.add(PointF(hp.x + left + i * lm.mHorizontalTabWidth, hp.y))
             }
-        }
+        } else if (mStartOrientation == Orientation.HORIZONTAL) {
+            /*  TODO:
+                Fix for last adapter item - it map to vertical center, but must be mapped to bottom.
+                Start smooth scroll down or map to bottom.
+              */
+            val index = getHorizontalAnchorChildIndex(header, lm)
+            if (index == HeaderLayout.INVALID_POSITION) {
+                mIsEmptyHeader = true
+                return
+            }
 
-        if (mStartOrientation == Orientation.HORIZONTAL) {
-            // TODO: implement
+            val top = -index * lm.mVerticalTabHeight
+            val vp = lm.getPoints().second
+            for (i in 0 until header.childCount) {
+                mHPoints.add(header.getChildAt(i).let { PointF(it.x, it.y) })
+                mVPoints.add(PointF(vp.x, vp.y + top + i * lm.mVerticalTabHeight))
+            }
         }
     }
 
@@ -65,21 +78,15 @@ class HeaderTransformer : HeaderLayoutManager.DefaultItemsTransformer() {
         val newWidth = hw - (hw - vw) * orientRatio
         val newHeight = hh - (hh - vh) * orientRatio
 
-        if (mStartOrientation == Orientation.VERTICAL) {
-            for (i in 0 until mHPoints.size) {
-                val hp = mHPoints[i]
-                val vp = mVPoints[i]
-                val hDiff = (vp.x - hp.x) * orientRatio
-                val vDiff = (vp.y - hp.y) * orientRatio
+        for (i in 0 until mHPoints.size) {
+            val hp = mHPoints[i]
+            val vp = mVPoints[i]
+            val hDiff = (vp.x - hp.x) * orientRatio
+            val vDiff = (vp.y - hp.y) * orientRatio
 
-                val x = (hp.x + hDiff).toInt()
-                val y = (hp.y + vDiff).toInt()
-                lm.layoutChild(header.getChildAt(i), x, y, newWidth.toInt(), newHeight.toInt())
-            }
-        }
-
-        if (mStartOrientation == Orientation.HORIZONTAL) {
-            // TODO: implement
+            val x = (hp.x + hDiff).toInt()
+            val y = (hp.y + vDiff).toInt()
+            lm.layoutChild(header.getChildAt(i), x, y, newWidth.toInt(), newHeight.toInt())
         }
     }
 
@@ -90,6 +97,10 @@ class HeaderTransformer : HeaderLayoutManager.DefaultItemsTransformer() {
         } else {
             lm.getVerticalAnchorView(header)?.let { header.indexOfChild(it) } ?: HeaderLayout.INVALID_POSITION
         }
+    }
+
+    private fun getHorizontalAnchorChildIndex(header: HeaderLayout, lm: HeaderLayoutManager): Int {
+        return lm.getHorizontalAnchorView(header)?.let { header.indexOfChild(it) } ?: HeaderLayout.INVALID_POSITION
     }
 
 }
