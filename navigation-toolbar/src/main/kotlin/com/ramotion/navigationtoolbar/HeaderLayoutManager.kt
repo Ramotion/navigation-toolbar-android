@@ -10,10 +10,10 @@ import android.support.design.widget.AppBarLayout
 import android.support.design.widget.CoordinatorLayout
 import android.support.v4.view.ViewCompat
 import android.util.AttributeSet
-import android.util.Log
 import android.util.SparseArray
 import android.view.View
 import kotlin.math.max
+import kotlin.math.min
 
 /**
  * Moves header's views
@@ -22,42 +22,63 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
     : CoordinatorLayout.Behavior<HeaderLayout>(context, attrs), AppBarLayout.OnOffsetChangedListener, HeaderLayout.ScrollListener {
 
     interface ItemsTransformer {
-        fun transform(header: HeaderLayout, layoutManager: HeaderLayoutManager, ratio: Float)
+        fun transform(header: HeaderLayout, lm: HeaderLayoutManager, appBarBottom: Int)
     }
 
     abstract class DefaultItemsTransformer: ItemsTransformer {
+        private var mIsInitialized = false
         private var mOffsetChangeStarted = false
+        private var mRatioWork = 0f
+        private var mRatioMiddle = 0f
+        private var mRatioTop = 0f
 
-        var mStartOrientation = Orientation.TRANSITIONAL
+        var mCurrentOrientation = Orientation.TRANSITIONAL
             private set
 
-        override fun transform(header: HeaderLayout, lm: HeaderLayoutManager, ratio: Float) {
-            val orientRatio = max(0f, (ratio - 0.5f) / 0.5f)
-            val isAtBorder = orientRatio == 0f || orientRatio == 1f
+        var mCurrentRatio = 0f
+            private  set
 
-            if (!isAtBorder && mStartOrientation == Orientation.TRANSITIONAL) {
-                onOffsetChangeStarted(header, lm, ratio, orientRatio)
-                onOffsetChanged(header, lm, ratio, orientRatio)
-            } else  if (isAtBorder && mStartOrientation != Orientation.TRANSITIONAL) {
-                onOffsetChanged(header, lm, ratio, orientRatio)
-                onOffsetChangeStopped(header, lm, ratio, orientRatio)
+        var mCurrentRatioWork = 0f
+            private  set
+
+        var mCurrentRatioMiddle = 0f
+            private  set
+
+        var mCurrentRatioTop = 0f
+            private  set
+
+        override fun transform(header: HeaderLayout, lm: HeaderLayoutManager, appBarBottom: Int) {
+            if (!mIsInitialized) {
+                mRatioWork = lm.mWorkHeight / lm.mScreenHeight.toFloat()
+                mRatioMiddle = lm.mScreenHalf / lm.mScreenHeight.toFloat()
+                mRatioTop = lm.mToolBarHeight / lm.mScreenHeight.toFloat()
+                mIsInitialized = true
+            }
+
+            mCurrentRatio = max(0f, appBarBottom / lm.mScreenHeight.toFloat())
+            mCurrentRatioWork = max(0f, (appBarBottom - lm.mToolBarHeight) / lm.mWorkHeight.toFloat())
+            mCurrentRatioMiddle = max(0f, (mCurrentRatio - mRatioMiddle) / mRatioMiddle)
+            mCurrentRatioTop = max(0f, 1 - (mRatioMiddle - min(max(mCurrentRatio, mRatioTop), mRatioMiddle)) / (mRatioMiddle - mRatioTop))
+
+            val isAtBorder = mCurrentRatioWork == 0f || mCurrentRatioWork == 1f
+            if (!isAtBorder && mCurrentOrientation == Orientation.TRANSITIONAL) {
+                mOffsetChangeStarted = true
+                mCurrentOrientation = if (mRatioMiddle >= 0.5) Orientation.VERTICAL else Orientation.HORIZONTAL
+                onOffsetChangeStarted(header, lm)
+                onOffsetChanged(header, lm)
+            } else if (isAtBorder && mCurrentOrientation != Orientation.TRANSITIONAL) {
+                onOffsetChanged(header, lm)
+                onOffsetChangeStopped(header, lm)
+                mOffsetChangeStarted = false
+                mCurrentOrientation = Orientation.TRANSITIONAL
             } else if (mOffsetChangeStarted) {
-                onOffsetChanged(header, lm, ratio, orientRatio)
+                onOffsetChanged(header, lm)
             }
         }
 
-        open fun onOffsetChangeStarted(header: HeaderLayout, lm: HeaderLayoutManager, ratio: Float, orientRatio: Float) {
-            mOffsetChangeStarted = true
-            mStartOrientation = if (orientRatio >= 0.5) Orientation.VERTICAL else Orientation.HORIZONTAL
-        }
-
-        open fun onOffsetChangeStopped(header: HeaderLayout, lm: HeaderLayoutManager, ratio: Float, orientRatio: Float) {
-            mOffsetChangeStarted = false
-            mStartOrientation = Orientation.TRANSITIONAL
-            lm.fill(header)
-        }
-
-        open fun onOffsetChanged(header: HeaderLayout, lm: HeaderLayoutManager, ratio: Float, orientRatio: Float) {}
+        open fun onOffsetChangeStarted(header: HeaderLayout, lm: HeaderLayoutManager) {}
+        open fun onOffsetChanged(header: HeaderLayout, lm: HeaderLayoutManager) {}
+        open fun onOffsetChangeStopped(header: HeaderLayout, lm: HeaderLayoutManager) {}
     }
 
     enum class Orientation {
@@ -73,14 +94,16 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
         const val SCROLL_UP_ANIMATION_DURATION = 1000L
     }
 
-    private val mScreenWidth = context.resources.displayMetrics.widthPixels
-    private val mScreenHeight = context.resources.displayMetrics.heightPixels
-    private val mScreenHalf = mScreenHeight / 2f
-
     // TODO: init in constructor from attr
     private val mTabOffsetCount = TAB_OFF_SCREEN_COUNT
     private val mTabOnScreenCount = TAB_ON_SCREEN_COUNT
     private val mTabCount = mTabOnScreenCount + mTabOffsetCount * 2
+
+    val mScreenWidth = context.resources.displayMetrics.widthPixels
+    val mScreenHeight = context.resources.displayMetrics.heightPixels
+    val mScreenHalf = mScreenHeight / 2f
+    val mToolBarHeight: Int
+    val mWorkHeight: Int
 
     // TODO: add getters
     val mHorizontalTabWidth = mScreenWidth
@@ -116,6 +139,18 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
             }
             true
         }
+
+        val resourceId = context.resources.getIdentifier("status_bar_height", "dimen", "android")
+        val statusBarSize = if (resourceId > 0) {
+            context.resources.getDimensionPixelSize(resourceId)
+        } else 0
+
+        val styledAttributes = context.theme.obtainStyledAttributes(intArrayOf(android.R.attr.actionBarSize))
+        val actionBarSize = styledAttributes.getDimension(0, 0f).toInt()
+        styledAttributes.recycle()
+
+        mToolBarHeight = actionBarSize + statusBarSize
+        mWorkHeight = mScreenHeight - mToolBarHeight
     }
 
     override fun layoutDependsOn(parent: CoordinatorLayout, child: HeaderLayout, dependency: View): Boolean {
@@ -144,7 +179,7 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
         header.y = (dependency.bottom - header.height).toFloat()
 
         // Transform header items
-        mItemsTransformer?.transform(header, this, getPositionRatio())
+        mItemsTransformer?.transform(header, this, dependency.bottom)
 
         return true
     }
@@ -538,8 +573,6 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
     }
 
     private fun onOffsetChangingStopped(offset: Int) {
-        Log.d("D", "onOffsetChangingStopped| offset: $offset")
-
         var hScrollEnable = false
         var vScrollEnable = false
         if (offset == 0) {
@@ -547,7 +580,6 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
             mCanDrag = false
         } else if (offset == -mScreenHalf.toInt()) {
             hScrollEnable = true
-            Log.d("D", "onOffsetChangingStopped| half")
         } else {
             // TODO: check if near and offset (scroll) header if needed
         }
