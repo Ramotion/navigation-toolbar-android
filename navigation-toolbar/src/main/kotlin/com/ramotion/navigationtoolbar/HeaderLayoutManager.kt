@@ -90,14 +90,17 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
         const val TAB_OFF_SCREEN_COUNT = 1
         const val VERTICAL_TAB_HEIGHT_RATIO = 1f / TAB_ON_SCREEN_COUNT
         const val VERTICAL_TAB_WIDTH_RATIO = 4f / 5f
-        const val SCROLL_STOP_CHECK_DELAY = 300L
+        const val SCROLL_STOP_CHECK_DELAY = 100L
         const val SCROLL_UP_ANIMATION_DURATION = 1000L
+        const val SNAP_ANIMATION_DURATION = 300L
+
     }
 
     // TODO: init in constructor from attr
     private val mTabOffsetCount = TAB_OFF_SCREEN_COUNT
     private val mTabOnScreenCount = TAB_ON_SCREEN_COUNT
     private val mTabCount = mTabOnScreenCount + mTabOffsetCount * 2
+    private val mScrollUpAnimationDuration = SCROLL_UP_ANIMATION_DURATION
 
     val mScreenWidth = context.resources.displayMetrics.widthPixels
     val mScreenHeight = context.resources.displayMetrics.heightPixels
@@ -105,6 +108,9 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
     val mStatusBarHeight: Int
     val mToolBarHeight: Int
     val mWorkHeight: Int
+
+    val mTopSnapDistance: Int
+    val mBottomSnapDistnace: Int
 
     // TODO: add getters
     val mHorizontalTabWidth = mScreenWidth
@@ -152,6 +158,9 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
 
         mToolBarHeight = actionBarSize + mStatusBarHeight
         mWorkHeight = mScreenHeight - mToolBarHeight
+
+        mTopSnapDistance = (mToolBarHeight + (mScreenHalf - mToolBarHeight) / 2).toInt()
+        mBottomSnapDistnace = (mScreenHalf + mScreenHalf / 2).toInt()
     }
 
     override fun layoutDependsOn(parent: CoordinatorLayout, child: HeaderLayout, dependency: View): Boolean {
@@ -576,24 +585,36 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
     private fun onOffsetChangingStopped(offset: Int) {
         var hScrollEnable = false
         var vScrollEnable = false
-        if (offset == 0) {
+
+        val invertedOffset = mScreenHeight + offset
+        if (invertedOffset == mScreenHeight) {
             vScrollEnable = true
             mCanDrag = false
-        } else if (offset == -mScreenHalf.toInt()) {
+        } else if (invertedOffset == mScreenHalf.toInt()) {
             hScrollEnable = true
+            mCanDrag = false
+        } else if (invertedOffset == mToolBarHeight) {
+            mCanDrag = true
+            return
         } else {
-            // TODO: check if near and offset (scroll) header if needed
+            // TODO: check
+            if (invertedOffset in mToolBarHeight..(mTopSnapDistance - 1)) {
+                mAppBar.setExpanded(false, true)
+                //smoothOffset(mScreenHeight - mToolBarHeight, SNAP_ANIMATION_DURATION)
+            } else if (invertedOffset in mTopSnapDistance..(mBottomSnapDistnace - 1)) {
+                smoothOffset(mScreenHalf.toInt(), SNAP_ANIMATION_DURATION)
+            } else {
+                smoothOffset(0, SNAP_ANIMATION_DURATION)
+            }
         }
-
-        // TODO: can drag when collapsed to toolbar
 
         mHeaderLayout.mIsHorizontalScrollEnabled = hScrollEnable
         mHeaderLayout.mIsVerticalScrollEnabled = vScrollEnable
     }
 
-    private fun smoothOffset(offset: Int) {
+    private fun smoothOffset(offset: Int, duration: Long = mScrollUpAnimationDuration) {
         mOffsetAnimator.cancel()
-        mOffsetAnimator.setDuration(SCROLL_UP_ANIMATION_DURATION)
+        mOffsetAnimator.setDuration(duration)
         mOffsetAnimator.setIntValues(mAppBarBehavior.topAndBottomOffset, -offset)
         mOffsetAnimator.addUpdateListener {
             val value = it.animatedValue as Int
