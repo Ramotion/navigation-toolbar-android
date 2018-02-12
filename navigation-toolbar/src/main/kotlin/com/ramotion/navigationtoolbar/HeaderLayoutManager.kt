@@ -102,6 +102,7 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
     val mScreenWidth = context.resources.displayMetrics.widthPixels
     val mScreenHeight = context.resources.displayMetrics.heightPixels
     val mScreenHalf = mScreenHeight / 2f
+    val mStatusBarHeight: Int
     val mToolBarHeight: Int
     val mWorkHeight: Int
 
@@ -141,7 +142,7 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
         }
 
         val resourceId = context.resources.getIdentifier("status_bar_height", "dimen", "android")
-        val statusBarSize = if (resourceId > 0) {
+        mStatusBarHeight = if (resourceId > 0) {
             context.resources.getDimensionPixelSize(resourceId)
         } else 0
 
@@ -149,7 +150,7 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
         val actionBarSize = styledAttributes.getDimension(0, 0f).toInt()
         styledAttributes.recycle()
 
-        mToolBarHeight = actionBarSize + statusBarSize
+        mToolBarHeight = actionBarSize + mStatusBarHeight
         mWorkHeight = mScreenHeight - mToolBarHeight
     }
 
@@ -399,8 +400,8 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
     fun getClickedChildIndex() = mClickedChildIndex
 
     fun layoutChild(child: View, x: Int, y: Int, w: Int, h: Int) {
-        val ws = View.MeasureSpec.makeMeasureSpec(w, View.MeasureSpec.AT_MOST)
-        val hs = View.MeasureSpec.makeMeasureSpec(h, View.MeasureSpec.AT_MOST)
+        val ws = View.MeasureSpec.makeMeasureSpec(w, View.MeasureSpec.EXACTLY)
+        val hs = View.MeasureSpec.makeMeasureSpec(h, View.MeasureSpec.EXACTLY)
         child.measure(ws, hs)
         child.layout(x, y, x + w, y + h)
     }
@@ -443,7 +444,7 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
 
     private fun initPoints(header: HeaderLayout) {
         val hx = 0f
-        val hy = mScreenHalf
+        val hy = mScreenHalf - mStatusBarHeight
         val vx = (header.width - mVerticalTabWidth).toFloat()
         val vy = ((1f * mScreenHeight) / mTabOnScreenCount) * mCenterIndex
 

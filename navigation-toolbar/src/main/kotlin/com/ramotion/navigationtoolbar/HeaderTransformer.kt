@@ -15,6 +15,13 @@ class HeaderTransformer : HeaderLayoutManager.DefaultItemsTransformer() {
     private var mHPoints: MutableList<PointF> = mutableListOf()
     private var mVPoints: MutableList<PointF> = mutableListOf()
 
+    private var mAppBarBottom: Int = 0
+
+    override fun transform(header: HeaderLayout, lm: HeaderLayoutManager, appBarBottom: Int) {
+        super.transform(header, lm, appBarBottom)
+        mAppBarBottom = appBarBottom
+    }
+
     override fun onOffsetChanged(header: HeaderLayout, lm: HeaderLayoutManager) {
         mIsEmptyHeader = header.childCount == 0
         if (mIsEmptyHeader) {
@@ -94,7 +101,11 @@ class HeaderTransformer : HeaderLayoutManager.DefaultItemsTransformer() {
             return
         }
 
-        if (mIsTransformMiddle) {
+        if (mIsTransformTop) {
+            (0 until header.childCount)
+                    .map { header.getChildAt(it) }
+                    .forEach { lm.layoutChild(it, it.left, header.height - mAppBarBottom, it.width, mAppBarBottom) }
+        } else if (mIsTransformMiddle) {
             val hw = lm.mHorizontalTabWidth
             val hh = lm.mHorizontalTabHeight
             val vw = lm.mVerticalTabWidth
