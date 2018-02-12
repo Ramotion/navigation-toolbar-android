@@ -444,7 +444,7 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
 
     private fun initPoints(header: HeaderLayout) {
         val hx = 0f
-        val hy = mScreenHalf - mStatusBarHeight
+        val hy = mScreenHalf // - mStatusBarHeight
         val vx = (header.width - mVerticalTabWidth).toFloat()
         val vy = ((1f * mScreenHeight) / mTabOnScreenCount) * mCenterIndex
 

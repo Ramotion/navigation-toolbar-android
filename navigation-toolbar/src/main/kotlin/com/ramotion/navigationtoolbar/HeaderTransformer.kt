@@ -102,9 +102,10 @@ class HeaderTransformer : HeaderLayoutManager.DefaultItemsTransformer() {
         }
 
         if (mIsTransformTop) {
+            val y = header.height - mAppBarBottom
             (0 until header.childCount)
                     .map { header.getChildAt(it) }
-                    .forEach { lm.layoutChild(it, it.left, header.height - mAppBarBottom, it.width, mAppBarBottom) }
+                    .forEach { lm.layoutChild(it, it.left, y, it.width, mAppBarBottom) }
         } else if (mIsTransformMiddle) {
             val hw = lm.mHorizontalTabWidth
             val hh = lm.mHorizontalTabHeight
