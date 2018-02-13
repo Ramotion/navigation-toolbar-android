@@ -2,6 +2,7 @@ package com.ramotion.navigationtoolbar.example.simple
 
 import android.os.Bundle
 import android.support.design.widget.Snackbar
+import android.support.v4.view.ViewPager
 import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
@@ -9,6 +10,10 @@ import com.ramotion.navigationtoolbar.NavigationToolBarLayout
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
+
+    private companion object {
+        const val ITEM_COUNT = 20
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -19,6 +24,7 @@ class MainActivity : AppCompatActivity() {
                     .setAction("Action", null).show()
         }
 
+        initViewPager()
         initHeader()
     }
 
@@ -39,9 +45,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun initViewPager() {
+        val pager = findViewById<ViewPager>(R.id.pager)
+        pager.adapter = ViewPagerAdapter(ITEM_COUNT)
+    }
+
     private fun initHeader() {
         val toolbar = findViewById<NavigationToolBarLayout>(R.id.navigation_toolbar_layout)
-        toolbar.setAdapter(HeaderAdapter(20))
+        toolbar.setAdapter(HeaderAdapter(ITEM_COUNT))
 //        toolbar.setCurrentPosition(3)
     }
 
