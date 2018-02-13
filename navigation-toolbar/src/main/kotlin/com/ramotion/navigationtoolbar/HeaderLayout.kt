@@ -42,7 +42,7 @@ class HeaderLayout : FrameLayout {
 
     internal var mScrollListener: ScrollListener? = null
 
-    var mAdapter: Adapter<ViewHolder>? = null
+    var mAdapter: Adapter<ViewHolder>? = null // TODO: move to LM
         private set
 
     constructor(context: Context, attrs: AttributeSet) : this(context, attrs, 0)
