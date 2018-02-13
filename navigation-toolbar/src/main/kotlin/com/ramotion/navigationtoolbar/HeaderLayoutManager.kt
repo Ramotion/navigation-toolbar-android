@@ -158,8 +158,9 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
     internal val mAppBarBehavior = AppBarBehavior()
     internal val mHeaderScrollListener = HeaderScrollListener()
 
-    private lateinit var mAppBar: AppBarLayout
-    private lateinit var mHeaderLayout: HeaderLayout
+    private var mAppBar: AppBarLayout? = null
+    private var mHeaderLayout: HeaderLayout? = null
+
     private lateinit var mHPoint: PointF // TODO: replace with data class
     private lateinit var mVPoint: PointF // TODO: replace with data class
 
@@ -206,8 +207,9 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
             parent.onLayoutChild(header, layoutDirection)
 
             mAppBar = parent.findViewById(R.id.com_ramotion_app_bar)
+
             mHeaderLayout = header
-            mHeaderLayout.mScrollListener = mHeaderScrollListener
+            header.mScrollListener = mHeaderScrollListener
 
             initPoints(header)
             fill(header)
@@ -233,13 +235,10 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
     }
 
     fun scrollToPosition(pos: Int) {
-        if (!mInitialized) {
-            return
-        }
-
-        if (pos < 0 || mHeaderLayout.mAdapter?.run { pos >= getItemCount() } == true) {
+        val header = mHeaderLayout ?: return
+        if (pos < 0 || header.mAdapter?.run { pos >= getItemCount() } == true) {
             mScrollToPosition = pos
-            fill(mHeaderLayout)
+            fill(header)
         }
     }
 
@@ -310,7 +309,7 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
             header.detachView(mViewCache.valueAt(i)!!)
         }
 
-        when (getOrientation(getPositionRatio())) {
+        when (orientation) {
             Orientation.HORIZONTAL -> {
                 fillLeft(header, pos)
                 fillRight(header, pos)
@@ -327,23 +326,21 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
     }
 
     fun scrollHorizontally(distance: Float): Boolean {
-        // TODO: check header != null
-
-        if (!mHeaderLayout.mIsHorizontalScrollEnabled) {
+        val header = mHeaderLayout ?: return false
+        if (!header.mIsHorizontalScrollEnabled) {
             return false
         }
 
-        return onHeaderHorizontalScroll(mHeaderLayout, distance)
+        return onHeaderHorizontalScroll(header, distance)
     }
 
     fun scrollVertically(distance: Float): Boolean {
-        // TODO: check header != null
-
-        if (!mHeaderLayout.mIsVerticalScrollEnabled) {
+        val header = mHeaderLayout ?: return false
+        if (!header.mIsVerticalScrollEnabled) {
             return false
         }
 
-        return onHeaderVerticalScroll(mHeaderLayout, distance)
+        return onHeaderVerticalScroll(header, distance)
     }
 
     private fun getHorizontalAnchorPos(header: HeaderLayout): Int {
@@ -515,9 +512,8 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
         mVPoint = PointF(vx, vy)
     }
 
-    private fun getPositionRatio(): Float {
-        return Math.max(0f, mAppBar.bottom / mScreenHeight.toFloat())
-    }
+    private fun getPositionRatio(): Float =
+            mAppBar?.let { Math.max(0f, it.bottom / mScreenHeight.toFloat()) } ?: 0f
 
     private fun getOrientation(ratio: Float): Orientation {
         return when {
@@ -622,11 +618,13 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
     }
 
     private fun checkIfOffsetChangingStopped() {
+        val header = mHeaderLayout ?: return
+
         mOffsetChanged = false
         mIsCheckingScrollStop = true
 
         val startOffset = mAppBarBehavior.topAndBottomOffset
-        mHeaderLayout.postOnAnimationDelayed({
+        header.postOnAnimationDelayed({
             mIsCheckingScrollStop = false
             val currentOffset = mAppBarBehavior.topAndBottomOffset
             val scrollStopped = currentOffset == startOffset
@@ -637,6 +635,9 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
     }
 
     private fun onOffsetChangingStopped(offset: Int) {
+        val header = mHeaderLayout ?: return
+        val appBar = mAppBar ?: return
+
         var hScrollEnable = false
         var vScrollEnable = false
 
@@ -653,7 +654,7 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
         } else {
             // TODO: check
             if (invertedOffset in mToolBarHeight..(mTopSnapDistance - 1)) {
-                mAppBar.setExpanded(false, true)
+                appBar.setExpanded(false, true)
                 //smoothOffset(mScreenHeight - mToolBarHeight, SNAP_ANIMATION_DURATION)
             } else if (invertedOffset in mTopSnapDistance..(mBottomSnapDistnace - 1)) {
                 smoothOffset(mScreenHalf.toInt(), SNAP_ANIMATION_DURATION)
@@ -662,11 +663,13 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
             }
         }
 
-        mHeaderLayout.mIsHorizontalScrollEnabled = hScrollEnable
-        mHeaderLayout.mIsVerticalScrollEnabled = vScrollEnable
+        header.mIsHorizontalScrollEnabled = hScrollEnable
+        header.mIsVerticalScrollEnabled = vScrollEnable
     }
 
     private fun smoothOffset(offset: Int, duration: Long = mScrollUpAnimationDuration) {
+        val header = mHeaderLayout ?: return
+
         mOffsetAnimator.cancel()
         mOffsetAnimator.setDuration(duration)
         mOffsetAnimator.setIntValues(mAppBarBehavior.topAndBottomOffset, -offset)
@@ -676,8 +679,8 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
         }
         mOffsetAnimator.addListener(object: AnimatorListenerAdapter() {
             override fun onAnimationStart(animation: Animator?, isReverse: Boolean) {
-                mHeaderLayout.mIsHorizontalScrollEnabled = false
-                mHeaderLayout.mIsVerticalScrollEnabled = false
+                header.mIsHorizontalScrollEnabled = false
+                header.mIsVerticalScrollEnabled = false
             }
             override fun onAnimationEnd(animation: Animator?) {
                 this@HeaderLayoutManager.onOffsetChangingStopped(-offset)
