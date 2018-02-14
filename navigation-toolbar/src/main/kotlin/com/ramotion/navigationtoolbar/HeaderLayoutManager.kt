@@ -236,9 +236,34 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
 
     fun scrollToPosition(pos: Int) {
         val header = mHeaderLayout ?: return
-        if (pos < 0 || header.mAdapter?.run { pos >= getItemCount() } == true) {
-            mScrollToPosition = pos
-            fill(header)
+
+        if (header.childCount == 0) {
+            return
+        }
+
+        val itemCount = header.mAdapter?.getItemCount() ?: -1
+        if (pos < 0 || pos > itemCount) {
+            return
+        }
+
+        if (header.mIsHorizontalScrollEnabled) {
+            val anchorPos = getHorizontalAnchorPos(header)
+            if (anchorPos == pos) {
+                return
+            }
+
+            val offset = (pos - anchorPos) * header.getChildAt(0).width
+            scrollHorizontally(offset.toFloat())
+        } else if (header.mIsVerticalScrollEnabled) {
+            val anchorPos = getVerticalAnchorPos(header)
+            if (anchorPos == pos) {
+                return
+            }
+
+            val offset = (pos - anchorPos) * header.getChildAt(0).height
+            scrollVertically(offset.toFloat())
+        } else {
+            return
         }
     }
 
