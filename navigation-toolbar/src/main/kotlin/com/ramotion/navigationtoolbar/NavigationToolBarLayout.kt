@@ -37,8 +37,12 @@ class NavigationToolBarLayout : CoordinatorLayout {
         mHeaderLayout.setAdapter(adapter)
     }
 
-    fun setCurrentPosition(pos: Int) {
+    fun scrollToPosition(pos: Int) {
         mHeaderLayoutManager.scrollToPosition(pos)
+    }
+
+    fun smoothScrollToPosition(pos: Int) {
+        mHeaderLayoutManager.smoothScrollToPosition(pos)
     }
 
     // TODO: set header items transformer

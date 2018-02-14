@@ -12,6 +12,7 @@ import android.support.v4.view.ViewCompat
 import android.util.AttributeSet
 import android.util.SparseArray
 import android.view.View
+import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
@@ -126,6 +127,7 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
         const val SCROLL_STOP_CHECK_DELAY = 100L
         const val SCROLL_UP_ANIMATION_DURATION = 1000L
         const val SNAP_ANIMATION_DURATION = 300L
+        const val MAX_SCROLL_DURATION = 600L
 
     }
 
@@ -234,6 +236,8 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
         mOffsetChanged = true
     }
 
+    // TODO: fun scroll(distance)
+
     fun scrollToPosition(pos: Int) {
         val header = mHeaderLayout ?: return
 
@@ -253,7 +257,7 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
             }
 
             val offset = (pos - anchorPos) * header.getChildAt(0).width
-            scrollHorizontally(offset.toFloat())
+            onHeaderHorizontalScroll(header, offset.toFloat())
         } else if (header.mIsVerticalScrollEnabled) {
             val anchorPos = getVerticalAnchorPos(header)
             if (anchorPos == pos) {
@@ -261,9 +265,57 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
             }
 
             val offset = (pos - anchorPos) * header.getChildAt(0).height
-            scrollVertically(offset.toFloat())
-        } else {
+            onHeaderVerticalScroll(header, offset.toFloat())
+        }
+    }
+
+    fun smoothScrollToPosition(pos: Int) {
+        val header = mHeaderLayout ?: return
+
+        if (header.childCount == 0) {
             return
+        }
+
+        val itemCount = header.mAdapter?.getItemCount() ?: -1
+        if (pos < 0 || pos > itemCount) {
+            return
+        }
+
+
+        if (header.mIsHorizontalScrollEnabled) {
+            val anchorPos = getHorizontalAnchorPos(header)
+            if (anchorPos == HeaderLayout.INVALID_POSITION) {
+                return
+            }
+
+            val anchorView = getHorizontalAnchorView(header) ?: return
+            val childWidth = anchorView.width
+            val offset = ((pos - anchorPos) * childWidth + (anchorView.left - mHPoint.x)).toInt()
+            if (offset == 0) {
+                return
+            }
+
+            val delta = abs(offset) / childWidth.toFloat()
+            val duration = min(((delta + 1) * 100).toInt(), MAX_SCROLL_DURATION.toInt())
+            header.mScroller.startScroll(0, 0, -offset, 0, duration)
+            header.postInvalidateOnAnimation()
+        } else if (header.mIsVerticalScrollEnabled) {
+            val anchorPos = getVerticalAnchorPos(header)
+            if (anchorPos == HeaderLayout.INVALID_POSITION) {
+                return
+            }
+
+            val anchorView = getVerticalAnchorView(header) ?: return
+            val childHeight = anchorView.height
+            val offset = ((pos - anchorPos) * childHeight + (anchorView.top - mVPoint.y)).toInt()
+            if (offset == 0) {
+                return
+            }
+
+            val delta = abs(offset) / childHeight.toFloat()
+            val duration = min(((delta + 1) * 100).toInt(), MAX_SCROLL_DURATION.toInt())
+            header.mScroller.startScroll(0, 0, 0, -offset, duration)
+            header.postInvalidateOnAnimation()
         }
     }
 
@@ -348,24 +400,6 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
         for (i in 0 until mViewCache.size()) {
             header.mRecycler.recycleView(mViewCache.valueAt(i)!!)
         }
-    }
-
-    fun scrollHorizontally(distance: Float): Boolean {
-        val header = mHeaderLayout ?: return false
-        if (!header.mIsHorizontalScrollEnabled) {
-            return false
-        }
-
-        return onHeaderHorizontalScroll(header, distance)
-    }
-
-    fun scrollVertically(distance: Float): Boolean {
-        val header = mHeaderLayout ?: return false
-        if (!header.mIsVerticalScrollEnabled) {
-            return false
-        }
-
-        return onHeaderVerticalScroll(header, distance)
     }
 
     private fun getHorizontalAnchorPos(header: HeaderLayout): Int {
