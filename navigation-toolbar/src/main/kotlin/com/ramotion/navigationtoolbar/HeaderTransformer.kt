@@ -131,12 +131,7 @@ class HeaderTransformer : HeaderLayoutManager.DefaultItemsTransformer() {
     }
 
     private fun getVerticalAnchorChildIndex(header: HeaderLayout, lm: HeaderLayoutManager): Int {
-        val clickIndex = lm.getClickedChildIndex() // TODO: refactor with transformByClick(clickedIndex)
-        return if (clickIndex != HeaderLayout.INVALID_POSITION) {
-            clickIndex
-        } else {
-            lm.getVerticalAnchorView(header)?.let { header.indexOfChild(it) } ?: HeaderLayout.INVALID_POSITION
-        }
+        return initiatorIndex ?: lm.getVerticalAnchorView(header)?.let { header.indexOfChild(it) } ?: HeaderLayout.INVALID_POSITION
     }
 
     private fun getHorizontalAnchorChildIndex(header: HeaderLayout, lm: HeaderLayoutManager): Int {

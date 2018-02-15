@@ -26,11 +26,14 @@ typealias OnItemClickHandler = (viewHolder: HeaderLayout.ViewHolder) -> Unit
 class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
     : CoordinatorLayout.Behavior<HeaderLayout>(context, attrs), AppBarLayout.OnOffsetChangedListener {
 
-    interface ItemsTransformer {
-        fun transform(header: HeaderLayout, lm: HeaderLayoutManager, appBarBottom: Int)
+    abstract class ItemsTransformer {
+        var initiatorIndex: Int? = null
+            internal set
+
+        abstract fun transform(header: HeaderLayout, lm: HeaderLayoutManager, appBarBottom: Int)
     }
 
-    abstract class DefaultItemsTransformer: ItemsTransformer {
+    abstract class DefaultItemsTransformer: ItemsTransformer() {
         private var mIsInitialized = false
         private var mOffsetChangeStarted = false
         private var mRatioWork = 0f
@@ -176,7 +179,6 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
     private var mIsCheckingScrollStop =false
 
     private var mScrollToPosition = HeaderLayout.INVALID_POSITION
-    private var mClickedChildIndex = HeaderLayout.INVALID_POSITION // TODO: set on click
 
     internal var mItemsTransformer: ItemsTransformer? = null
     internal var mItemClickedListener: OnItemClickHandler? = null
@@ -275,6 +277,10 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
     }
 
     fun smoothScrollToPosition(pos: Int) {
+        if (mOffsetAnimator.isRunning) {
+            return
+        }
+
         val header = mHeaderLayout ?: return
 
         if (header.childCount == 0) {
@@ -283,13 +289,6 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
 
         val itemCount = header.mAdapter?.getItemCount() ?: -1
         if (pos < 0 || pos > itemCount) {
-            return
-        }
-
-        // TODO: remove
-        if (mClickedChildIndex != INVALID_POSITION &&
-            pos == getChildViewHolder(header.getChildAt(mClickedChildIndex))?.mPosition ?: -1)
-        {
             return
         }
 
@@ -368,8 +367,6 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
         return result
     }
 
-    fun getClickedChildIndex() = mClickedChildIndex
-
     fun layoutChild(child: View, x: Int, y: Int, w: Int, h: Int) {
         val ws = View.MeasureSpec.makeMeasureSpec(w, View.MeasureSpec.EXACTLY)
         val hs = View.MeasureSpec.makeMeasureSpec(h, View.MeasureSpec.EXACTLY)
@@ -437,8 +434,7 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
         }
 
         if (header.mIsVerticalScrollEnabled) {
-            mClickedChildIndex = header.indexOfChild(viewHolder.view)
-            smoothOffset(mScreenHalf.toInt())
+            smoothOffsetOnClick(header.indexOfChild(viewHolder.view))
             mItemClickedListener?.invoke(viewHolder)
             return true
         }
@@ -748,10 +744,12 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
         header.mIsVerticalScrollEnabled = vScrollEnable
     }
 
-    // TODO: smoothOffset(offset, duraction, byClick = false)
-    private fun smoothOffset(offset: Int, duration: Long = mScrollUpAnimationDuration) {
-        // TODO: transformer?.beginTransformByClick
+    private fun smoothOffsetOnClick(initiatorIndex: Int) {
+        mItemsTransformer?.initiatorIndex = initiatorIndex
+        smoothOffset(mScreenHalf.toInt())
+    }
 
+    private fun smoothOffset(offset: Int, duration: Long = mScrollUpAnimationDuration) {
         val header = mHeaderLayout ?: return
 
         mOffsetAnimator.cancel()
@@ -768,7 +766,6 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
             }
             override fun onAnimationEnd(animation: Animator?) {
                 this@HeaderLayoutManager.onOffsetChangingStopped(-offset)
-                mClickedChildIndex = INVALID_POSITION
             }
         })
         mOffsetAnimator.start()
