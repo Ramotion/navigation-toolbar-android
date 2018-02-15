@@ -29,6 +29,7 @@ class NavigationToolBarLayout : CoordinatorLayout {
         mHeaderLayoutManager.mItemsTransformer = HeaderTransformer()
 
         mAppBarLayout = findViewById(R.id.com_ramotion_app_bar)
+        mAppBarLayout.outlineProvider = null
         mAppBarLayout.addOnOffsetChangedListener(mHeaderLayoutManager)
         (mAppBarLayout.layoutParams as CoordinatorLayout.LayoutParams).behavior = mHeaderLayoutManager.mAppBarBehavior
     }
