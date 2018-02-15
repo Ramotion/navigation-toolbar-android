@@ -11,11 +11,13 @@ import android.view.LayoutInflater
 
 class NavigationToolBarLayout : CoordinatorLayout {
 
-    val mToolBar: Toolbar // TODO: remove
+    val mToolBar: Toolbar
 
     private val mHeaderLayout: HeaderLayout
     private val mHeaderLayoutManager: HeaderLayoutManager
     private val mAppBarLayout: AppBarLayout
+
+    private val mItemClickListeners = mutableListOf<OnItemClickHandler>()
 
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
 
@@ -27,6 +29,7 @@ class NavigationToolBarLayout : CoordinatorLayout {
 
         mHeaderLayoutManager = (mHeaderLayout.layoutParams as CoordinatorLayout.LayoutParams).behavior as HeaderLayoutManager
         mHeaderLayoutManager.mItemsTransformer = HeaderTransformer()
+        mHeaderLayoutManager.mItemClickedListener = { vh -> mItemClickListeners.forEach { it.invoke(vh) } }
 
         mAppBarLayout = findViewById(R.id.com_ramotion_app_bar)
         mAppBarLayout.outlineProvider = null
@@ -34,16 +37,18 @@ class NavigationToolBarLayout : CoordinatorLayout {
         (mAppBarLayout.layoutParams as CoordinatorLayout.LayoutParams).behavior = mHeaderLayoutManager.mAppBarBehavior
     }
 
-    fun setAdapter(adapter: HeaderLayout.Adapter<out HeaderLayout.ViewHolder>) {
-        mHeaderLayout.setAdapter(adapter)
+    fun setAdapter(adapter: HeaderLayout.Adapter<out HeaderLayout.ViewHolder>) = mHeaderLayout.setAdapter(adapter)
+
+    fun scrollToPosition(pos: Int) = mHeaderLayoutManager.scrollToPosition(pos)
+
+    fun smoothScrollToPosition(pos: Int) = mHeaderLayoutManager.smoothScrollToPosition(pos)
+
+    fun addItemClickListener(listener: OnItemClickHandler) {
+        mItemClickListeners += listener
     }
 
-    fun scrollToPosition(pos: Int) {
-        mHeaderLayoutManager.scrollToPosition(pos)
-    }
-
-    fun smoothScrollToPosition(pos: Int) {
-        mHeaderLayoutManager.smoothScrollToPosition(pos)
+    fun removeItemClickListener(listener: OnItemClickHandler) = {
+        mItemClickListeners -= listener
     }
 
     // TODO: set header items transformer

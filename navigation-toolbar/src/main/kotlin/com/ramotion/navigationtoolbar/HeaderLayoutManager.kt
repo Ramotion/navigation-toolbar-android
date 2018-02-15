@@ -12,9 +12,13 @@ import android.support.v4.view.ViewCompat
 import android.util.AttributeSet
 import android.util.SparseArray
 import android.view.View
+import com.ramotion.navigationtoolbar.HeaderLayout.Companion.INVALID_POSITION
+import com.ramotion.navigationtoolbar.HeaderLayout.Companion.getChildViewHolder
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
+
+typealias OnItemClickHandler = (viewHolder: HeaderLayout.ViewHolder) -> Unit
 
 /**
  * Moves header's views
@@ -175,6 +179,7 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
     private var mClickedChildIndex = HeaderLayout.INVALID_POSITION // TODO: set on click
 
     internal var mItemsTransformer: ItemsTransformer? = null
+    internal var mItemClickedListener: OnItemClickHandler? = null
 
     init {
         Looper.myQueue().addIdleHandler {
@@ -281,6 +286,12 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
             return
         }
 
+        // TODO: remove
+        if (mClickedChildIndex != INVALID_POSITION &&
+            pos == getChildViewHolder(header.getChildAt(mClickedChildIndex))?.mPosition ?: -1)
+        {
+            return
+        }
 
         if (header.mIsHorizontalScrollEnabled) {
             val anchorPos = getHorizontalAnchorPos(header)
@@ -419,9 +430,20 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
     }
 
     private fun onHeaderItemClick(header: HeaderLayout, viewHolder: HeaderLayout.ViewHolder): Boolean {
-        mClickedChildIndex = header.indexOfChild(viewHolder.view)
-        smoothOffset(mScreenHalf.toInt())
-        return true
+        if (header.mIsHorizontalScrollEnabled) {
+            smoothScrollToPosition(viewHolder.mPosition)
+            mItemClickedListener?.invoke(viewHolder)
+            return true
+        }
+
+        if (header.mIsVerticalScrollEnabled) {
+            mClickedChildIndex = header.indexOfChild(viewHolder.view)
+            smoothOffset(mScreenHalf.toInt())
+            mItemClickedListener?.invoke(viewHolder)
+            return true
+        }
+
+        return false
     }
 
     private fun onHeaderDown(header: HeaderLayout): Boolean {
@@ -726,7 +748,10 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
         header.mIsVerticalScrollEnabled = vScrollEnable
     }
 
+    // TODO: smoothOffset(offset, duraction, byClick = false)
     private fun smoothOffset(offset: Int, duration: Long = mScrollUpAnimationDuration) {
+        // TODO: transformer?.beginTransformByClick
+
         val header = mHeaderLayout ?: return
 
         mOffsetAnimator.cancel()
@@ -743,6 +768,7 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
             }
             override fun onAnimationEnd(animation: Animator?) {
                 this@HeaderLayoutManager.onOffsetChangingStopped(-offset)
+                mClickedChildIndex = INVALID_POSITION
             }
         })
         mOffsetAnimator.start()

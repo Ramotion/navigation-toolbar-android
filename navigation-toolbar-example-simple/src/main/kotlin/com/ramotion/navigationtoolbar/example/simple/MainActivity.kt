@@ -15,6 +15,9 @@ class MainActivity : AppCompatActivity() {
         const val ITEM_COUNT = 20
     }
 
+    private lateinit var mViewPager: ViewPager
+    private lateinit var mHeader: NavigationToolBarLayout
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -52,14 +55,21 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initViewPager() {
-        val pager = findViewById<ViewPager>(R.id.pager)
-        pager.adapter = ViewPagerAdapter(ITEM_COUNT)
+        mViewPager = findViewById<ViewPager>(R.id.pager)
+        mViewPager.adapter = ViewPagerAdapter(ITEM_COUNT)
+        mViewPager.addOnPageChangeListener(object : ViewPager.SimpleOnPageChangeListener() {
+            override fun onPageSelected(position: Int) {
+                mHeader.smoothScrollToPosition(position)
+            }
+        })
     }
 
     private fun initHeader() {
-        val toolbar = findViewById<NavigationToolBarLayout>(R.id.navigation_toolbar_layout)
-        toolbar.setAdapter(HeaderAdapter(ITEM_COUNT))
-//        toolbar.setCurrentPosition(3)
+        mHeader = findViewById<NavigationToolBarLayout>(R.id.navigation_toolbar_layout)
+        mHeader.setAdapter(HeaderAdapter(ITEM_COUNT))
+        mHeader.addItemClickListener {
+            mViewPager.currentItem = it.mPosition
+        }
     }
 
 }

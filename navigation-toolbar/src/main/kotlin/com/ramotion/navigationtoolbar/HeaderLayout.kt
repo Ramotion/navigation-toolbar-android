@@ -55,7 +55,6 @@ class HeaderLayout : FrameLayout {
     // Do nothing here. Layout children in HeaderLayoutManager
     //override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {}
 
-    // TODO: performClick stuff
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         return mTouchGestureDetector.onTouchEvent(event)
     }

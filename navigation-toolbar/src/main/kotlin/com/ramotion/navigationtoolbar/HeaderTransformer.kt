@@ -80,6 +80,8 @@ class HeaderTransformer : HeaderLayoutManager.DefaultItemsTransformer() {
     }
 
     private fun onTransformMiddleStopped(header: HeaderLayout, lm: HeaderLayoutManager) {
+        // TODO: reset transformByClick flag
+
         if (mCurrentRatioMiddle == 1f) { onTransform(header, lm) }
         mIsTransformMiddle = false
         mHPoints.clear()
@@ -129,7 +131,7 @@ class HeaderTransformer : HeaderLayoutManager.DefaultItemsTransformer() {
     }
 
     private fun getVerticalAnchorChildIndex(header: HeaderLayout, lm: HeaderLayoutManager): Int {
-        val clickIndex = lm.getClickedChildIndex()
+        val clickIndex = lm.getClickedChildIndex() // TODO: refactor with transformByClick(clickedIndex)
         return if (clickIndex != HeaderLayout.INVALID_POSITION) {
             clickIndex
         } else {
