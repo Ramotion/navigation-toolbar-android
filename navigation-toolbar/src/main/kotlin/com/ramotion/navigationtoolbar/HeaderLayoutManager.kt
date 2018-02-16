@@ -177,8 +177,6 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
     private var mOffsetChanged = false
     private var mIsCheckingScrollStop =false
 
-    private var mScrollToPosition = HeaderLayout.INVALID_POSITION
-
     internal var mItemsTransformer: ItemsTransformer? = null
     internal var mItemClickedListener: OnItemClickHandler? = null
 
@@ -408,19 +406,11 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
     }
 
     private fun getHorizontalAnchorPos(header: HeaderLayout): Int {
-        return if (mScrollToPosition != HeaderLayout.INVALID_POSITION) {
-            mScrollToPosition
-        } else {
-            getHorizontalAnchorView(header)?.let { header.getAdapterPosition(it) } ?: 0
-        }
+        return getHorizontalAnchorView(header)?.let { header.getAdapterPosition(it) } ?: HeaderLayout.INVALID_POSITION
     }
 
     private fun getVerticalAnchorPos(header: HeaderLayout): Int {
-        return if (mScrollToPosition != HeaderLayout.INVALID_POSITION) {
-            mScrollToPosition
-        } else {
-            getVerticalAnchorView(header)?.let { header.getAdapterPosition(it) } ?: 0
-        }
+        return getVerticalAnchorView(header)?.let { header.getAdapterPosition(it) } ?: HeaderLayout.INVALID_POSITION
     }
 
     private fun onHeaderItemClick(header: HeaderLayout, viewHolder: HeaderLayout.ViewHolder): Boolean {
@@ -455,8 +445,6 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
             return false
         }
 
-        mScrollToPosition = HeaderLayout.INVALID_POSITION
-
         val scrollLeft = distance >= 0
         val offset = if (scrollLeft) {
             val lastRight = header.getChildAt(childCount - 1).right
@@ -485,8 +473,6 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
         if (childCount == 0) {
             return false
         }
-
-        mScrollToPosition = HeaderLayout.INVALID_POSITION
 
         val scrollUp = distance >= 0
         val offset = if (scrollUp) {
@@ -617,15 +603,20 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
     }
 
     private fun fillRight(header: HeaderLayout, anchorPos: Int) {
-        if (anchorPos == HeaderLayout.INVALID_POSITION) {
+        if (header.mAdapter?.run { getItemCount() == 0 } != false) {
             return
+        }
+
+        val startPos = when (anchorPos) {
+            HeaderLayout.INVALID_POSITION -> 0
+            else -> anchorPos
         }
 
         val top = mAppBar?.let { header.height - it.bottom } ?: mHPoint.y.toInt()
         val bottom = mAppBar?.bottom ?: mHorizontalTabHeight
-        val maxPos = Math.min(header.mAdapter?.run { getItemCount() } ?: 0, anchorPos + mCenterIndex + 1 + mTabOffsetCount)
+        val maxPos = Math.min(header.mAdapter?.run { getItemCount() } ?: 0, startPos + mCenterIndex + 1 + mTabOffsetCount)
 
-        var pos = anchorPos
+        var pos = startPos
         var left  = if (header.childCount > 0) {
             header.getChildAt(header.childCount - 1).right
         } else {
@@ -658,13 +649,18 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
     }
 
     private fun fillBottom(header: HeaderLayout, anchorPos: Int) {
-        if (anchorPos == HeaderLayout.INVALID_POSITION) {
+        if (header.mAdapter?.run { getItemCount() == 0 } != false) {
             return
         }
 
-        val maxPos = Math.min(header.mAdapter?.run { getItemCount() } ?: 0, anchorPos + mCenterIndex + 1 + mTabOffsetCount)
+        val startPos = when (anchorPos) {
+            HeaderLayout.INVALID_POSITION -> 0
+            else -> anchorPos
+        }
+
+        val maxPos = Math.min(header.mAdapter?.run { getItemCount() } ?: 0, startPos + mCenterIndex + 1 + mTabOffsetCount)
         val left = mVPoint.x.toInt()
-        var pos = anchorPos
+        var pos = startPos
 
         var top  = if (header.childCount > 0) {
             header.getChildAt(header.childCount - 1).bottom
