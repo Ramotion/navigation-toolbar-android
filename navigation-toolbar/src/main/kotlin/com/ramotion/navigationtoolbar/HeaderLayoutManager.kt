@@ -12,8 +12,6 @@ import android.support.v4.view.ViewCompat
 import android.util.AttributeSet
 import android.util.SparseArray
 import android.view.View
-import com.ramotion.navigationtoolbar.HeaderLayout.Companion.INVALID_POSITION
-import com.ramotion.navigationtoolbar.HeaderLayout.Companion.getChildViewHolder
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -375,7 +373,6 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
     }
 
     fun fill(header: HeaderLayout) {
-        // TODO: optimize
         val orientation = getOrientation(getPositionRatio())
         val pos = when (orientation) {
             Orientation.HORIZONTAL -> getHorizontalAnchorPos(header)
@@ -605,14 +602,15 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
             return
         }
 
-        val top = mHPoint.y.toInt()
+        val top = mAppBar?.let { header.height - it.bottom } ?: mHPoint.y.toInt()
+        val bottom = mAppBar?.bottom ?: mHorizontalTabHeight
         val leftDiff = mHPoint.x.toInt() - (mViewCache.get(anchorPos)?.left ?: 0)
 
         var pos = Math.max(0, anchorPos - mCenterIndex - mTabOffsetCount)
         var left = (mHPoint.x.toInt() -(anchorPos - pos) * mHorizontalTabWidth) - leftDiff
 
         while (pos < anchorPos) {
-            val view = getPlacedChildForPosition(header, pos, left, top, mHorizontalTabWidth, mHorizontalTabHeight)
+            val view = getPlacedChildForPosition(header, pos, left, top, mHorizontalTabWidth, bottom)
             left = view.right
             pos++
         }
@@ -623,8 +621,9 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
             return
         }
 
+        val top = mAppBar?.let { header.height - it.bottom } ?: mHPoint.y.toInt()
+        val bottom = mAppBar?.bottom ?: mHorizontalTabHeight
         val maxPos = Math.min(header.mAdapter?.run { getItemCount() } ?: 0, anchorPos + mCenterIndex + 1 + mTabOffsetCount)
-        val top = mHPoint.y.toInt()
 
         var pos = anchorPos
         var left  = if (header.childCount > 0) {
@@ -634,7 +633,7 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
         }
 
         while (pos <  maxPos) {
-            val view = getPlacedChildForPosition(header, pos, left, top, mHorizontalTabWidth, mHorizontalTabHeight)
+            val view = getPlacedChildForPosition(header, pos, left, top, mHorizontalTabWidth, bottom)
             left = view.right
             pos++
         }

@@ -94,7 +94,10 @@ class HeaderTransformer : HeaderLayoutManager.DefaultItemsTransformer() {
     }
 
     private fun onTransformTopStopped(header: HeaderLayout, lm: HeaderLayoutManager) {
-        if (mCurrentRatioTop == 0f) { onTransform(header, lm) }
+        if (mCurrentRatioTop == 0f) {
+            onTransform(header, lm)
+            lm.fill(header)
+        }
         mIsTransformTop = false
     }
 
