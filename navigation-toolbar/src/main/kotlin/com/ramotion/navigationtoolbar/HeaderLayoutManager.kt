@@ -725,8 +725,8 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
             hScrollEnable = true
             mCanDrag = false
         } else if (invertedOffset == mToolBarHeight) {
+            hScrollEnable = true
             mCanDrag = true
-            return
         } else {
             // TODO: check
             if (invertedOffset in mToolBarHeight..(mTopSnapDistance - 1)) {
