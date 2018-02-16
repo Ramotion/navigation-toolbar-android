@@ -229,11 +229,10 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
     }
 
     override fun onDependentViewChanged(parent: CoordinatorLayout, header: HeaderLayout, dependency: View): Boolean {
-        // Offset header on collapsing
-        header.y = (dependency.bottom - header.height).toFloat()
+        header.mScroller.forceFinished(true)
+        header.y = (dependency.bottom - header.height).toFloat() // Offset header on collapsing
 
-        // Transform header items
-        mItemsTransformer?.transform(header, this, dependency.bottom)
+        mItemsTransformer?.transform(header, this, dependency.bottom) // Transform header items
 
         return true
     }
