@@ -159,11 +159,12 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
     val mVerticalTabWidth = (mScreenWidth * VERTICAL_TAB_WIDTH_RATIO).toInt()
 
     private val mViewCache = SparseArray<View?>()
-    private val mOffsetAnimator = ValueAnimator() // TODO: add duration attribute
     private val mCenterIndex = mTabOnScreenCount % 2 + mTabOffsetCount
 
     internal val mAppBarBehavior = AppBarBehavior()
     internal val mHeaderScrollListener = HeaderScrollListener()
+
+    private var mOffsetAnimator: ValueAnimator? = null // TODO: add duration attribute
 
     private var mAppBar: AppBarLayout? = null
     private var mHeaderLayout: HeaderLayout? = null
@@ -275,7 +276,7 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
     }
 
     fun smoothScrollToPosition(pos: Int) {
-        if (mOffsetAnimator.isRunning) {
+        if (mOffsetAnimator?.isRunning == true) {
             return
         }
 
@@ -745,29 +746,39 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
 
     private fun smoothOffsetOnClick(initiatorIndex: Int) {
         mItemsTransformer?.initiatorIndex = initiatorIndex
+
         smoothOffset(mScreenHalf.toInt())
+
+        mOffsetAnimator?.addListener(object: AnimatorListenerAdapter() {
+            override fun onAnimationEnd(animation: Animator?) {
+                mItemsTransformer?.initiatorIndex = HeaderLayout.INVALID_POSITION
+            }
+        })
     }
 
     private fun smoothOffset(offset: Int, duration: Long = mScrollUpAnimationDuration) {
         val header = mHeaderLayout ?: return
 
-        mOffsetAnimator.cancel()
-        mOffsetAnimator.setDuration(duration)
-        mOffsetAnimator.setIntValues(mAppBarBehavior.topAndBottomOffset, -offset)
-        mOffsetAnimator.addUpdateListener {
-            val value = it.animatedValue as Int
-            mAppBarBehavior.topAndBottomOffset = value
+        mOffsetAnimator?.cancel()
+
+        mOffsetAnimator = ValueAnimator().also { animator ->
+            animator.duration = duration
+            animator.setIntValues(mAppBarBehavior.topAndBottomOffset, -offset)
+            animator.addUpdateListener {
+                val value = it.animatedValue as Int
+                mAppBarBehavior.topAndBottomOffset = value
+            }
+            animator.addListener(object: AnimatorListenerAdapter() {
+                override fun onAnimationStart(animation: Animator?, isReverse: Boolean) {
+                    header.mIsHorizontalScrollEnabled = false
+                    header.mIsVerticalScrollEnabled = false
+                }
+                override fun onAnimationEnd(animation: Animator?) {
+                    this@HeaderLayoutManager.onOffsetChangingStopped(-offset)
+                }
+            })
+            animator.start()
         }
-        mOffsetAnimator.addListener(object: AnimatorListenerAdapter() {
-            override fun onAnimationStart(animation: Animator?, isReverse: Boolean) {
-                header.mIsHorizontalScrollEnabled = false
-                header.mIsVerticalScrollEnabled = false
-            }
-            override fun onAnimationEnd(animation: Animator?) {
-                this@HeaderLayoutManager.onOffsetChangingStopped(-offset)
-            }
-        })
-        mOffsetAnimator.start()
     }
 
 }
