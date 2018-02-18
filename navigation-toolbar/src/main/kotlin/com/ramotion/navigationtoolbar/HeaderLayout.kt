@@ -9,7 +9,6 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
-import android.widget.OverScroller
 
 /**
  * Header views container and producer with cache (recycler).
@@ -25,6 +24,7 @@ class HeaderLayout : FrameLayout {
     internal interface ScrollListener {
         fun onItemClick(header: HeaderLayout, viewHolder: ViewHolder): Boolean
         fun onHeaderDown(header: HeaderLayout): Boolean
+        fun onHeaderUp(header: HeaderLayout): Unit
         fun onHeaderHorizontalScroll(header: HeaderLayout, distance: Float): Boolean
         fun onHeaderVerticalScroll(header: HeaderLayout, distance: Float): Boolean
         fun onHeaderHorizontalFling(header: HeaderLayout, velocity: Float): Boolean
@@ -42,26 +42,6 @@ class HeaderLayout : FrameLayout {
 
     var mAdapter: Adapter<ViewHolder>? = null // TODO: move to LM
         private set
-
-    constructor(context: Context, attrs: AttributeSet) : this(context, attrs, 0)
-
-    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
-        mTouchGestureDetector = GestureDetectorCompat(context, TouchGestureListener())
-    }
-
-    override fun onTouchEvent(event: MotionEvent?): Boolean {
-        return mTouchGestureDetector.onTouchEvent(event)
-    }
-
-    fun getAdapterPosition(view: View) = (view.layoutParams as LayoutParams).getViewAdapterPosition()
-
-    internal fun detachView(child: View) = detachViewFromParent(child)
-
-    internal fun attachView(child: View) = attachViewToParent(child, -1, child.layoutParams)
-
-    internal fun setAdapter(adapter: Adapter<out ViewHolder>) {
-        mAdapter = adapter as Adapter<ViewHolder> // TODO: fix?
-    }
 
     private inner class TouchGestureListener : GestureDetector.SimpleOnGestureListener() {
         override fun onSingleTapUp(e: MotionEvent): Boolean {
@@ -188,6 +168,30 @@ class HeaderLayout : FrameLayout {
             mAdapter?.onViewRecycled(getChildViewHolder(view)!!)
             this@HeaderLayout.removeView(view)
         }
+    }
+
+    constructor(context: Context, attrs: AttributeSet) : this(context, attrs, 0)
+
+    constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
+        mTouchGestureDetector = GestureDetectorCompat(context, TouchGestureListener())
+    }
+
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        val res = mTouchGestureDetector.onTouchEvent(event)
+        if (event.action == MotionEvent.ACTION_UP) {
+            mScrollListener?.onHeaderUp(this)
+        }
+        return res
+    }
+
+    fun getAdapterPosition(view: View) = (view.layoutParams as LayoutParams).getViewAdapterPosition()
+
+    internal fun detachView(child: View) = detachViewFromParent(child)
+
+    internal fun attachView(child: View) = attachViewToParent(child, -1, child.layoutParams)
+
+    internal fun setAdapter(adapter: Adapter<out ViewHolder>) {
+        mAdapter = adapter as Adapter<ViewHolder> // TODO: fix?
     }
 
 }

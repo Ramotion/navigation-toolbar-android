@@ -10,6 +10,7 @@ import android.support.design.widget.AppBarLayout
 import android.support.design.widget.CoordinatorLayout
 import android.support.v4.view.ViewCompat
 import android.util.AttributeSet
+import android.util.Log
 import android.util.SparseArray
 import android.view.View
 import android.widget.OverScroller
@@ -27,6 +28,10 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
 
     enum class Orientation {
         HORIZONTAL, VERTICAL, TRANSITIONAL
+    }
+
+    enum class ScrollState {
+        IDLE, DRAGGING, FLING
     }
 
     internal companion object {
@@ -71,17 +76,18 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     internal val mHeaderScrollListener = HeaderScrollListener()
 
     private var mOffsetAnimator: ValueAnimator? = null // TODO: add duration attribute
-
     private var mAppBar: AppBarLayout? = null
     private var mHeaderLayout: HeaderLayout? = null
-
-    private lateinit var mHPoint: PointF // TODO: replace with data class
-    private lateinit var mVPoint: PointF // TODO: replace with data class
 
     private var mInitialized = false
     private var mCanDrag = true
     private var mOffsetChanged = false
     private var mIsCheckingScrollStop =false
+
+    private var mScrollState = ScrollState.IDLE
+
+    private lateinit var mHPoint: PointF // TODO: replace with data class
+    private lateinit var mVPoint: PointF // TODO: replace with data class
 
     internal var mItemsTransformer: ItemsTransformer? = null
     internal var mItemClickedListener: OnItemClickHandler? = null
@@ -166,6 +172,9 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         override fun onHeaderDown(header: HeaderLayout) =
                 this@HeaderLayoutManager.onHeaderDown(header)
 
+        override fun onHeaderUp(header: HeaderLayout)  =
+                this@HeaderLayoutManager.onHeaderUp(header)
+
         override fun onHeaderHorizontalScroll(header: HeaderLayout, distance: Float) =
                 this@HeaderLayoutManager.onHeaderHorizontalScroll(header, distance)
 
@@ -189,6 +198,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
             val y = mScroller.currY
 
             if (!mScroller.computeScrollOffset()) {
+                setScrollState(ScrollState.IDLE)
                 return
             }
 
@@ -206,18 +216,23 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         }
 
         fun fling(startX: Int, startY: Int, velocityX: Int, velocityY: Int, minX: Int, maxX: Int, minY: Int, maxY: Int) {
+            setScrollState(ScrollState.FLING)
             mScroller.forceFinished(true)
             mScroller.fling(startX, startY, velocityX, velocityY, minX, maxX, minY, maxY)
             mHeaderLayout.also { ViewCompat.postOnAnimation(it, this) }
         }
 
         fun startScroll(startX: Int, startY: Int, dx: Int, dy: Int, duration: Int) {
+            setScrollState(ScrollState.FLING)
             mScroller.startScroll(startX, startY, dx, dy, duration)
             mHeaderLayout.also { ViewCompat.postOnAnimation(it, this) }
         }
 
         fun stop() {
-            mScroller.abortAnimation()
+            if (!mScroller.isFinished) {
+                setScrollState(ScrollState.IDLE)
+                mScroller.abortAnimation()
+            }
         }
     }
 
@@ -476,11 +491,19 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         return true
     }
 
+    private fun onHeaderUp(header: HeaderLayout): Unit {
+        if (mScrollState != ScrollState.FLING) {
+            setScrollState(ScrollState.IDLE)
+        }
+    }
+
     private fun onHeaderHorizontalScroll(header: HeaderLayout, distance: Float): Boolean {
         val childCount = header.childCount
         if (childCount == 0) {
             return false
         }
+
+        setScrollState(ScrollState.DRAGGING)
 
         val scrollLeft = distance >= 0
         val offset = if (scrollLeft) {
@@ -510,6 +533,8 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         if (childCount == 0) {
             return false
         }
+
+        setScrollState(ScrollState.DRAGGING)
 
         val scrollUp = distance >= 0
         val offset = if (scrollUp) {
@@ -784,4 +809,8 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         }
     }
 
+    private fun setScrollState(state: ScrollState) {
+        Log.d("D", "current state: ${state.name}")
+        mScrollState = state
+    }
 }
