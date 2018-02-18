@@ -12,6 +12,7 @@ import android.support.v4.view.ViewCompat
 import android.util.AttributeSet
 import android.util.SparseArray
 import android.view.View
+import android.widget.OverScroller
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -21,7 +22,7 @@ typealias OnItemClickHandler = (viewHolder: HeaderLayout.ViewHolder) -> Unit
 /**
  * Moves header's views
  */
-class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
+class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     : CoordinatorLayout.Behavior<HeaderLayout>(context, attrs), AppBarLayout.OnOffsetChangedListener {
 
     enum class Orientation {
@@ -64,6 +65,7 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
 
     private val mViewCache = SparseArray<View?>()
     private val mCenterIndex = mTabOnScreenCount % 2 + mTabOffsetCount
+    private val mScroller = OverScroller(context)
 
     internal val mAppBarBehavior = AppBarBehavior()
     internal val mHeaderScrollListener = HeaderScrollListener()
@@ -227,9 +229,8 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
     }
 
     override fun onDependentViewChanged(parent: CoordinatorLayout, header: HeaderLayout, dependency: View): Boolean {
-        header.mScroller.forceFinished(true)
+        mScroller.forceFinished(true)
         header.y = (dependency.bottom - header.height).toFloat() // Offset header on collapsing
-
         mItemsTransformer?.transform(header, this, dependency.bottom) // Transform header items
 
         return true
@@ -303,7 +304,7 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
 
             val delta = abs(offset) / childWidth.toFloat()
             val duration = min(((delta + 1) * 100).toInt(), MAX_SCROLL_DURATION.toInt())
-            header.mScroller.startScroll(0, 0, -offset, 0, duration)
+            mScroller.startScroll(0, 0, -offset, 0, duration)
             header.postInvalidateOnAnimation()
         } else if (header.mIsVerticalScrollEnabled) {
             val anchorPos = getVerticalAnchorPos(header)
@@ -320,7 +321,7 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
 
             val delta = abs(offset) / childHeight.toFloat()
             val duration = min(((delta + 1) * 100).toInt(), MAX_SCROLL_DURATION.toInt())
-            header.mScroller.startScroll(0, 0, 0, -offset, duration)
+            mScroller.startScroll(0, 0, 0, -offset, duration)
             header.postInvalidateOnAnimation()
         }
     }
@@ -434,7 +435,7 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
             return false
         }
 
-        header.mScroller.forceFinished(true);
+        mScroller.forceFinished(true);
         ViewCompat.postInvalidateOnAnimation(header);
         return true
     }
@@ -510,7 +511,7 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
         val min = -itemCount * mHorizontalTabWidth + header.width
         val max = 0
 
-        header.mScroller.apply {
+        mScroller.apply {
             forceFinished(true)
             fling(start, 0, velocity.toInt(), 0, min, max, 0, 0)
         }
@@ -532,7 +533,7 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
         val min = -itemCount * mVerticalTabHeight + header.height
         val max = 0
 
-        header.mScroller.apply {
+        mScroller.apply {
             forceFinished(true)
             fling(0, start, 0, velocity.toInt(), 0, 0, min, max)
         }
@@ -542,16 +543,16 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
     }
 
     private fun computeScroll(header: HeaderLayout) {
-        val x = header.mScroller.currX
-        val y = header.mScroller.currY
+        val x = mScroller.currX
+        val y = mScroller.currY
 
-        if (!header.mScroller.computeScrollOffset()) {
+        if (!mScroller.computeScrollOffset()) {
             return
         }
 
         for (i in 0 until header.childCount) {
-            val diffX = header.mScroller.currX - x
-            val diffY = header.mScroller.currY - y
+            val diffX = mScroller.currX - x
+            val diffY = mScroller.currY - y
             val child = header.getChildAt(i)
             child.offsetLeftAndRight(diffX)
             child.offsetTopAndBottom(diffY)

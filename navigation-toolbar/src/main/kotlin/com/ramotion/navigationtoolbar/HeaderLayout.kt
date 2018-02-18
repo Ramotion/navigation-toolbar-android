@@ -34,7 +34,6 @@ class HeaderLayout : FrameLayout {
 
     private val mTouchGestureDetector: GestureDetectorCompat
 
-    internal val mScroller: OverScroller
     internal val mRecycler = Recycler()
 
     internal var mIsHorizontalScrollEnabled = false
@@ -49,7 +48,6 @@ class HeaderLayout : FrameLayout {
 
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
         mTouchGestureDetector = GestureDetectorCompat(context, TouchGestureListener())
-        mScroller = OverScroller(context)
     }
 
     // Do nothing here. Layout children in HeaderLayoutManager
