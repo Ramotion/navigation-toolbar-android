@@ -65,7 +65,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
 
     private val mViewCache = SparseArray<View?>()
     private val mCenterIndex = mTabOnScreenCount % 2 + mTabOffsetCount
-    private val mScroller = OverScroller(context)
+    private val mViewFlinger = ViewFlinger(context)
 
     internal val mAppBarBehavior = AppBarBehavior()
     internal val mHeaderScrollListener = HeaderScrollListener()
@@ -177,9 +177,48 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
 
         override fun onHeaderVerticalFling(header: HeaderLayout, velocity: Float) =
                 this@HeaderLayoutManager.onHeaderVerticalFling(header, velocity)
+    }
 
-        override fun computeScroll(header: HeaderLayout) =
-                this@HeaderLayoutManager.computeScroll(header)
+    private inner class ViewFlinger(context: Context) : Runnable {
+        private val mScroller = OverScroller(context)
+
+        override fun run() {
+            val header = mHeaderLayout ?: return
+
+            val x = mScroller.currX
+            val y = mScroller.currY
+
+            if (!mScroller.computeScrollOffset()) {
+                return
+            }
+
+            for (i in 0 until header.childCount) {
+                val diffX = mScroller.currX - x
+                val diffY = mScroller.currY - y
+                val child = header.getChildAt(i)
+                child.offsetLeftAndRight(diffX)
+                child.offsetTopAndBottom(diffY)
+            }
+
+            fill(header)
+
+            ViewCompat.postOnAnimation(header, this)
+        }
+
+        fun fling(startX: Int, startY: Int, velocityX: Int, velocityY: Int, minX: Int, maxX: Int, minY: Int, maxY: Int) {
+            mScroller.forceFinished(true)
+            mScroller.fling(startX, startY, velocityX, velocityY, minX, maxX, minY, maxY)
+            mHeaderLayout.also { ViewCompat.postOnAnimation(it, this) }
+        }
+
+        fun startScroll(startX: Int, startY: Int, dx: Int, dy: Int, duration: Int) {
+            mScroller.startScroll(startX, startY, dx, dy, duration)
+            mHeaderLayout.also { ViewCompat.postOnAnimation(it, this) }
+        }
+
+        fun stop() {
+            mScroller.abortAnimation()
+        }
     }
 
     init {
@@ -229,7 +268,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     }
 
     override fun onDependentViewChanged(parent: CoordinatorLayout, header: HeaderLayout, dependency: View): Boolean {
-        mScroller.forceFinished(true)
+        mViewFlinger.stop()
         header.y = (dependency.bottom - header.height).toFloat() // Offset header on collapsing
         mItemsTransformer?.transform(header, this, dependency.bottom) // Transform header items
 
@@ -304,8 +343,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
 
             val delta = abs(offset) / childWidth.toFloat()
             val duration = min(((delta + 1) * 100).toInt(), MAX_SCROLL_DURATION.toInt())
-            mScroller.startScroll(0, 0, -offset, 0, duration)
-            header.postInvalidateOnAnimation()
+            mViewFlinger.startScroll(0, 0, -offset, 0, duration)
         } else if (header.mIsVerticalScrollEnabled) {
             val anchorPos = getVerticalAnchorPos(header)
             if (anchorPos == HeaderLayout.INVALID_POSITION) {
@@ -321,8 +359,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
 
             val delta = abs(offset) / childHeight.toFloat()
             val duration = min(((delta + 1) * 100).toInt(), MAX_SCROLL_DURATION.toInt())
-            mScroller.startScroll(0, 0, 0, -offset, duration)
-            header.postInvalidateOnAnimation()
+            mViewFlinger.startScroll(0, 0, 0, -offset, duration)
         }
     }
 
@@ -435,8 +472,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
             return false
         }
 
-        mScroller.forceFinished(true);
-        ViewCompat.postInvalidateOnAnimation(header);
+        mViewFlinger.stop()
         return true
     }
 
@@ -511,11 +547,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         val min = -itemCount * mHorizontalTabWidth + header.width
         val max = 0
 
-        mScroller.apply {
-            forceFinished(true)
-            fling(start, 0, velocity.toInt(), 0, min, max, 0, 0)
-        }
-        ViewCompat.postInvalidateOnAnimation(header)
+        mViewFlinger.fling(start, 0, velocity.toInt(), 0, min, max, 0, 0)
 
         return true
     }
@@ -533,34 +565,9 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         val min = -itemCount * mVerticalTabHeight + header.height
         val max = 0
 
-        mScroller.apply {
-            forceFinished(true)
-            fling(0, start, 0, velocity.toInt(), 0, 0, min, max)
-        }
-        ViewCompat.postInvalidateOnAnimation(header)
+        mViewFlinger.fling(0, start, 0, velocity.toInt(), 0, 0, min, max)
 
         return true
-    }
-
-    private fun computeScroll(header: HeaderLayout) {
-        val x = mScroller.currX
-        val y = mScroller.currY
-
-        if (!mScroller.computeScrollOffset()) {
-            return
-        }
-
-        for (i in 0 until header.childCount) {
-            val diffX = mScroller.currX - x
-            val diffY = mScroller.currY - y
-            val child = header.getChildAt(i)
-            child.offsetLeftAndRight(diffX)
-            child.offsetTopAndBottom(diffY)
-        }
-
-        fill(header)
-
-        ViewCompat.postInvalidateOnAnimation(header)
     }
 
     private fun initPoints(header: HeaderLayout) {

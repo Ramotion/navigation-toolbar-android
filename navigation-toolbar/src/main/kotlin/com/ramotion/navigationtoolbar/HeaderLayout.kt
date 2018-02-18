@@ -29,7 +29,6 @@ class HeaderLayout : FrameLayout {
         fun onHeaderVerticalScroll(header: HeaderLayout, distance: Float): Boolean
         fun onHeaderHorizontalFling(header: HeaderLayout, velocity: Float): Boolean
         fun onHeaderVerticalFling(header: HeaderLayout, velocity: Float): Boolean
-        fun computeScroll(header: HeaderLayout)
     }
 
     private val mTouchGestureDetector: GestureDetectorCompat
@@ -50,16 +49,8 @@ class HeaderLayout : FrameLayout {
         mTouchGestureDetector = GestureDetectorCompat(context, TouchGestureListener())
     }
 
-    // Do nothing here. Layout children in HeaderLayoutManager
-    //override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {}
-
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         return mTouchGestureDetector.onTouchEvent(event)
-    }
-
-    override fun computeScroll() {
-        super.computeScroll()
-        mScrollListener?.computeScroll(this)
     }
 
     fun getAdapterPosition(view: View) = (view.layoutParams as LayoutParams).getViewAdapterPosition()
