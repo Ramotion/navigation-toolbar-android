@@ -24,6 +24,66 @@ typealias OnItemClickHandler = (viewHolder: HeaderLayout.ViewHolder) -> Unit
 class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
     : CoordinatorLayout.Behavior<HeaderLayout>(context, attrs), AppBarLayout.OnOffsetChangedListener {
 
+    enum class Orientation {
+        HORIZONTAL, VERTICAL, TRANSITIONAL
+    }
+
+    internal companion object {
+        const val TAB_ON_SCREEN_COUNT = 5
+        const val TAB_OFF_SCREEN_COUNT = 1
+        const val VERTICAL_TAB_HEIGHT_RATIO = 1f / TAB_ON_SCREEN_COUNT
+        const val VERTICAL_TAB_WIDTH_RATIO = 4f / 5f
+        const val SCROLL_STOP_CHECK_DELAY = 100L
+        const val SCROLL_UP_ANIMATION_DURATION = 1000L
+        const val SNAP_ANIMATION_DURATION = 300L
+        const val MAX_SCROLL_DURATION = 600L
+
+    }
+
+    // TODO: init in constructor from attr
+    private val mTabOffsetCount = TAB_OFF_SCREEN_COUNT
+    private val mTabOnScreenCount = TAB_ON_SCREEN_COUNT
+    private val mTabCount = mTabOnScreenCount + mTabOffsetCount * 2
+    private val mScrollUpAnimationDuration = SCROLL_UP_ANIMATION_DURATION
+
+    val mScreenWidth = context.resources.displayMetrics.widthPixels
+    val mScreenHeight = context.resources.displayMetrics.heightPixels
+    val mScreenHalf = mScreenHeight / 2f
+    val mStatusBarHeight: Int
+    val mToolBarHeight: Int
+    val mWorkHeight: Int
+
+    val mTopSnapDistance: Int
+    val mBottomSnapDistnace: Int
+
+    // TODO: add getters
+    val mHorizontalTabWidth = mScreenWidth
+    val mHorizontalTabHeight = mScreenHalf.toInt()
+    val mVerticalTabHeight = (mScreenHeight * VERTICAL_TAB_HEIGHT_RATIO).toInt()
+    val mVerticalTabWidth = (mScreenWidth * VERTICAL_TAB_WIDTH_RATIO).toInt()
+
+    private val mViewCache = SparseArray<View?>()
+    private val mCenterIndex = mTabOnScreenCount % 2 + mTabOffsetCount
+
+    internal val mAppBarBehavior = AppBarBehavior()
+    internal val mHeaderScrollListener = HeaderScrollListener()
+
+    private var mOffsetAnimator: ValueAnimator? = null // TODO: add duration attribute
+
+    private var mAppBar: AppBarLayout? = null
+    private var mHeaderLayout: HeaderLayout? = null
+
+    private lateinit var mHPoint: PointF // TODO: replace with data class
+    private lateinit var mVPoint: PointF // TODO: replace with data class
+
+    private var mInitialized = false
+    private var mCanDrag = true
+    private var mOffsetChanged = false
+    private var mIsCheckingScrollStop =false
+
+    internal var mItemsTransformer: ItemsTransformer? = null
+    internal var mItemClickedListener: OnItemClickHandler? = null
+
     abstract class ItemsTransformer {
         var initiatorIndex: Int? = null
             internal set
@@ -119,66 +179,6 @@ class HeaderLayoutManager(private val context: Context, attrs: AttributeSet?)
         override fun computeScroll(header: HeaderLayout) =
                 this@HeaderLayoutManager.computeScroll(header)
     }
-
-    enum class Orientation {
-        HORIZONTAL, VERTICAL, TRANSITIONAL
-    }
-
-    internal companion object {
-        const val TAB_ON_SCREEN_COUNT = 5
-        const val TAB_OFF_SCREEN_COUNT = 1
-        const val VERTICAL_TAB_HEIGHT_RATIO = 1f / TAB_ON_SCREEN_COUNT
-        const val VERTICAL_TAB_WIDTH_RATIO = 4f / 5f
-        const val SCROLL_STOP_CHECK_DELAY = 100L
-        const val SCROLL_UP_ANIMATION_DURATION = 1000L
-        const val SNAP_ANIMATION_DURATION = 300L
-        const val MAX_SCROLL_DURATION = 600L
-
-    }
-
-    // TODO: init in constructor from attr
-    private val mTabOffsetCount = TAB_OFF_SCREEN_COUNT
-    private val mTabOnScreenCount = TAB_ON_SCREEN_COUNT
-    private val mTabCount = mTabOnScreenCount + mTabOffsetCount * 2
-    private val mScrollUpAnimationDuration = SCROLL_UP_ANIMATION_DURATION
-
-    val mScreenWidth = context.resources.displayMetrics.widthPixels
-    val mScreenHeight = context.resources.displayMetrics.heightPixels
-    val mScreenHalf = mScreenHeight / 2f
-    val mStatusBarHeight: Int
-    val mToolBarHeight: Int
-    val mWorkHeight: Int
-
-    val mTopSnapDistance: Int
-    val mBottomSnapDistnace: Int
-
-    // TODO: add getters
-    val mHorizontalTabWidth = mScreenWidth
-    val mHorizontalTabHeight = mScreenHalf.toInt()
-    val mVerticalTabHeight = (mScreenHeight * VERTICAL_TAB_HEIGHT_RATIO).toInt()
-    val mVerticalTabWidth = (mScreenWidth * VERTICAL_TAB_WIDTH_RATIO).toInt()
-
-    private val mViewCache = SparseArray<View?>()
-    private val mCenterIndex = mTabOnScreenCount % 2 + mTabOffsetCount
-
-    internal val mAppBarBehavior = AppBarBehavior()
-    internal val mHeaderScrollListener = HeaderScrollListener()
-
-    private var mOffsetAnimator: ValueAnimator? = null // TODO: add duration attribute
-
-    private var mAppBar: AppBarLayout? = null
-    private var mHeaderLayout: HeaderLayout? = null
-
-    private lateinit var mHPoint: PointF // TODO: replace with data class
-    private lateinit var mVPoint: PointF // TODO: replace with data class
-
-    private var mInitialized = false
-    private var mCanDrag = true
-    private var mOffsetChanged = false
-    private var mIsCheckingScrollStop =false
-
-    internal var mItemsTransformer: ItemsTransformer? = null
-    internal var mItemClickedListener: OnItemClickHandler? = null
 
     init {
         Looper.myQueue().addIdleHandler {
