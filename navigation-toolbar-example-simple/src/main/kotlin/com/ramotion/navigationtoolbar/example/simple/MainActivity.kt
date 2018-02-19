@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v4.view.ViewPager
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import com.ramotion.navigationtoolbar.NavigationToolBarLayout
@@ -67,9 +68,10 @@ class MainActivity : AppCompatActivity() {
     private fun initHeader() {
         mHeader = findViewById<NavigationToolBarLayout>(R.id.navigation_toolbar_layout)
         mHeader.setAdapter(HeaderAdapter(ITEM_COUNT))
-        mHeader.addItemClickListener {
-            mViewPager.currentItem = it.mPosition
-        }
+        mHeader.addItemChangeListener { mViewPager.currentItem = it }
+        mHeader.addItemClickListener { mViewPager.currentItem = it.mPosition }
+
+        SimpleSnapHelper().attach(mHeader)
     }
 
 }

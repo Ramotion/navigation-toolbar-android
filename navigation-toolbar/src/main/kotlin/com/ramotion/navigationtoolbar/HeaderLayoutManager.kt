@@ -18,7 +18,9 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
-typealias OnItemClickHandler = (viewHolder: HeaderLayout.ViewHolder) -> Unit
+typealias ItemClickListener = (viewHolder: HeaderLayout.ViewHolder) -> Unit
+typealias ItemChangeListener = (position: Int) -> Unit
+typealias ScrollStateListener = (state: HeaderLayoutManager.ScrollState) -> Unit
 
 /**
  * Moves header's views
@@ -90,7 +92,9 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     private lateinit var mVPoint: PointF // TODO: replace with data class
 
     internal var mItemsTransformer: ItemsTransformer? = null
-    internal var mItemClickedListener: OnItemClickHandler? = null
+    internal var mItemClickedListener: ItemClickListener? = null
+    internal var mItemChangeListener: ItemChangeListener? = null
+    internal var mScrollStateListener: ScrollStateListener? = null
 
     abstract class ItemsTransformer {
         var initiatorIndex: Int? = null
@@ -325,6 +329,8 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
             val offset = (pos - anchorPos) * header.getChildAt(0).height
             onHeaderVerticalScroll(header, offset.toFloat())
         }
+
+        mItemChangeListener?.invoke(pos)
     }
 
     fun smoothScrollToPosition(pos: Int) {
@@ -376,6 +382,8 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
             val duration = min(((delta + 1) * 100).toInt(), MAX_SCROLL_DURATION.toInt())
             mViewFlinger.startScroll(0, 0, 0, -offset, duration)
         }
+
+        mItemChangeListener?.invoke(pos)
     }
 
     fun getPoints(): Pair<PointF, PointF> = Pair(PointF(mHPoint.x, mHPoint.y), PointF(mVPoint.x, mVPoint.y))
@@ -455,6 +463,17 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
 
         for (i in 0 until mViewCache.size()) {
             header.mRecycler.recycleView(mViewCache.valueAt(i)!!)
+        }
+    }
+
+    fun getAnchorPos(): Int? {
+        val header = mHeaderLayout ?: return null
+
+        val orientation = getOrientation(getPositionRatio())
+        return when (orientation) {
+            Orientation.HORIZONTAL -> getHorizontalAnchorPos(header)
+            Orientation.VERTICAL -> getVerticalAnchorPos(header)
+            Orientation.TRANSITIONAL -> null
         }
     }
 
@@ -811,6 +830,11 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
 
     private fun setScrollState(state: ScrollState) {
         Log.d("D", "current state: ${state.name}")
+        if (mScrollState == state) {
+            return
+        }
+
+        mScrollStateListener?.invoke(state)
         mScrollState = state
     }
 }

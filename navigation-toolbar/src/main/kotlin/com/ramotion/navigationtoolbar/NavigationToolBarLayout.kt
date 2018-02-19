@@ -17,7 +17,9 @@ class NavigationToolBarLayout : CoordinatorLayout {
     private val mHeaderLayoutManager: HeaderLayoutManager
     private val mAppBarLayout: AppBarLayout
 
-    private val mItemClickListeners = mutableListOf<OnItemClickHandler>()
+    private val mItemClickListeners = mutableListOf<ItemClickListener>()
+    private val mItemChangeListeners = mutableListOf<ItemChangeListener>()
+    private val mScrollStateListeners = mutableListOf<ScrollStateListener>()
 
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
 
@@ -29,7 +31,9 @@ class NavigationToolBarLayout : CoordinatorLayout {
 
         mHeaderLayoutManager = (mHeaderLayout.layoutParams as CoordinatorLayout.LayoutParams).behavior as HeaderLayoutManager
         mHeaderLayoutManager.mItemsTransformer = HeaderTransformer()
-        mHeaderLayoutManager.mItemClickedListener = { vh -> mItemClickListeners.forEach { it.invoke(vh) } }
+        mHeaderLayoutManager.mItemClickedListener = { vh -> mItemClickListeners.forEach { it.invoke(vh) }}
+        mHeaderLayoutManager.mItemChangeListener = { pos -> mItemChangeListeners.forEach { it.invoke(pos) }}
+        mHeaderLayoutManager.mScrollStateListener = { state -> mScrollStateListeners.forEach { it.invoke(state) }}
 
         mAppBarLayout = findViewById(R.id.com_ramotion_app_bar)
         mAppBarLayout.outlineProvider = null
@@ -43,12 +47,30 @@ class NavigationToolBarLayout : CoordinatorLayout {
 
     fun smoothScrollToPosition(pos: Int) = mHeaderLayoutManager.smoothScrollToPosition(pos)
 
-    fun addItemClickListener(listener: OnItemClickHandler) {
+    fun getAnchorPos(): Int? = mHeaderLayoutManager.getAnchorPos()
+
+    fun addItemClickListener(listener: ItemClickListener) {
         mItemClickListeners += listener
     }
 
-    fun removeItemClickListener(listener: OnItemClickHandler) = {
+    fun removeItemClickListener(listener: ItemClickListener) {
         mItemClickListeners -= listener
+    }
+
+    fun addItemChangeListener(listener: ItemChangeListener) {
+        mItemChangeListeners += listener
+    }
+
+    fun removeItemChangeListener(listener: ItemChangeListener) {
+        mItemChangeListeners -= listener
+    }
+
+    fun addScrollStateListener(listener: ScrollStateListener) {
+        mScrollStateListeners += listener
+    }
+
+    fun removeScrollStateListener(listener: ScrollStateListener) {
+        mScrollStateListeners -= listener
     }
 
     // TODO: set header items transformer
