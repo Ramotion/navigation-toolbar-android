@@ -49,13 +49,25 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     }
 
     interface ItemTransformer {
-        fun transformItem()
+        fun transformItem(text: String)
     }
 
+    interface HeaderOffsetChangeListener {
+        fun onHeaderOffsetChange(text: String)
+    }
+
+    // TODO: combine with default transformer
     // TODO: use list of transformers
     internal val mItemTransformer = object : ItemTransformer {
-        override fun transformItem() {
-            Log.d("D", "transformItem called")
+        override fun transformItem(text: String) {
+            Log.d("D", "transformItem called from: $text")
+        }
+    }
+
+    // TODO: combine with default transformer
+    internal val mHeaderOffsetChangeListener = object : HeaderOffsetChangeListener {
+        override fun onHeaderOffsetChange(text: String) {
+            Log.d("D", "onHeaderOffsetChange called from: $text")
         }
     }
 
@@ -302,6 +314,8 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         header.y = (dependency.bottom - header.height).toFloat() // Offset header on collapsing
         mItemsTransformer?.transform(header, this, dependency.bottom) // Transform header items
 
+        mHeaderOffsetChangeListener.onHeaderOffsetChange("onDependentViewChanged")
+
         return true
     }
 
@@ -476,7 +490,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
             header.mRecycler.recycleView(mViewCache.valueAt(i)!!)
         }
 
-        mItemTransformer.transformItem()
+        mItemTransformer.transformItem("fill")
     }
 
     fun getAnchorPos(): Int? {
