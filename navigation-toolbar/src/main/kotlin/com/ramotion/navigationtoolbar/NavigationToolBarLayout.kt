@@ -16,7 +16,6 @@ class NavigationToolBarLayout : CoordinatorLayout {
     val mHeaderLayoutManager: HeaderLayoutManager
     val mAppBarLayout: AppBarLayout
 
-    private val mItemClickListeners = mutableListOf<ItemClickListener>()
     private val mItemChangeListeners = mutableListOf<ItemChangeListener>()
     private val mScrollStateListeners = mutableListOf<ScrollStateListener>()
 
@@ -30,7 +29,6 @@ class NavigationToolBarLayout : CoordinatorLayout {
 
         mHeaderLayoutManager = (mHeaderLayout.layoutParams as CoordinatorLayout.LayoutParams).behavior as HeaderLayoutManager
         mHeaderLayoutManager.mItemsTransformer = HeaderTransformer()
-        mHeaderLayoutManager.mItemClickedListener = { vh -> mItemClickListeners.forEach { it.invoke(vh) }}
         mHeaderLayoutManager.mItemChangeListener = { pos -> mItemChangeListeners.forEach { it.invoke(pos) }}
         mHeaderLayoutManager.mScrollStateListener = { state -> mScrollStateListeners.forEach { it.invoke(state) }}
 
@@ -50,12 +48,12 @@ class NavigationToolBarLayout : CoordinatorLayout {
 
     fun getAnchorPos(): Int? = mHeaderLayoutManager.getAnchorPos()
 
-    fun addItemClickListener(listener: ItemClickListener) {
-        mItemClickListeners += listener
+    fun addItemClickListener(listener: HeaderLayoutManager.ItemClickListener) {
+        mHeaderLayoutManager.mItemClickListeners += listener
     }
 
-    fun removeItemClickListener(listener: ItemClickListener) {
-        mItemClickListeners -= listener
+    fun removeItemClickListener(listener: HeaderLayoutManager.ItemClickListener) {
+        mHeaderLayoutManager.mItemClickListeners -= listener
     }
 
     fun addItemChangeListener(listener: ItemChangeListener) {

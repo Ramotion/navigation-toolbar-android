@@ -18,7 +18,6 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
-typealias ItemClickListener = (viewHolder: HeaderLayout.ViewHolder) -> Unit
 typealias ItemChangeListener = (position: Int) -> Unit
 typealias ScrollStateListener = (state: HeaderLayoutManager.ScrollState) -> Unit
 
@@ -52,6 +51,10 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         fun transform(header: HeaderLayout, headerBottom: Int)
     }
 
+    interface ItemClickListener {
+        fun onItemClick(viewHolder: HeaderLayout.ViewHolder)
+    }
+
     // TODO: init in constructor from attr
     private val mTabOffsetCount = TAB_OFF_SCREEN_COUNT
     private val mTabOnScreenCount = TAB_ON_SCREEN_COUNT
@@ -80,6 +83,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
 
     internal val mAppBarBehavior = AppBarBehavior()
     internal val mHeaderScrollListener = HeaderScrollListener()
+    internal val mItemClickListeners = mutableListOf<ItemClickListener>()
 
     private var mOffsetAnimator: ValueAnimator? = null // TODO: add duration attribute
     private var mAppBar: AppBarLayout? = null
@@ -97,7 +101,6 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
 
     internal var mItemsTransformer: ItemsTransformer? = null // TODO: remove
     internal var mItemTransformer: ItemTransformer? = null
-    internal var mItemClickedListener: ItemClickListener? = null
     internal var mItemChangeListener: ItemChangeListener? = null
     internal var mScrollStateListener: ScrollStateListener? = null
 
@@ -498,13 +501,13 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     private fun onHeaderItemClick(header: HeaderLayout, viewHolder: HeaderLayout.ViewHolder): Boolean {
         if (header.mIsHorizontalScrollEnabled) {
             smoothScrollToPosition(viewHolder.mPosition)
-            mItemClickedListener?.invoke(viewHolder)
+            mItemClickListeners.forEach { it.onItemClick(viewHolder) }
             return true
         }
 
         if (header.mIsVerticalScrollEnabled) {
             smoothOffsetOnClick(header.indexOfChild(viewHolder.view))
-            mItemClickedListener?.invoke(viewHolder)
+            mItemClickListeners.forEach { it.onItemClick(viewHolder) }
             return true
         }
 

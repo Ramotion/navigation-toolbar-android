@@ -4,9 +4,10 @@ import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v4.view.ViewPager
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import com.ramotion.navigationtoolbar.HeaderLayout
+import com.ramotion.navigationtoolbar.HeaderLayoutManager
 import com.ramotion.navigationtoolbar.NavigationToolBarLayout
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -69,7 +70,12 @@ class MainActivity : AppCompatActivity() {
         mHeader = findViewById<NavigationToolBarLayout>(R.id.navigation_toolbar_layout)
         mHeader.setAdapter(HeaderAdapter(ITEM_COUNT))
         mHeader.addItemChangeListener { mViewPager.currentItem = it }
-        mHeader.addItemClickListener { mViewPager.currentItem = it.mPosition }
+
+        mHeader.addItemClickListener(object : HeaderLayoutManager.ItemClickListener {
+            override fun onItemClick(viewHolder: HeaderLayout.ViewHolder) {
+                mViewPager.currentItem = viewHolder.mPosition
+            }
+        })
 
         SimpleSnapHelper().attach(mHeader)
     }
