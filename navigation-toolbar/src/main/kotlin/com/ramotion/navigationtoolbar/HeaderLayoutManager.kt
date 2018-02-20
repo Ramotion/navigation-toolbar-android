@@ -302,7 +302,6 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         header.y = (dependency.bottom - header.height).toFloat() // Offset header on collapsing
 
         mItemsTransformer?.transform(header, this, dependency.bottom) // TODO: remove
-        Log.d("D", "onDependentViewChanged")
         mItemTransformer?.transform(dependency.bottom)
 
         return true
@@ -859,7 +858,6 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     }
 
     private fun setScrollState(state: ScrollState) {
-        Log.d("D", "current state: ${state.name}")
         if (mScrollState == state) {
             return
         }

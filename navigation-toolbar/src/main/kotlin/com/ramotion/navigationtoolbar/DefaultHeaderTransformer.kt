@@ -1,5 +1,6 @@
 package com.ramotion.navigationtoolbar
 
+import android.graphics.PointF
 import android.util.Log
 import kotlin.math.max
 import kotlin.math.min
@@ -15,6 +16,9 @@ open class DefaultHeaderTransformer
     private var mRatioBottomHalf = 0f
 
     private var mClickedItem: Int? = 0
+
+    private var mHPoints: MutableList<PointF> = mutableListOf()
+    private var mVPoints: MutableList<PointF> = mutableListOf()
 
     protected var mCurrentRatio = 0f; private set
     protected var mCurrentRatioWork = 0f; private set
@@ -40,12 +44,24 @@ open class DefaultHeaderTransformer
     }
 
     override fun transform(headerBottom: Int) {
-        Log.d("D", "transform called: $headerBottom")
         updateRatios(headerBottom)
+
+        val arePointsEmpty = mHPoints.isEmpty() || mVPoints.isEmpty()
+        val isNearTopOfBottomHalf = mCurrentRatioBottomHalf> 0f && mCurrentRatioBottomHalf < 0.5f
+        if (arePointsEmpty && isNearTopOfBottomHalf) {
+            updatePoints(false)
+        }
+
+        val isNearBottomOfTopHalf = mCurrentRatioTopHalf <= 1f && mCurrentRatioBottomHalf == 0f
+        val isAtBottomHalf = mCurrentRatioBottomHalf == 1f
+        if (!arePointsEmpty && (isNearBottomOfTopHalf || isAtBottomHalf)) {
+            clearPoints()
+        }
     }
 
     override fun onItemClick(viewHolder: HeaderLayout.ViewHolder) {
         mClickedItem = mHeaderLayout?.indexOfChild(viewHolder.view)
+        updatePoints(true)
     }
 
     private fun updateRatios(headerBottom: Int) {
@@ -55,8 +71,18 @@ open class DefaultHeaderTransformer
         mCurrentRatioWork = max(0f, (headerBottom - lm.mToolBarHeight) / lm.mWorkHeight.toFloat())
         mCurrentRatioTopHalf = max(0f, 1 - (mRatioBottomHalf - min(max(mCurrentRatio, mRatioTopHalf), mRatioBottomHalf)) / (mRatioBottomHalf - mRatioTopHalf))
         mCurrentRatioBottomHalf = max(0f, (mCurrentRatio - mRatioBottomHalf) / mRatioBottomHalf)
+    }
 
-        Log.d("D", "r: $mCurrentRatio, rw: $mCurrentRatioWork, rth: $mCurrentRatioTopHalf, rbh: $mCurrentRatioBottomHalf")
+    private fun updatePoints(up: Boolean) {
+        Log.d("D", "updatePoints| ${if(up) "up" else " down"}")
+        mHPoints.add(PointF(1f, 1f))
+        mVPoints.add(PointF(1f, 1f))
+    }
+
+    private fun clearPoints() {
+        Log.d("D", "clearPoints")
+        mHPoints.clear()
+        mVPoints.clear()
     }
 
 }

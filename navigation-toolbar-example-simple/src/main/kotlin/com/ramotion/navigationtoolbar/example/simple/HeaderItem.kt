@@ -21,7 +21,6 @@ class HeaderItem(view: View) : HeaderLayout.ViewHolder(view) {
     }
 
     fun clearContent() {
-        Log.d("D", "item clearContent: $mPosition")
     }
 
 }
