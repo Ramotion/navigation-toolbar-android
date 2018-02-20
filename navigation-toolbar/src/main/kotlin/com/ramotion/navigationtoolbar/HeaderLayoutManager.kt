@@ -48,6 +48,17 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
 
     }
 
+    interface ItemTransformer {
+        fun transformItem()
+    }
+
+    // TODO: use list of transformers
+    internal val mItemTransformer = object : ItemTransformer {
+        override fun transformItem() {
+            Log.d("D", "transformItem called")
+        }
+    }
+
     // TODO: init in constructor from attr
     private val mTabOffsetCount = TAB_OFF_SCREEN_COUNT
     private val mTabOnScreenCount = TAB_ON_SCREEN_COUNT
@@ -464,6 +475,8 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         for (i in 0 until mViewCache.size()) {
             header.mRecycler.recycleView(mViewCache.valueAt(i)!!)
         }
+
+        mItemTransformer.transformItem()
     }
 
     fun getAnchorPos(): Int? {
