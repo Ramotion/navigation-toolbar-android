@@ -14,6 +14,7 @@ import android.util.Log
 import android.util.SparseArray
 import android.view.View
 import android.widget.OverScroller
+import java.lang.ref.WeakReference
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -48,6 +49,8 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     }
 
     interface ItemTransformer {
+        fun attach(lm: HeaderLayoutManager, header: HeaderLayout)
+        fun detach()
         fun transform(headerBottom: Int)
     }
 
@@ -80,10 +83,10 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     private val mViewCache = SparseArray<View?>()
     private val mCenterIndex = mTabOnScreenCount % 2 + mTabOffsetCount
     private val mViewFlinger = ViewFlinger(context)
+    private val mItemClickListeners = mutableListOf<WeakReference<ItemClickListener>>()
 
     internal val mAppBarBehavior = AppBarBehavior()
     internal val mHeaderScrollListener = HeaderScrollListener()
-    internal val mItemClickListeners = mutableListOf<ItemClickListener>()
 
     private var mOffsetAnimator: ValueAnimator? = null // TODO: add duration attribute
     private var mAppBar: AppBarLayout? = null
@@ -490,6 +493,20 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         }
     }
 
+    fun addItemClickListener(listener: HeaderLayoutManager.ItemClickListener) {
+        mItemClickListeners.indices
+                .filter { mItemClickListeners[it].get() == null }
+                .forEach { mItemClickListeners.removeAt(it) }
+
+        mItemClickListeners += WeakReference(listener)
+    }
+
+    fun removeItemClickListener(listener: HeaderLayoutManager.ItemClickListener) {
+        mItemClickListeners.indices
+                .filter { mItemClickListeners[it].get() == listener }
+                .forEach { mItemClickListeners.removeAt(it) }
+    }
+
     private fun getHorizontalAnchorPos(header: HeaderLayout): Int {
         return getHorizontalAnchorView(header)?.let { header.getAdapterPosition(it) } ?: HeaderLayout.INVALID_POSITION
     }
@@ -501,13 +518,13 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     private fun onHeaderItemClick(header: HeaderLayout, viewHolder: HeaderLayout.ViewHolder): Boolean {
         if (header.mIsHorizontalScrollEnabled) {
             smoothScrollToPosition(viewHolder.mPosition)
-            mItemClickListeners.forEach { it.onItemClick(viewHolder) }
+            mItemClickListeners.forEach { it.get()?.onItemClick(viewHolder) }
             return true
         }
 
         if (header.mIsVerticalScrollEnabled) {
             smoothOffsetOnClick(header.indexOfChild(viewHolder.view))
-            mItemClickListeners.forEach { it.onItemClick(viewHolder) }
+            mItemClickListeners.forEach { it.get()?.onItemClick(viewHolder) }
             return true
         }
 

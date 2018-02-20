@@ -48,14 +48,6 @@ class NavigationToolBarLayout : CoordinatorLayout {
 
     fun getAnchorPos(): Int? = mHeaderLayoutManager.getAnchorPos()
 
-    fun addItemClickListener(listener: HeaderLayoutManager.ItemClickListener) {
-        mHeaderLayoutManager.mItemClickListeners += listener
-    }
-
-    fun removeItemClickListener(listener: HeaderLayoutManager.ItemClickListener) {
-        mHeaderLayoutManager.mItemClickListeners -= listener
-    }
-
     fun addItemChangeListener(listener: ItemChangeListener) {
         mItemChangeListeners += listener
     }
@@ -72,8 +64,18 @@ class NavigationToolBarLayout : CoordinatorLayout {
         mScrollStateListeners -= listener
     }
 
-    fun setItemTransformer(transformer: HeaderLayoutManager.ItemTransformer?) {
-        mHeaderLayoutManager.mItemTransformer = transformer ?: DefaultHeaderTransformer(mHeaderLayoutManager, mHeaderLayout)
+    fun addItemClickListener(listener: HeaderLayoutManager.ItemClickListener) =
+            mHeaderLayoutManager.addItemClickListener(listener)
+
+    fun removeItemClickListener(listener: HeaderLayoutManager.ItemClickListener) =
+            mHeaderLayoutManager.removeItemClickListener(listener)
+
+    fun setItemTransformer(newTransformer: HeaderLayoutManager.ItemTransformer?) {
+        mHeaderLayoutManager.mItemTransformer?.detach()
+
+        (newTransformer ?: DefaultHeaderTransformer())
+                .also { it.attach(mHeaderLayoutManager, mHeaderLayout) }
+                .also { mHeaderLayoutManager.mItemTransformer = it }
     }
 
 }
