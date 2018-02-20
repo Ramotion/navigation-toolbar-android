@@ -12,10 +12,9 @@ import android.view.LayoutInflater
 class NavigationToolBarLayout : CoordinatorLayout {
 
     val mToolBar: Toolbar
-
-    private val mHeaderLayout: HeaderLayout
-    private val mHeaderLayoutManager: HeaderLayoutManager
-    private val mAppBarLayout: AppBarLayout
+    val mHeaderLayout: HeaderLayout
+    val mHeaderLayoutManager: HeaderLayoutManager
+    val mAppBarLayout: AppBarLayout
 
     private val mItemClickListeners = mutableListOf<ItemClickListener>()
     private val mItemChangeListeners = mutableListOf<ItemChangeListener>()
@@ -39,6 +38,8 @@ class NavigationToolBarLayout : CoordinatorLayout {
         mAppBarLayout.outlineProvider = null
         mAppBarLayout.addOnOffsetChangedListener(mHeaderLayoutManager)
         (mAppBarLayout.layoutParams as CoordinatorLayout.LayoutParams).behavior = mHeaderLayoutManager.mAppBarBehavior
+
+        setItemTransformer(null)
     }
 
     fun setAdapter(adapter: HeaderLayout.Adapter<out HeaderLayout.ViewHolder>) = mHeaderLayout.setAdapter(adapter)
@@ -73,6 +74,8 @@ class NavigationToolBarLayout : CoordinatorLayout {
         mScrollStateListeners -= listener
     }
 
-    // TODO: set header items transformer
+    fun setItemTransformer(transformer: HeaderLayoutManager.ItemTransformer?) {
+        mHeaderLayoutManager.mItemTransformer = transformer ?: DefaultHeaderTransformer()
+    }
 
 }

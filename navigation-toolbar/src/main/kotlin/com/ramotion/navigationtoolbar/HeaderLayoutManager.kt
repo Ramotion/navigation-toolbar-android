@@ -49,26 +49,8 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     }
 
     interface ItemTransformer {
-        fun transformItem(text: String)
-    }
-
-    interface HeaderOffsetChangeListener {
-        fun onHeaderOffsetChange(text: String)
-    }
-
-    // TODO: combine with default transformer
-    // TODO: use list of transformers
-    internal val mItemTransformer = object : ItemTransformer {
-        override fun transformItem(text: String) {
-            Log.d("D", "transformItem called from: $text")
-        }
-    }
-
-    // TODO: combine with default transformer
-    internal val mHeaderOffsetChangeListener = object : HeaderOffsetChangeListener {
-        override fun onHeaderOffsetChange(text: String) {
-            Log.d("D", "onHeaderOffsetChange called from: $text")
-        }
+        fun onFill(header: HeaderLayout)
+        fun onHeaderOffsetChange(header: HeaderLayout, offset: Int)
     }
 
     // TODO: init in constructor from attr
@@ -114,7 +96,8 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     private lateinit var mHPoint: PointF // TODO: replace with data class
     private lateinit var mVPoint: PointF // TODO: replace with data class
 
-    internal var mItemsTransformer: ItemsTransformer? = null
+    internal var mItemsTransformer: ItemsTransformer? = null // TODO: remove
+    internal var mItemTransformer: ItemTransformer? = null
     internal var mItemClickedListener: ItemClickListener? = null
     internal var mItemChangeListener: ItemChangeListener? = null
     internal var mScrollStateListener: ScrollStateListener? = null
@@ -312,9 +295,10 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     override fun onDependentViewChanged(parent: CoordinatorLayout, header: HeaderLayout, dependency: View): Boolean {
         mViewFlinger.stop()
         header.y = (dependency.bottom - header.height).toFloat() // Offset header on collapsing
-        mItemsTransformer?.transform(header, this, dependency.bottom) // Transform header items
 
-        mHeaderOffsetChangeListener.onHeaderOffsetChange("onDependentViewChanged")
+        mItemsTransformer?.transform(header, this, dependency.bottom) // TODO: remove
+        Log.d("D", "onDependentViewChanged")
+        mItemTransformer?.onHeaderOffsetChange(header, dependency.bottom)
 
         return true
     }
@@ -490,7 +474,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
             header.mRecycler.recycleView(mViewCache.valueAt(i)!!)
         }
 
-        mItemTransformer.transformItem("fill")
+        mItemTransformer?.onFill(header)
     }
 
     fun getAnchorPos(): Int? {
