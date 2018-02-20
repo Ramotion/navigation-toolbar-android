@@ -4,10 +4,16 @@ import android.util.Log
 import kotlin.math.max
 import kotlin.math.min
 
-open class DefaultHeaderTransformer(private val mLayoutManager: HeaderLayoutManager) : HeaderLayoutManager.ItemTransformer {
+open class DefaultHeaderTransformer(
+        private val mLayoutManager: HeaderLayoutManager,
+        private val mHeaderLayout: HeaderLayout
+) : HeaderLayoutManager.ItemTransformer, HeaderLayoutManager.ItemClickListener {
+
     private var mRatioWork = 0f
     private var mRatioTopHalf = 0f
     private var mRatioBottomHalf = 0f
+
+    private var mClickedItem: Int? = 0
 
     protected var mCurrentRatio = 0f; private set
     protected var mCurrentRatioWork = 0f; private set
@@ -20,11 +26,13 @@ open class DefaultHeaderTransformer(private val mLayoutManager: HeaderLayoutMana
         mRatioBottomHalf = mLayoutManager.mScreenHalf / mLayoutManager.mScreenHeight.toFloat()
     }
 
-    override fun transform(header: HeaderLayout, headerBottom: Int) {
+    override fun transform(headerBottom: Int) {
         Log.d("D", "transform called: $headerBottom")
         updateRatios(headerBottom)
+    }
 
-
+    override fun onItemClick(viewHolder: HeaderLayout.ViewHolder) {
+        mClickedItem = mHeaderLayout.indexOfChild(viewHolder.view)
     }
 
     private fun updateRatios(headerBottom: Int) {

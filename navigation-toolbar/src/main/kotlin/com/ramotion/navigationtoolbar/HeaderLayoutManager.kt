@@ -48,7 +48,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     }
 
     interface ItemTransformer {
-        fun transform(header: HeaderLayout, headerBottom: Int)
+        fun transform(headerBottom: Int)
     }
 
     interface ItemClickListener {
@@ -300,7 +300,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
 
         mItemsTransformer?.transform(header, this, dependency.bottom) // TODO: remove
         Log.d("D", "onDependentViewChanged")
-        mItemTransformer?.transform(header, dependency.bottom)
+        mItemTransformer?.transform(dependency.bottom)
 
         return true
     }
@@ -476,7 +476,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
             header.mRecycler.recycleView(mViewCache.valueAt(i)!!)
         }
 
-        mAppBar?.bottom?.let { mItemTransformer?.transform(header, it) }
+        mAppBar?.bottom?.let { mItemTransformer?.transform(it) }
     }
 
     fun getAnchorPos(): Int? {
