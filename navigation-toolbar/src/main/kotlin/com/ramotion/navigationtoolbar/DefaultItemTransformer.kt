@@ -177,7 +177,8 @@ open class DefaultItemTransformer
         val newWidth = hw - (hw - vw) * mCurrentRatioBottomHalf
         val newHeight = hh - (hh - vh) * mCurrentRatioBottomHalf
 
-        for (i in 0 until mHPoints.size) {
+        val count = min(header.childCount, mHPoints.size)
+        for (i in 0 until count) {
             val hp = mHPoints[i]
             val vp = mVPoints[i]
             val hDiff = (vp.x - hp.x) * mCurrentRatioBottomHalf
