@@ -126,6 +126,8 @@ class HeaderLayout : FrameLayout {
 
         abstract fun onBindViewHolder(holder: VH, position: Int)
 
+        open fun onViewRecycled(holder: VH) {}
+
         fun createViewHolder(parent: ViewGroup): VH = onCreateViewHolder(parent)
 
         fun bindViewHolder(holder: VH, position: Int) {
@@ -143,7 +145,7 @@ class HeaderLayout : FrameLayout {
             holder.view.layoutParams = hlp
         }
 
-        fun onViewRecycled(holder: VH) {}
+        fun recycleView(holder: VH) = onViewRecycled(holder)
 
     }
 
@@ -165,7 +167,7 @@ class HeaderLayout : FrameLayout {
 
         fun recycleView(view: View) {
             // TODO: cache
-            mAdapter?.onViewRecycled(getChildViewHolder(view)!!)
+            mAdapter?.recycleView(getChildViewHolder(view)!!)
             this@HeaderLayout.removeView(view)
         }
     }

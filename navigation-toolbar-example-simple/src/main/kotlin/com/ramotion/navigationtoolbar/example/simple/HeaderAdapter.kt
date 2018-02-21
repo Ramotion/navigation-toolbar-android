@@ -17,4 +17,7 @@ class HeaderAdapter(private val mCount: Int) : HeaderLayout.Adapter<HeaderItem>(
         holder.setContent()
     }
 
+    override fun onViewRecycled(holder: HeaderItem) {
+        holder.clearContent()
+    }
 }
