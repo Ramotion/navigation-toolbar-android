@@ -102,73 +102,9 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     private lateinit var mHPoint: PointF // TODO: replace with data class
     private lateinit var mVPoint: PointF // TODO: replace with data class
 
-    internal var mItemsTransformer: ItemsTransformer? = null // TODO: remove
     internal var mItemTransformer: ItemTransformer? = null
     internal var mItemChangeListener: ItemChangeListener? = null
     internal var mScrollStateListener: ScrollStateListener? = null
-
-    abstract class ItemsTransformer {
-        var initiatorIndex: Int? = null
-            internal set
-
-        abstract fun transform(header: HeaderLayout, lm: HeaderLayoutManager, appBarBottom: Int)
-    }
-
-    abstract class DefaultItemsTransformer: ItemsTransformer() {
-        private var mIsInitialized = false
-        private var mOffsetChangeStarted = false
-        private var mRatioWork = 0f
-        private var mRatioMiddle = 0f
-        private var mRatioTop = 0f
-
-        var mCurrentOrientation = Orientation.TRANSITIONAL
-            private set
-
-        var mCurrentRatio = 0f
-            private  set
-
-        var mCurrentRatioWork = 0f
-            private  set
-
-        var mCurrentRatioMiddle = 0f
-            private  set
-
-        var mCurrentRatioTop = 0f
-            private  set
-
-        override fun transform(header: HeaderLayout, lm: HeaderLayoutManager, appBarBottom: Int) {
-            if (!mIsInitialized) {
-                mRatioWork = lm.mWorkHeight / lm.mScreenHeight.toFloat()
-                mRatioMiddle = lm.mScreenHalf / lm.mScreenHeight.toFloat()
-                mRatioTop = lm.mToolBarHeight / lm.mScreenHeight.toFloat()
-                mIsInitialized = true
-            }
-
-            mCurrentRatio = max(0f, appBarBottom / lm.mScreenHeight.toFloat())
-            mCurrentRatioWork = max(0f, (appBarBottom - lm.mToolBarHeight) / lm.mWorkHeight.toFloat())
-            mCurrentRatioMiddle = max(0f, (mCurrentRatio - mRatioMiddle) / mRatioMiddle)
-            mCurrentRatioTop = max(0f, 1 - (mRatioMiddle - min(max(mCurrentRatio, mRatioTop), mRatioMiddle)) / (mRatioMiddle - mRatioTop))
-
-            val isAtBorder = mCurrentRatioWork == 0f || mCurrentRatioWork == 1f
-            if (!isAtBorder && mCurrentOrientation == Orientation.TRANSITIONAL) {
-                mOffsetChangeStarted = true
-                mCurrentOrientation = if (mRatioMiddle >= 0.5) Orientation.VERTICAL else Orientation.HORIZONTAL
-                onOffsetChangeStarted(header, lm)
-                onOffsetChanged(header, lm)
-            } else if (isAtBorder && mCurrentOrientation != Orientation.TRANSITIONAL) {
-                onOffsetChanged(header, lm)
-                onOffsetChangeStopped(header, lm)
-                mOffsetChangeStarted = false
-                mCurrentOrientation = Orientation.TRANSITIONAL
-            } else if (mOffsetChangeStarted) {
-                onOffsetChanged(header, lm)
-            }
-        }
-
-        open fun onOffsetChangeStarted(header: HeaderLayout, lm: HeaderLayoutManager) {}
-        open fun onOffsetChanged(header: HeaderLayout, lm: HeaderLayoutManager) {}
-        open fun onOffsetChangeStopped(header: HeaderLayout, lm: HeaderLayoutManager) {}
-    }
 
     inner class AppBarBehavior : AppBarLayout.Behavior() {
 
@@ -301,7 +237,6 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         mViewFlinger.stop()
         header.y = (dependency.bottom - header.height).toFloat() // Offset header on collapsing
 
-        mItemsTransformer?.transform(header, this, dependency.bottom) // TODO: remove
         mItemTransformer?.transform(dependency.bottom)
 
         return true
@@ -524,7 +459,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         }
 
         if (header.mIsVerticalScrollEnabled) {
-            smoothOffsetOnClick(header.indexOfChild(viewHolder.view))
+            smoothOffset(mScreenHalf.toInt())
             mItemClickListeners.forEach { it.get()?.onItemClick(viewHolder) }
             return true
         }
@@ -820,18 +755,6 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
 
         header.mIsHorizontalScrollEnabled = hScrollEnable
         header.mIsVerticalScrollEnabled = vScrollEnable
-    }
-
-    private fun smoothOffsetOnClick(initiatorIndex: Int) {
-        mItemsTransformer?.initiatorIndex = initiatorIndex
-
-        smoothOffset(mScreenHalf.toInt())
-
-        mOffsetAnimator?.addListener(object: AnimatorListenerAdapter() {
-            override fun onAnimationEnd(animation: Animator?) {
-                mItemsTransformer?.initiatorIndex = HeaderLayout.INVALID_POSITION
-            }
-        })
     }
 
     private fun smoothOffset(offset: Int, duration: Long = mScrollUpAnimationDuration) {

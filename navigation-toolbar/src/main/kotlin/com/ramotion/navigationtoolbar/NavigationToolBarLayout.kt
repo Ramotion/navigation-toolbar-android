@@ -28,7 +28,6 @@ class NavigationToolBarLayout : CoordinatorLayout {
         mHeaderLayout = findViewById(R.id.com_ramotion_header_layout)
 
         mHeaderLayoutManager = (mHeaderLayout.layoutParams as CoordinatorLayout.LayoutParams).behavior as HeaderLayoutManager
-        mHeaderLayoutManager.mItemsTransformer = HeaderTransformer()
         mHeaderLayoutManager.mItemChangeListener = { pos -> mItemChangeListeners.forEach { it.invoke(pos) }}
         mHeaderLayoutManager.mScrollStateListener = { state -> mScrollStateListeners.forEach { it.invoke(state) }}
 
