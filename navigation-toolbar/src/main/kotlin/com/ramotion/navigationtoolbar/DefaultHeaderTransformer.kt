@@ -19,6 +19,7 @@ open class DefaultHeaderTransformer
     private var mRatioBottomHalf = 0f
 
     private var mClickedItem: Int? = null
+    private var mPrevItemCount: Int? = null
 
     protected var mCurrentRatio = 0f; private set
     protected var mCurrentRatioWork = 0f; private set
@@ -48,9 +49,13 @@ open class DefaultHeaderTransformer
         val prevRatioTopHalf = mCurrentRatioTopHalf
         val prevRatioBottomHalf = mCurrentRatioBottomHalf
 
+        val prevItemCount = mPrevItemCount ?: 0
+        val curItemCount = mHeaderLayout?.childCount ?: 0
+        mPrevItemCount = curItemCount
+
         updateRatios(headerBottom)
 
-        val nothingChanged = prevRatio == mCurrentRatio
+        val nothingChanged = prevRatio == mCurrentRatio && prevItemCount == curItemCount
         if (nothingChanged) {
             Log.d("D", "transform| nothing changed")
             return
@@ -60,21 +65,14 @@ open class DefaultHeaderTransformer
         val expandedToTopOfBottomHalf = mCurrentRatioTopHalf == 1f
                 && prevRatioTopHalf < mCurrentRatioTopHalf && prevRatioTopHalf != 0f
         if (expandedToTopOfBottomHalf) {
-            Log.d("D", "------------------------------------")
-            Log.d("D", "|transform| reached middle from top|")
-            Log.d("D", "------------------------------------")
             updatePoints(false)
             transformBottomHalf()
         }
 
-        Log.d("D", "transform| mCurrentRatioBottomHalf: $mCurrentRatioBottomHalf")
         // On scroll from top to bottom
         val expandedToBottomOfBottomHalf = mCurrentRatioBottomHalf == 1f
                 && prevRatioBottomHalf < mCurrentRatioBottomHalf && prevRatioBottomHalf != 0f
         if (expandedToBottomOfBottomHalf) {
-            Log.d("D", "---------------------------")
-            Log.d("D", "|transform| reached bottom|")
-            Log.d("D", "---------------------------")
             transformBottomHalf()
             clearPoints()
         }
@@ -83,9 +81,6 @@ open class DefaultHeaderTransformer
         val collapsedToTopOfBottomHalf = mCurrentRatioBottomHalf == 0f
                 && prevRatioBottomHalf > mCurrentRatioBottomHalf
         if (collapsedToTopOfBottomHalf) {
-            Log.d("D", "---------------------------------------")
-            Log.d("D", "|transform| reached middle from bottom|")
-            Log.d("D", "---------------------------------------")
             transformBottomHalf()
             transformTopHalf()
             clearPoints()
@@ -94,9 +89,6 @@ open class DefaultHeaderTransformer
         val collapsedToTopOfTopHalf = mCurrentRatioTopHalf == 0f
                 && prevRatioTopHalf > mCurrentRatioTopHalf && prevRatioTopHalf != 0f
         if (collapsedToTopOfTopHalf) {
-            Log.d("D", "------------------------")
-            Log.d("D", "|transform| reached top|")
-            Log.d("D", "------------------------")
             transformTopHalf()
         }
 
@@ -161,11 +153,9 @@ open class DefaultHeaderTransformer
     }
 
     private fun transformTopHalf() {
-        Log.d("D", "transformTopHalf")
     }
 
     private fun transformBottomHalf() {
-        Log.d("D", "transformBottomHalf")
     }
 
 }
