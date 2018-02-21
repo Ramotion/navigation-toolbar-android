@@ -18,7 +18,7 @@ open class DefaultHeaderTransformer
     private var mRatioTopHalf = 0f
     private var mRatioBottomHalf = 0f
 
-    private var mClickedItem: Int? = null
+    private var mClickedItemIndex: Int? = null
     private var mPrevItemCount: Int? = null
 
     protected var mCurrentRatio = 0f; private set
@@ -61,12 +61,15 @@ open class DefaultHeaderTransformer
             return
         }
 
+        var transformed = false
+
         // On scroll from top (top half) to bottom (bottom half)
         val expandedToTopOfBottomHalf = mCurrentRatioTopHalf == 1f
                 && prevRatioTopHalf < mCurrentRatioTopHalf && prevRatioTopHalf != 0f
         if (expandedToTopOfBottomHalf) {
-            updatePoints(false)
             transformBottomHalf()
+            updatePoints(false)
+            transformed = true
         }
 
         // On scroll from top to bottom
@@ -75,6 +78,7 @@ open class DefaultHeaderTransformer
         if (expandedToBottomOfBottomHalf) {
             transformBottomHalf()
             clearPoints()
+            transformed = true
         }
 
         // On scroll from bottom to top
@@ -83,17 +87,19 @@ open class DefaultHeaderTransformer
         if (collapsedToTopOfBottomHalf) {
             transformBottomHalf()
             transformTopHalf()
-            clearPoints()
+            mHeaderLayout?.let { mLayoutManager?.fill(it) }
+            updatePoints(false)
+            transformed = true
         }
 
         val collapsedToTopOfTopHalf = mCurrentRatioTopHalf == 0f
                 && prevRatioTopHalf > mCurrentRatioTopHalf && prevRatioTopHalf != 0f
         if (collapsedToTopOfTopHalf) {
             transformTopHalf()
+            clearPoints()
+            transformed = true
         }
 
-        val transformed = expandedToBottomOfBottomHalf || expandedToTopOfBottomHalf
-                || collapsedToTopOfBottomHalf || collapsedToTopOfTopHalf
         if (!transformed) {
             val isAtBottomHalf = mCurrentRatioBottomHalf > 0f && mCurrentRatioBottomHalf < 1f
             if (isAtBottomHalf) {
@@ -105,7 +111,7 @@ open class DefaultHeaderTransformer
     }
 
     override fun onItemClick(viewHolder: HeaderLayout.ViewHolder) {
-        mClickedItem = mHeaderLayout?.indexOfChild(viewHolder.view)
+        mClickedItemIndex = mHeaderLayout?.indexOfChild(viewHolder.view)
         updatePoints(true)
     }
 
@@ -123,7 +129,13 @@ open class DefaultHeaderTransformer
 
         val lm = mLayoutManager ?: return
         val header = mHeaderLayout ?: return
-        val index = lm.getAnchorView(header)?.let { header.indexOfChild(it) } ?: return
+
+        val index = if (up) {
+            mClickedItemIndex ?: throw RuntimeException("No vertical (clicked) item index")
+        } else {
+            lm.getAnchorView(header)?.let { header.indexOfChild(it) }
+                    ?: throw RuntimeException("No horizontal item index")
+        }
 
         clearPoints()
 
@@ -156,6 +168,27 @@ open class DefaultHeaderTransformer
     }
 
     private fun transformBottomHalf() {
+        val lm = mLayoutManager ?: return
+        val header = mHeaderLayout ?: return
+
+        val hw = lm.mHorizontalTabWidth
+        val hh = lm.mHorizontalTabHeight
+        val vw = lm.mVerticalTabWidth
+        val vh = lm.mVerticalTabHeight
+
+        val newWidth = hw - (hw - vw) * mCurrentRatioBottomHalf
+        val newHeight = hh - (hh - vh) * mCurrentRatioBottomHalf
+
+        for (i in 0 until mHPoints.size) {
+            val hp = mHPoints[i]
+            val vp = mVPoints[i]
+            val hDiff = (vp.x - hp.x) * mCurrentRatioBottomHalf
+            val vDiff = (vp.y - hp.y) * mCurrentRatioBottomHalf
+
+            val x = (hp.x + hDiff).toInt()
+            val y = (hp.y + vDiff).toInt()
+            lm.layoutChild(header.getChildAt(i), x, y, newWidth.toInt(), newHeight.toInt())
+        }
     }
 
 }
