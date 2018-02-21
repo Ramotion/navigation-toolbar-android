@@ -8,6 +8,9 @@ import kotlin.math.min
 open class DefaultHeaderTransformer
     : HeaderLayoutManager.ItemTransformer, HeaderLayoutManager.ItemClickListener {
 
+    private val mHPoints: MutableList<PointF> = mutableListOf()
+    private val mVPoints: MutableList<PointF> = mutableListOf()
+
     private var mLayoutManager: HeaderLayoutManager? = null
     private var mHeaderLayout: HeaderLayout? = null
 
@@ -15,10 +18,7 @@ open class DefaultHeaderTransformer
     private var mRatioTopHalf = 0f
     private var mRatioBottomHalf = 0f
 
-    private var mClickedItem: Int? = 0
-
-    private var mHPoints: MutableList<PointF> = mutableListOf()
-    private var mVPoints: MutableList<PointF> = mutableListOf()
+    private var mClickedItem: Int? = null
 
     protected var mCurrentRatio = 0f; private set
     protected var mCurrentRatioWork = 0f; private set
@@ -44,18 +44,71 @@ open class DefaultHeaderTransformer
     }
 
     override fun transform(headerBottom: Int) {
+        val prevRatio = mCurrentRatio
+        val prevRatioTopHalf = mCurrentRatioTopHalf
+        val prevRatioBottomHalf = mCurrentRatioBottomHalf
+
         updateRatios(headerBottom)
 
-        val arePointsEmpty = mHPoints.isEmpty() || mVPoints.isEmpty()
-        val isNearTopOfBottomHalf = mCurrentRatioBottomHalf> 0f && mCurrentRatioBottomHalf < 0.5f
-        if (arePointsEmpty && isNearTopOfBottomHalf) {
-            updatePoints(false)
+        val nothingChanged = prevRatio == mCurrentRatio
+        if (nothingChanged) {
+            Log.d("D", "transform| nothing changed")
+            return
         }
 
-        val isNearBottomOfTopHalf = mCurrentRatioTopHalf <= 1f && mCurrentRatioBottomHalf == 0f
-        val isAtBottomHalf = mCurrentRatioBottomHalf == 1f
-        if (!arePointsEmpty && (isNearBottomOfTopHalf || isAtBottomHalf)) {
+        // On scroll from top (top half) to bottom (bottom half)
+        val expandedToTopOfBottomHalf = mCurrentRatioTopHalf == 1f
+                && prevRatioTopHalf < mCurrentRatioTopHalf && prevRatioTopHalf != 0f
+        if (expandedToTopOfBottomHalf) {
+            Log.d("D", "------------------------------------")
+            Log.d("D", "|transform| reached middle from top|")
+            Log.d("D", "------------------------------------")
+            updatePoints(false)
+            transformBottomHalf()
+        }
+
+        Log.d("D", "transform| mCurrentRatioBottomHalf: $mCurrentRatioBottomHalf")
+        // On scroll from top to bottom
+        val expandedToBottomOfBottomHalf = mCurrentRatioBottomHalf == 1f
+                && prevRatioBottomHalf < mCurrentRatioBottomHalf && prevRatioBottomHalf != 0f
+        if (expandedToBottomOfBottomHalf) {
+            Log.d("D", "---------------------------")
+            Log.d("D", "|transform| reached bottom|")
+            Log.d("D", "---------------------------")
+            transformBottomHalf()
             clearPoints()
+        }
+
+        // On scroll from bottom to top
+        val collapsedToTopOfBottomHalf = mCurrentRatioBottomHalf == 0f
+                && prevRatioBottomHalf > mCurrentRatioBottomHalf
+        if (collapsedToTopOfBottomHalf) {
+            Log.d("D", "---------------------------------------")
+            Log.d("D", "|transform| reached middle from bottom|")
+            Log.d("D", "---------------------------------------")
+            transformBottomHalf()
+            transformTopHalf()
+            clearPoints()
+        }
+
+        val collapsedToTopOfTopHalf = mCurrentRatioTopHalf == 0f
+                && prevRatioTopHalf > mCurrentRatioTopHalf && prevRatioTopHalf != 0f
+        if (collapsedToTopOfTopHalf) {
+            Log.d("D", "------------------------")
+            Log.d("D", "|transform| reached top|")
+            Log.d("D", "------------------------")
+            transformTopHalf()
+        }
+
+        val transformed = expandedToBottomOfBottomHalf || expandedToTopOfBottomHalf
+                || collapsedToTopOfBottomHalf || collapsedToTopOfTopHalf
+        if (!transformed) {
+            val isAtBottomHalf = mCurrentRatioBottomHalf > 0f && mCurrentRatioBottomHalf < 1f
+            if (isAtBottomHalf) {
+                transformBottomHalf()
+            } else {
+                transformTopHalf()
+            }
         }
     }
 
@@ -75,14 +128,44 @@ open class DefaultHeaderTransformer
 
     private fun updatePoints(up: Boolean) {
         Log.d("D", "updatePoints| ${if(up) "up" else " down"}")
-        mHPoints.add(PointF(1f, 1f))
-        mVPoints.add(PointF(1f, 1f))
+
+        val lm = mLayoutManager ?: return
+        val header = mHeaderLayout ?: return
+        val index = lm.getAnchorView(header)?.let { header.indexOfChild(it) } ?: return
+
+        clearPoints()
+
+        if (up) {
+            val left = -index * lm.mHorizontalTabWidth
+            val (x, y) = lm.getPoints().first.run { x to y }
+
+            for (i in 0 until header.childCount) {
+                mVPoints.add(header.getChildAt(i).let { PointF(it.x, it.y) })
+                mHPoints.add(PointF(x + left + i * lm.mHorizontalTabWidth, y))
+            }
+        } else {
+            val top = -index * lm.mVerticalTabHeight
+            val (x, y) = lm.getPoints().second.run { x to y }
+
+            for (i in 0 until header.childCount) {
+                mHPoints.add(header.getChildAt(i).let { PointF(it.x, it.y) })
+                mVPoints.add(PointF(x, y + top + i * lm.mVerticalTabHeight))
+            }
+        }
     }
 
     private fun clearPoints() {
         Log.d("D", "clearPoints")
         mHPoints.clear()
         mVPoints.clear()
+    }
+
+    private fun transformTopHalf() {
+        Log.d("D", "transformTopHalf")
+    }
+
+    private fun transformBottomHalf() {
+        Log.d("D", "transformBottomHalf")
     }
 
 }

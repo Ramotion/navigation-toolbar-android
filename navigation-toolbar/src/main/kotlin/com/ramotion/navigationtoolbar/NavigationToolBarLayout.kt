@@ -46,7 +46,7 @@ class NavigationToolBarLayout : CoordinatorLayout {
 
     fun smoothScrollToPosition(pos: Int) = mHeaderLayoutManager.smoothScrollToPosition(pos)
 
-    fun getAnchorPos(): Int? = mHeaderLayoutManager.getAnchorPos()
+    fun getAnchorPos(): Int? = mHeaderLayoutManager.getAnchorPos(mHeaderLayout)
 
     fun addItemChangeListener(listener: ItemChangeListener) {
         mItemChangeListeners += listener

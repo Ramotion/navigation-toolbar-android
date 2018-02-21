@@ -481,15 +481,17 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         mAppBar?.bottom?.let { mItemTransformer?.transform(it) }
     }
 
-    fun getAnchorPos(): Int? {
-        val header = mHeaderLayout ?: return null
-
+    fun getAnchorView(header: HeaderLayout): View? {
         val orientation = getOrientation(getPositionRatio())
         return when (orientation) {
-            Orientation.HORIZONTAL -> getHorizontalAnchorPos(header)
-            Orientation.VERTICAL -> getVerticalAnchorPos(header)
+            Orientation.HORIZONTAL -> getHorizontalAnchorView(header)
+            Orientation.VERTICAL -> getVerticalAnchorView(header)
             Orientation.TRANSITIONAL -> null
         }
+    }
+
+    fun getAnchorPos(header: HeaderLayout): Int? {
+        return getAnchorView(header)?.let { HeaderLayout.getChildViewHolder(it) }?.mPosition
     }
 
     fun addItemClickListener(listener: HeaderLayoutManager.ItemClickListener) {
