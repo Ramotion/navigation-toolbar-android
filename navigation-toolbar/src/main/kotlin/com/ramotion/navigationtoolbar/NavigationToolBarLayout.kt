@@ -72,7 +72,7 @@ class NavigationToolBarLayout : CoordinatorLayout {
     fun setItemTransformer(newTransformer: HeaderLayoutManager.ItemTransformer?) {
         mHeaderLayoutManager.mItemTransformer?.detach()
 
-        (newTransformer ?: DefaultHeaderTransformer())
+        (newTransformer ?: DefaultItemTransformer())
                 .also { it.attach(mHeaderLayoutManager, mHeaderLayout) }
                 .also { mHeaderLayoutManager.mItemTransformer = it }
     }

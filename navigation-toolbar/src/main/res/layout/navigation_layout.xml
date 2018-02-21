@@ -32,6 +32,7 @@
         android:layout_height="match_parent"
         android:background="@android:color/holo_green_light"
         android:fitsSystemWindows="true"
+        android:clipChildren="false"
         app:layout_behavior="com.ramotion.navigationtoolbar.HeaderLayoutManager"/>
 
     <android.support.v7.widget.Toolbar

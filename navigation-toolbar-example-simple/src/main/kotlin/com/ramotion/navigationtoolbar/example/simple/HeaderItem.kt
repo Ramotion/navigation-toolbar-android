@@ -13,10 +13,10 @@ class HeaderItem(view: View) : HeaderLayout.ViewHolder(view) {
         val mRandom = Random()
     }
 
-    private final val mText: TextView = view.findViewById(R.id.text)
+    internal val mTitle = view.findViewById<TextView>(R.id.title)
 
     fun setContent() {
-        mText.text = mPosition.toString()
+        mTitle.text = "Title ${mPosition}"
         view.setBackgroundColor(Color.rgb(mRandom.nextInt(255), mRandom.nextInt(255), mRandom.nextInt(255)))
     }
 

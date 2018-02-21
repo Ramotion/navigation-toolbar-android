@@ -1,11 +1,10 @@
 package com.ramotion.navigationtoolbar
 
 import android.graphics.PointF
-import android.util.Log
 import kotlin.math.max
 import kotlin.math.min
 
-open class DefaultHeaderTransformer
+open class DefaultItemTransformer
     : HeaderLayoutManager.ItemTransformer, HeaderLayoutManager.ItemClickListener {
 
     private val mHPoints: MutableList<PointF> = mutableListOf()
