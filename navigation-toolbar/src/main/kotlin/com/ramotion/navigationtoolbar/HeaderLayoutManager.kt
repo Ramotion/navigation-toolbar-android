@@ -42,7 +42,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         const val VERTICAL_TAB_HEIGHT_RATIO = 1f / TAB_ON_SCREEN_COUNT
         const val VERTICAL_TAB_WIDTH_RATIO = 4f / 5f
         const val SCROLL_STOP_CHECK_DELAY = 100L
-        const val SCROLL_UP_ANIMATION_DURATION = 1000L
+        const val SCROLL_UP_ANIMATION_DURATION = 500L
         const val SNAP_ANIMATION_DURATION = 300L
         const val MAX_SCROLL_DURATION = 600L
 
