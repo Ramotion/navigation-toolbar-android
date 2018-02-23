@@ -83,7 +83,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     private val mViewCache = SparseArray<View?>()
     private val mCenterIndex = mTabOnScreenCount % 2 + mTabOffsetCount
     private val mViewFlinger = ViewFlinger(context)
-    private val mItemClickListeners = mutableListOf<WeakReference<ItemClickListener>>()
+    private val mItemClickListeners = mutableListOf<ItemClickListener>()
 
     internal val mAppBarBehavior = AppBarBehavior()
     internal val mHeaderScrollListener = HeaderScrollListener()
@@ -429,19 +429,9 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         return getAnchorView(header)?.let { HeaderLayout.getChildViewHolder(it) }?.mPosition
     }
 
-    fun addItemClickListener(listener: HeaderLayoutManager.ItemClickListener) {
-        mItemClickListeners.indices
-                .filter { mItemClickListeners[it].get() == null }
-                .forEach { mItemClickListeners.removeAt(it) }
+    fun addItemClickListener(listener: HeaderLayoutManager.ItemClickListener) = mItemClickListeners.add(listener)
 
-        mItemClickListeners += WeakReference(listener)
-    }
-
-    fun removeItemClickListener(listener: HeaderLayoutManager.ItemClickListener) {
-        mItemClickListeners.indices
-                .filter { mItemClickListeners[it].get() == listener }
-                .forEach { mItemClickListeners.removeAt(it) }
-    }
+    fun removeItemClickListener(listener: HeaderLayoutManager.ItemClickListener) = mItemClickListeners.remove(listener)
 
     private fun getHorizontalAnchorPos(header: HeaderLayout): Int {
         return getHorizontalAnchorView(header)?.let { header.getAdapterPosition(it) } ?: HeaderLayout.INVALID_POSITION
@@ -454,13 +444,13 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     private fun onHeaderItemClick(header: HeaderLayout, viewHolder: HeaderLayout.ViewHolder): Boolean {
         if (header.mIsHorizontalScrollEnabled) {
             smoothScrollToPosition(viewHolder.mPosition)
-            mItemClickListeners.forEach { it.get()?.onItemClick(viewHolder) }
+            mItemClickListeners.forEach { it.onItemClick(viewHolder) }
             return true
         }
 
         if (header.mIsVerticalScrollEnabled) {
             smoothOffset(mScreenHalf.toInt())
-            mItemClickListeners.forEach { it.get()?.onItemClick(viewHolder) }
+            mItemClickListeners.forEach { it.onItemClick(viewHolder) }
             return true
         }
 
