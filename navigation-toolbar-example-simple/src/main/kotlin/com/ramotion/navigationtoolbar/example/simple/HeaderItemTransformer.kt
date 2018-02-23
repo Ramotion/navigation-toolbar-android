@@ -15,6 +15,9 @@ class HeaderItemTransformer(
     private var mLayoutManager: HeaderLayoutManager? = null
     private var mHeaderLayout: HeaderLayout? = null
 
+    private var mPrevChildCount = Int.MIN_VALUE
+    private var mPrevScrollOffset = Int.MIN_VALUE
+
     override fun attach(lm: HeaderLayoutManager, header: HeaderLayout) {
         super.attach(lm, header)
 
@@ -30,6 +33,16 @@ class HeaderItemTransformer(
         if (childCount == 0) {
             return
         }
+
+        val scrollOffset = header.getChildAt(0).left
+        val nothingChanged = scrollOffset == mPrevScrollOffset && childCount == mPrevChildCount
+        if (nothingChanged) {
+            return
+        }
+
+        mPrevChildCount = childCount
+        mPrevScrollOffset = scrollOffset
+
 
         if (mCurrentRatioTopHalf in 0f..1f && mCurrentRatioBottomHalf == 0f) {
             var curZ = childCount / 2f
@@ -52,8 +65,6 @@ class HeaderItemTransformer(
                 val titleNewLeft = titleInitialLeft + itemNewCenterDiff * mCurrentRatioTopHalf
                 val ratio = 1.5f - min(headerCenter.toFloat(), abs(headerCenter - itemNewCenter)) / headerCenter
                 transformTitle(holder.mTitle, titleNewLeft, ratio)
-
-//                Log.d("D", "i: $i, z: ${item.z}, ic: $itemCenter, hcd: $headerCenterDiff, inc: $itemNewCenter, incd: $itemNewCenterDiff, a: $ratio")
             }
         } else if (mCurrentRatioBottomHalf in 0f .. 1f && mCurrentRatioTopHalf == 1f) {
             for (i in 0 until childCount) {
