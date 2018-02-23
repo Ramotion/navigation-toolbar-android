@@ -16,7 +16,11 @@ class HeaderItemTransformer(
     private var mHeaderLayout: HeaderLayout? = null
 
     private var mPrevChildCount = Int.MIN_VALUE
-    private var mPrevScrollOffset = Int.MIN_VALUE
+    private var mPrevHScrollOffset = Int.MIN_VALUE
+    private var mPrevVScrollOffset = Int.MIN_VALUE
+    private var mPrevHeaderBottom = Int.MIN_VALUE
+
+    private var mTopTitlesAnimated = false
 
     override fun attach(lm: HeaderLayoutManager, header: HeaderLayout) {
         super.attach(lm, header)
@@ -34,15 +38,18 @@ class HeaderItemTransformer(
             return
         }
 
-        val scrollOffset = header.getChildAt(0).left
-        val nothingChanged = scrollOffset == mPrevScrollOffset && childCount == mPrevChildCount
+        val hScrollOffset = header.getChildAt(0).left
+        val vScrollOffset = header.getChildAt(0).top
+        val nothingChanged = hScrollOffset == mPrevHScrollOffset && vScrollOffset == mPrevVScrollOffset
+                && childCount == mPrevChildCount && mPrevHeaderBottom == headerBottom
         if (nothingChanged) {
             return
         }
 
         mPrevChildCount = childCount
-        mPrevScrollOffset = scrollOffset
-
+        mPrevHScrollOffset = hScrollOffset
+        mPrevVScrollOffset = vScrollOffset
+        mPrevHeaderBottom = headerBottom
 
         if (mCurrentRatioTopHalf in 0f..1f && mCurrentRatioBottomHalf == 0f) {
             var curZ = childCount / 2f
@@ -64,8 +71,17 @@ class HeaderItemTransformer(
                 val titleInitialLeft = item.width / 2 - holder.mTitle.width / 2
                 val titleNewLeft = titleInitialLeft + itemNewCenterDiff * mCurrentRatioTopHalf
                 val ratio = 1.5f - min(headerCenter.toFloat(), abs(headerCenter - itemNewCenter)) / headerCenter
-                transformTitle(holder.mTitle, titleNewLeft, ratio)
+
+                holder.mTitle.also {
+                    if (mCurrentRatioTopHalf > 0.5f && !mTopTitlesAnimated) {
+                        it.animate().x(titleNewLeft).start()
+                    } else {
+                        it.x = titleNewLeft
+                    }
+                    transformTitle(it, ratio)
+                }
             }
+            mTopTitlesAnimated = true
         } else if (mCurrentRatioBottomHalf in 0f .. 1f && mCurrentRatioTopHalf == 1f) {
             for (i in 0 until childCount) {
                 val item = header.getChildAt(i)
@@ -77,13 +93,17 @@ class HeaderItemTransformer(
                 val titleInitialLeft = itemWidth / 2 - holder.mTitle.width / 2
                 val titleNewLeft = titleInitialLeft - abs(titleInitialLeft - mVerticalLeftOffset) * mCurrentRatioBottomHalf
 
-                transformTitle(holder.mTitle, titleNewLeft,1f)
+                holder.mTitle.also {
+                    it.x = titleNewLeft
+                    transformTitle(it, 1f)
+                }
             }
+
+            mTopTitlesAnimated = false
         }
     }
 
-    private fun transformTitle(view: View, x: Float, ratio: Float) {
-        view.x = x
+    private fun transformTitle(view: View, ratio: Float) {
         view.alpha = ratio
         view.scaleX = min(1f, ratio)
         view.scaleY = view.scaleX
