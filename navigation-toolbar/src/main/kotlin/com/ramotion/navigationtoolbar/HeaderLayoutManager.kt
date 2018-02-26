@@ -157,6 +157,11 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
             val diffX = mScroller.currX - x
             val diffY = mScroller.currY - y
 
+            if (diffX == 0 && diffY == 0) {
+                ViewCompat.postOnAnimation(header, this)
+                return
+            }
+
             for (i in 0 until header.childCount) {
                 val child = header.getChildAt(i)
                 child.offsetLeftAndRight(diffX)
@@ -172,13 +177,14 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
             setScrollState(ScrollState.FLING)
             mScroller.forceFinished(true)
             mScroller.fling(startX, startY, velocityX, velocityY, minX, maxX, minY, maxY)
-            mHeaderLayout.also { ViewCompat.postOnAnimation(it, this) }
+            ViewCompat.postOnAnimation(mHeaderLayout, this)
         }
 
         fun startScroll(startX: Int, startY: Int, dx: Int, dy: Int, duration: Int) {
             setScrollState(ScrollState.FLING)
+            mScroller.forceFinished(true)
             mScroller.startScroll(startX, startY, dx, dy, duration)
-            mHeaderLayout.also { ViewCompat.postOnAnimation(it, this) }
+            ViewCompat.postOnAnimation(mHeaderLayout, this)
         }
 
         fun stop() {
@@ -288,7 +294,6 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         }
 
         val header = mHeaderLayout ?: return
-
         if (header.childCount == 0) {
             return
         }
@@ -311,9 +316,10 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
                 return
             }
 
+            val startX = getStartX(header.getChildAt(0))
             val delta = abs(offset) / childWidth.toFloat()
             val duration = min(((delta + 1) * 100).toInt(), MAX_SCROLL_DURATION.toInt())
-            mViewFlinger.startScroll(0, 0, -offset, 0, duration)
+            mViewFlinger.startScroll(startX, 0, -offset, 0, duration)
         } else if (header.mIsVerticalScrollEnabled) {
             val anchorPos = getVerticalAnchorPos(header)
             if (anchorPos == HeaderLayout.INVALID_POSITION) {
@@ -327,9 +333,10 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
                 return
             }
 
+            val startY = getStartY(header.getChildAt(0))
             val delta = abs(offset) / childHeight.toFloat()
             val duration = min(((delta + 1) * 100).toInt(), MAX_SCROLL_DURATION.toInt())
-            mViewFlinger.startScroll(0, 0, 0, -offset, duration)
+            mViewFlinger.startScroll(0, startY, 0, -offset, duration)
         }
 
         mItemChangeListener?.invoke(pos)
@@ -542,13 +549,11 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         }
 
         val itemCount = header.mAdapter?.getItemCount() ?: return false
-        val first = header.getChildAt(0)
-        val firstPos = HeaderLayout.getChildViewHolder(first)!!.mPosition
-        val start = first.left - firstPos * mHorizontalTabWidth
+        val startX = getStartX(header.getChildAt(0))
         val min = -itemCount * mHorizontalTabWidth + header.width
         val max = 0
 
-        mViewFlinger.fling(start, 0, velocity.toInt(), 0, min, max, 0, 0)
+        mViewFlinger.fling(startX, 0, velocity.toInt(), 0, min, max, 0, 0)
 
         return true
     }
@@ -560,15 +565,23 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         }
 
         val itemCount = header.mAdapter?.getItemCount() ?: return false
-        val first = header.getChildAt(0)
-        val firstPos = HeaderLayout.getChildViewHolder(first)!!.mPosition
-        val start = first.top - firstPos * mVerticalTabHeight
+        val startY = getStartY(header.getChildAt(0))
         val min = -itemCount * mVerticalTabHeight + header.height
         val max = 0
 
-        mViewFlinger.fling(0, start, 0, velocity.toInt(), 0, 0, min, max)
+        mViewFlinger.fling(0, startY, 0, velocity.toInt(), 0, 0, min, max)
 
         return true
+    }
+
+    private fun getStartX(firstView: View): Int {
+        val firstPos = HeaderLayout.getChildViewHolder(firstView)!!.mPosition
+        return firstView.left - firstPos * mHorizontalTabWidth
+    }
+
+    private fun getStartY(topView: View): Int {
+        val firstPos = HeaderLayout.getChildViewHolder(topView)!!.mPosition
+        return topView.top - firstPos * mVerticalTabHeight
     }
 
     private fun initPoints(header: HeaderLayout) {
