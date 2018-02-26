@@ -154,9 +154,10 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
                 return
             }
 
+            val diffX = mScroller.currX - x
+            val diffY = mScroller.currY - y
+
             for (i in 0 until header.childCount) {
-                val diffX = mScroller.currX - x
-                val diffY = mScroller.currY - y
                 val child = header.getChildAt(i)
                 child.offsetLeftAndRight(diffX)
                 child.offsetTopAndBottom(diffY)
@@ -442,19 +443,19 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     }
 
     private fun onHeaderItemClick(header: HeaderLayout, viewHolder: HeaderLayout.ViewHolder): Boolean {
-        if (header.mIsHorizontalScrollEnabled) {
-            smoothScrollToPosition(viewHolder.mPosition)
-            mItemClickListeners.forEach { it.onItemClick(viewHolder) }
-            return true
+        return when {
+            header.mIsHorizontalScrollEnabled -> {
+                smoothScrollToPosition(viewHolder.mPosition)
+                mItemClickListeners.forEach { it.onItemClick(viewHolder) }
+                true
+            }
+            header.mIsVerticalScrollEnabled -> {
+                smoothOffset(mScreenHalf.toInt())
+                mItemClickListeners.forEach { it.onItemClick(viewHolder) }
+                true
+            }
+            else -> false
         }
-
-        if (header.mIsVerticalScrollEnabled) {
-            smoothOffset(mScreenHalf.toInt())
-            mItemClickListeners.forEach { it.onItemClick(viewHolder) }
-            return true
-        }
-
-        return false
     }
 
     private fun onHeaderDown(header: HeaderLayout): Boolean {
@@ -580,8 +581,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         mVPoint = PointF(vx, vy)
     }
 
-    private fun getPositionRatio(): Float =
-            mAppBar?.let { Math.max(0f, it.bottom / mScreenHeight.toFloat()) } ?: 0f
+    private fun getPositionRatio() = mAppBar?.let { Math.max(0f, it.bottom / mScreenHeight.toFloat()) } ?: 0f
 
     private fun getOrientation(getRatio: () -> Float, force: Boolean = false): Orientation {
         return if (force) {
@@ -728,23 +728,26 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         var vScrollEnable = false
 
         val invertedOffset = mScreenHeight + offset
-        if (invertedOffset == mScreenHeight) {
-            vScrollEnable = true
-            mCanDrag = false
-        } else if (invertedOffset == mScreenHalf.toInt()) {
-            hScrollEnable = true
-            mCanDrag = false
-        } else if (invertedOffset == mToolBarHeight) {
-            hScrollEnable = true
-            mCanDrag = true
-        } else {
-            // TODO: check
-            if (invertedOffset in mToolBarHeight..(mTopSnapDistance - 1)) {
-                appBar.setExpanded(false, true)
-                //smoothOffset(mScreenHeight - mToolBarHeight, SNAP_ANIMATION_DURATION)
-            } else if (invertedOffset in mTopSnapDistance..(mBottomSnapDistnace - 1)) {
+        when (invertedOffset) {
+            mScreenHeight -> {
+                vScrollEnable = true
+                mCanDrag = false
+            }
+            mScreenHalf.toInt() -> {
+                hScrollEnable = true
+                mCanDrag = false
+            }
+            mToolBarHeight -> {
+                hScrollEnable = true
+                mCanDrag = true
+            }
+            in mToolBarHeight..(mTopSnapDistance - 1) -> {
+                appBar.setExpanded(false, true) // or smoothOffset(mScreenHeight - mToolBarHeight, SNAP_ANIMATION_DURATION)
+            }
+            in mTopSnapDistance..(mBottomSnapDistnace - 1) -> {
                 smoothOffset(mScreenHalf.toInt(), SNAP_ANIMATION_DURATION)
-            } else {
+            }
+            else -> {
                 smoothOffset(0, SNAP_ANIMATION_DURATION)
             }
         }
