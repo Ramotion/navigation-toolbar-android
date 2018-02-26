@@ -149,27 +149,34 @@ class HeaderLayout : FrameLayout {
 
     }
 
-    // TODO: use ViewHolder pattern
     internal inner class Recycler {
 
+        private val mViewCache = mutableListOf<View>()
+
         fun getViewForPosition(position: Int): View {
-            // TODO: try get from cache
-            val holder = mAdapter!!.createViewHolder(this@HeaderLayout)
-            mAdapter!!.bindViewHolder(holder, position)
+            val adapter = mAdapter ?: throw RuntimeException("No adapter set")
+            val holder = mViewCache.firstOrNull()?.let { mViewCache.remove(it); getChildViewHolder(it) }
+                    ?: adapter.createViewHolder(this@HeaderLayout)
+            bindViewToPosition(holder, position)
             return holder.view
         }
 
-        /* TODO: use with cache
-        fun bindViewToPosition(view: View, position: Int) {
-            mAdapter!!.bindViewHolder(getChildViewHolder(view)!!, position)
-        }
-        */
-
-        fun recycleView(view: View) {
-            // TODO: cache
-            mAdapter?.recycleView(getChildViewHolder(view)!!)
+        fun recycleView(view: View, cache: Boolean = true) {
+            val adapter = mAdapter ?: throw RuntimeException("No adapter set")
+            val holder = getChildViewHolder(view) ?: throw RuntimeException("No view holder")
+            adapter.recycleView(holder)
             this@HeaderLayout.removeView(view)
+            if (cache) {
+                holder.mPosition = INVALID_POSITION
+                mViewCache.add(holder.view)
+            }
         }
+
+        private fun bindViewToPosition(holder: ViewHolder, position: Int) {
+            val adapter = mAdapter ?: throw RuntimeException("No adapter set")
+            adapter.bindViewHolder(holder, position)
+        }
+
     }
 
     constructor(context: Context, attrs: AttributeSet) : this(context, attrs, 0)
@@ -184,6 +191,13 @@ class HeaderLayout : FrameLayout {
             mScrollListener?.onHeaderUp(this)
         }
         return res
+    }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        for (i in 0 until childCount) {
+            mRecycler.recycleView(getChildAt(i), false)
+        }
     }
 
     fun getAdapterPosition(view: View) = (view.layoutParams as LayoutParams).getViewAdapterPosition()
