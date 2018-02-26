@@ -98,6 +98,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     private var mIsCheckingScrollStop =false
 
     private var mScrollState = ScrollState.IDLE
+    private var mCurOrientation: Orientation? = null
 
     private lateinit var mHPoint: PointF // TODO: replace with data class
     private lateinit var mVPoint: PointF // TODO: replace with data class
@@ -236,9 +237,8 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     override fun onDependentViewChanged(parent: CoordinatorLayout, header: HeaderLayout, dependency: View): Boolean {
         mViewFlinger.stop()
         header.y = (dependency.bottom - header.height).toFloat() // Offset header on collapsing
-
+        mCurOrientation = null
         mItemTransformer?.transform(dependency.bottom)
-
         return true
     }
 
@@ -380,7 +380,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     }
 
     fun fill(header: HeaderLayout) {
-        val orientation = getOrientation(getPositionRatio())
+        val orientation = getOrientation(::getPositionRatio)
         val pos = when (orientation) {
             Orientation.HORIZONTAL -> getHorizontalAnchorPos(header)
             Orientation.VERTICAL -> getVerticalAnchorPos(header)
@@ -417,7 +417,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     }
 
     fun getAnchorView(header: HeaderLayout): View? {
-        val orientation = getOrientation(getPositionRatio())
+        val orientation = getOrientation(::getPositionRatio)
         return when (orientation) {
             Orientation.HORIZONTAL -> getHorizontalAnchorView(header)
             Orientation.VERTICAL -> getVerticalAnchorView(header)
@@ -583,11 +583,17 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     private fun getPositionRatio(): Float =
             mAppBar?.let { Math.max(0f, it.bottom / mScreenHeight.toFloat()) } ?: 0f
 
-    private fun getOrientation(ratio: Float): Orientation {
-        return when {
-            ratio <= 0.5f -> Orientation.HORIZONTAL
-            ratio < 1 -> Orientation.TRANSITIONAL
-            else -> Orientation.VERTICAL
+    private fun getOrientation(getRatio: () -> Float, force: Boolean = false): Orientation {
+        return if (force) {
+            val ratio = getRatio()
+            mCurOrientation = when {
+                ratio <= 0.5f -> Orientation.HORIZONTAL
+                ratio < 1 -> Orientation.TRANSITIONAL
+                else -> Orientation.VERTICAL
+            }
+            mCurOrientation!!
+        } else {
+            mCurOrientation ?: getOrientation(getRatio, true)
         }
     }
 
