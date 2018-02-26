@@ -40,8 +40,7 @@ class HeaderLayout : FrameLayout {
 
     internal var mScrollListener: ScrollListener? = null
 
-    var mAdapter: Adapter<ViewHolder>? = null // TODO: move to LM
-        private set
+    var mAdapter: Adapter<ViewHolder>? = null; private set
 
     private inner class TouchGestureListener : GestureDetector.SimpleOnGestureListener() {
         override fun onSingleTapUp(e: MotionEvent): Boolean {
@@ -69,24 +68,20 @@ class HeaderLayout : FrameLayout {
 
         override fun onScroll(e1: MotionEvent?, e2: MotionEvent?, distanceX: Float, distanceY: Float): Boolean {
             return mScrollListener?.run {
-                if (mIsHorizontalScrollEnabled) {
-                    onHeaderHorizontalScroll(this@HeaderLayout, distanceX)
-                } else if (mIsVerticalScrollEnabled) {
-                    onHeaderVerticalScroll(this@HeaderLayout, distanceY)
-                } else {
-                    false
+                when {
+                    mIsHorizontalScrollEnabled -> onHeaderHorizontalScroll(this@HeaderLayout, distanceX)
+                    mIsVerticalScrollEnabled -> onHeaderVerticalScroll(this@HeaderLayout, distanceY)
+                    else -> false
                 }
             } ?: false
         }
 
         override fun onFling(e1: MotionEvent?, e2: MotionEvent?, velocityX: Float, velocityY: Float): Boolean {
             return mScrollListener?.run {
-                if (mIsHorizontalScrollEnabled) {
-                    onHeaderHorizontalFling(this@HeaderLayout, velocityX)
-                } else if (mIsVerticalScrollEnabled) {
-                    onHeaderVerticalFling(this@HeaderLayout, velocityY)
-                } else {
-                    false
+                when {
+                    mIsHorizontalScrollEnabled -> onHeaderHorizontalFling(this@HeaderLayout, velocityX)
+                    mIsVerticalScrollEnabled -> onHeaderVerticalFling(this@HeaderLayout, velocityY)
+                    else -> false
                 }
             } ?: false
         }
@@ -117,7 +112,6 @@ class HeaderLayout : FrameLayout {
 
     }
 
-    // TODO: use ViewHolder pattern
     abstract class Adapter<VH : ViewHolder> {
 
         abstract fun getItemCount(): Int
