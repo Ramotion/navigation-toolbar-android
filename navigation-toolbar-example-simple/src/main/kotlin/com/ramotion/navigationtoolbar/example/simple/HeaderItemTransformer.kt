@@ -21,6 +21,7 @@ class HeaderItemTransformer(
     private var mPrevHeaderBottom = Int.MIN_VALUE
 
     private var mTopTitlesAnimated = false
+    private var mElevation: Float? = null
 
     override fun attach(lm: HeaderLayoutManager, header: HeaderLayout) {
         super.attach(lm, header)
@@ -51,8 +52,10 @@ class HeaderItemTransformer(
         mPrevVScrollOffset = vScrollOffset
         mPrevHeaderBottom = headerBottom
 
+        val elevation = mElevation ?: run { mElevation = header.getChildAt(0).elevation; mElevation!! }
+
         if (mCurrentRatioTopHalf in 0f..1f && mCurrentRatioBottomHalf == 0f) {
-            var curZ = childCount / 2f
+            var curZ = childCount / 2f + elevation
             var prevZDiff = Int.MAX_VALUE
             for (i in 0 until childCount) {
                 val item = header.getChildAt(i)
@@ -87,7 +90,7 @@ class HeaderItemTransformer(
                 val item = header.getChildAt(i)
                 val holder = HeaderLayout.getChildViewHolder(item) as HeaderItem
 
-                item.z = 0f
+                item.z = elevation
 
                 val itemWidth = item.width
                 val titleInitialLeft = itemWidth / 2 - holder.mTitle.width / 2
