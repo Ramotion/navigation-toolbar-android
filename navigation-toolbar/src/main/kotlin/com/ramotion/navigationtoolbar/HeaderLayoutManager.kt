@@ -303,6 +303,8 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
             return
         }
 
+        mItemChangeListener?.invoke(pos)
+
         if (header.mIsHorizontalScrollEnabled) {
             val anchorPos = getHorizontalAnchorPos(header)
             if (anchorPos == HeaderLayout.INVALID_POSITION) {
@@ -338,8 +340,6 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
             val duration = min(((delta + 1) * 100).toInt(), MAX_SCROLL_DURATION.toInt())
             mViewFlinger.startScroll(0, startY, 0, -offset, duration)
         }
-
-        mItemChangeListener?.invoke(pos)
     }
 
     fun getPoints(): Pair<PointF, PointF> = Pair(PointF(mHPoint.x, mHPoint.y), PointF(mVPoint.x, mVPoint.y))
