@@ -759,13 +759,13 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
                 mCanDrag = true
             }
             in mToolBarHeight..(mTopSnapDistance - 1) -> {
-                appBar.setExpanded(false, true) // or smoothOffset(mScreenHeight - mToolBarHeight, SNAP_ANIMATION_DURATION)
+                appBar.setExpanded(false, true)
             }
             in mTopSnapDistance..(mBottomSnapDistnace - 1) -> {
                 smoothOffset(mScreenHalf.toInt(), SNAP_ANIMATION_DURATION)
             }
             else -> {
-                smoothOffset(0, SNAP_ANIMATION_DURATION)
+                appBar.setExpanded(true, true)
             }
         }
 
