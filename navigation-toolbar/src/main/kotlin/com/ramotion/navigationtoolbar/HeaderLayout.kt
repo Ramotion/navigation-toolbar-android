@@ -190,7 +190,7 @@ class HeaderLayout : FrameLayout {
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
         for (i in 0 until childCount) {
-            mRecycler.recycleView(getChildAt(i), false)
+            mRecycler.recycleView(getChildAt(i), false) // TODO: fix NPE
         }
     }
 

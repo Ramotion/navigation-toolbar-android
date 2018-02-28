@@ -4,6 +4,7 @@ import android.view.View
 import com.ramotion.navigationtoolbar.DefaultItemTransformer
 import com.ramotion.navigationtoolbar.HeaderLayout
 import com.ramotion.navigationtoolbar.HeaderLayoutManager
+import com.ramotion.navigationtoolbar.NavigationToolBarLayout
 import kotlin.math.abs
 import kotlin.math.min
 
@@ -23,11 +24,16 @@ class HeaderItemTransformer(
     private var mTopTitlesAnimated = false
     private var mElevation: Float? = null
 
-    override fun attach(lm: HeaderLayoutManager, header: HeaderLayout) {
-        super.attach(lm, header)
+    override fun attach(ntl: NavigationToolBarLayout) {
+        super.attach(ntl)
+        mLayoutManager = ntl.mHeaderLayoutManager
+        mHeaderLayout = ntl.mHeaderLayout
+    }
 
-        mLayoutManager = lm
-        mHeaderLayout = header
+    override fun detach() {
+        super.detach()
+        mLayoutManager = null
+        mHeaderLayout = null
     }
 
     override fun transform(headerBottom: Int) {

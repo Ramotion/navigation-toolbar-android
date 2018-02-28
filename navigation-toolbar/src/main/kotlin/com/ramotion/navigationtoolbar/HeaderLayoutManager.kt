@@ -49,14 +49,16 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
 
     }
 
-    interface ItemTransformer {
-        fun attach(lm: HeaderLayoutManager, header: HeaderLayout)
-        fun detach()
-        fun transform(headerBottom: Int)
+    interface HeaderChangeListener {
+        fun onHeaderChanged(headerBottom: Int)
+    }
+
+    interface HeaderUpdateListener {
+        fun onHeaderUpdated(headerBottom: Int)
     }
 
     interface ItemClickListener {
-        fun onItemClick(viewHolder: HeaderLayout.ViewHolder)
+        fun onItemClick(viewHolder: HeaderLayout.ViewHolder) // TODO: onItemClicked
     }
 
     // TODO: init in constructor from attr
@@ -84,10 +86,12 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     private val mViewCache = SparseArray<View?>()
     private val mCenterIndex = mTabOnScreenCount % 2 + mTabOffsetCount
     private val mViewFlinger = ViewFlinger(context)
-    private val mItemClickListeners = mutableListOf<ItemClickListener>()
+    private val mItemClickListeners = mutableListOf<ItemClickListener>() // TODO: make mItemClickListeners internal
 
     internal val mAppBarBehavior = AppBarBehavior()
     internal val mHeaderScrollListener = HeaderScrollListener()
+    internal val mHeaderChangeListener = mutableListOf<HeaderChangeListener>()
+    internal val mHeaderUpdateListener = mutableListOf<HeaderUpdateListener>()
 
     private var mOffsetAnimator: ValueAnimator? = null // TODO: add duration attribute
     private var mAppBar: AppBarLayout? = null
@@ -104,7 +108,6 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     private lateinit var mHPoint: PointF // TODO: replace with data class
     private lateinit var mVPoint: PointF // TODO: replace with data class
 
-    internal var mItemTransformer: ItemTransformer? = null
     internal var mItemChangeListener: ItemChangeListener? = null
     internal var mScrollStateListener: ScrollStateListener? = null
 
@@ -246,10 +249,11 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     }
 
     override fun onDependentViewChanged(parent: CoordinatorLayout, header: HeaderLayout, dependency: View): Boolean {
-        mViewFlinger.stop()
-        header.y = (dependency.bottom - header.height).toFloat() // Offset header on collapsing
+        val headerBottom = dependency.bottom
+        header.y = (headerBottom - header.height).toFloat() // Offset header on collapsing
         mCurOrientation = null
-        mItemTransformer?.transform(dependency.bottom)
+        mViewFlinger.stop()
+        mHeaderChangeListener.forEach { it.onHeaderChanged(headerBottom) }
         return true
     }
 
@@ -261,7 +265,6 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
 
     fun scrollToPosition(pos: Int) {
         val header = mHeaderLayout ?: return
-
         if (header.childCount == 0) {
             return
         }
@@ -425,7 +428,8 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
             header.mRecycler.recycleView(mViewCache.valueAt(i)!!)
         }
 
-        mAppBar?.bottom?.let { mItemTransformer?.transform(it) }
+        val headerBottom = (header.y + header.height).toInt()
+        mHeaderUpdateListener.forEach { it.onHeaderUpdated(headerBottom) }
     }
 
     fun getAnchorView(header: HeaderLayout): View? {
@@ -441,8 +445,10 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         return getAnchorView(header)?.let { HeaderLayout.getChildViewHolder(it) }?.mPosition
     }
 
+    // TODO: remove, make mItemClickListeners internal
     fun addItemClickListener(listener: HeaderLayoutManager.ItemClickListener) = mItemClickListeners.add(listener)
 
+    // TODO: remove, make mItemClickListeners internal
     fun removeItemClickListener(listener: HeaderLayoutManager.ItemClickListener) = mItemClickListeners.remove(listener)
 
     private fun getHorizontalAnchorPos(header: HeaderLayout): Int {

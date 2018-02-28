@@ -5,11 +5,12 @@ import kotlin.math.max
 import kotlin.math.min
 
 open class DefaultItemTransformer
-    : HeaderLayoutManager.ItemTransformer, HeaderLayoutManager.ItemClickListener {
+    : NavigationToolBarLayout.ItemTransformer(), HeaderLayoutManager.ItemClickListener {
 
     private val mHPoints: MutableList<PointF> = mutableListOf()
     private val mVPoints: MutableList<PointF> = mutableListOf()
 
+    private var mNavigationToolBarLayout: NavigationToolBarLayout? = null
     private var mLayoutManager: HeaderLayoutManager? = null
     private var mHeaderLayout: HeaderLayout? = null
 
@@ -25,20 +26,23 @@ open class DefaultItemTransformer
     protected var mCurrentRatioTopHalf = -1f; private set
     protected var mCurrentRatioBottomHalf = -1f; private set
 
-    override fun attach(lm: HeaderLayoutManager, header: HeaderLayout) {
-        mLayoutManager = lm
-        mHeaderLayout = header
+    override fun attach(ntl: NavigationToolBarLayout) {
+        mHeaderLayout = ntl.mHeaderLayout
 
-        mRatioWork = lm.mWorkHeight / lm.mScreenHeight.toFloat()
-        mRatioTopHalf = lm.mToolBarHeight / lm.mScreenHeight.toFloat()
-        mRatioBottomHalf = lm.mScreenHalf / lm.mScreenHeight.toFloat()
+        mLayoutManager = ntl.mHeaderLayoutManager.also { lm ->
+            mRatioWork = lm.mWorkHeight / lm.mScreenHeight.toFloat()
+            mRatioTopHalf = lm.mToolBarHeight / lm.mScreenHeight.toFloat()
+            mRatioBottomHalf = lm.mScreenHalf / lm.mScreenHeight.toFloat()
+        }
 
-        lm.addItemClickListener(this)
+        mNavigationToolBarLayout = ntl.also {
+            it.addItemClickListener(this)
+        }
     }
 
     override fun detach() {
-        mLayoutManager?.removeItemClickListener(this)
-
+        mNavigationToolBarLayout?.removeItemClickListener(this)
+        mNavigationToolBarLayout = null
         mLayoutManager = null
         mHeaderLayout = null
     }

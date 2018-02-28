@@ -7,9 +7,19 @@ import android.support.design.widget.CoordinatorLayout
 import android.support.v7.widget.Toolbar
 import android.util.AttributeSet
 import android.view.LayoutInflater
+import com.ramotion.navigationtoolbar.HeaderLayoutManager.HeaderChangeListener
+import com.ramotion.navigationtoolbar.HeaderLayoutManager.HeaderUpdateListener
 
 
 class NavigationToolBarLayout : CoordinatorLayout {
+
+    abstract class ItemTransformer : HeaderChangeListener, HeaderUpdateListener {
+        final override fun onHeaderChanged(headerBottom: Int) = transform(headerBottom)
+        final override fun onHeaderUpdated(headerBottom: Int) = transform(headerBottom)
+        abstract fun attach(ntl: NavigationToolBarLayout)
+        abstract fun detach()
+        abstract fun transform(headerBottom: Int)
+    }
 
     val mToolBar: Toolbar
     val mHeaderLayout: HeaderLayout
@@ -18,6 +28,8 @@ class NavigationToolBarLayout : CoordinatorLayout {
 
     private val mItemChangeListeners = mutableListOf<ItemChangeListener>()
     private val mScrollStateListeners = mutableListOf<ScrollStateListener>()
+
+    private var mHeaderItemTransformer: ItemTransformer? = null
 
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
 
@@ -69,12 +81,19 @@ class NavigationToolBarLayout : CoordinatorLayout {
     fun removeItemClickListener(listener: HeaderLayoutManager.ItemClickListener) =
             mHeaderLayoutManager.removeItemClickListener(listener)
 
-    fun setItemTransformer(newTransformer: HeaderLayoutManager.ItemTransformer?) {
-        mHeaderLayoutManager.mItemTransformer?.detach()
+    fun setItemTransformer(newTransformer: ItemTransformer?) {
+        mHeaderItemTransformer?.also {
+            mHeaderLayoutManager.mHeaderChangeListener -= it
+            mHeaderLayoutManager.mHeaderUpdateListener -= it
+            it.detach()
+        }
 
-        (newTransformer ?: DefaultItemTransformer())
-                .also { it.attach(mHeaderLayoutManager, mHeaderLayout) }
-                .also { mHeaderLayoutManager.mItemTransformer = it }
+        (newTransformer ?: DefaultItemTransformer()).also {
+            it.attach(this)
+            mHeaderLayoutManager.mHeaderChangeListener += it
+            mHeaderLayoutManager.mHeaderUpdateListener += it
+            mHeaderItemTransformer = it
+        }
     }
 
 }
