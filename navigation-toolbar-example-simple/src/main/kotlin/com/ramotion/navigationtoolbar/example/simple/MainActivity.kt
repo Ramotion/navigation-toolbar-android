@@ -73,7 +73,7 @@ class MainActivity : AppCompatActivity() {
         mHeader.addItemChangeListener { mViewPager.currentItem = it }
 
         mHeader.addItemClickListener(object : HeaderLayoutManager.ItemClickListener {
-            override fun onItemClick(viewHolder: HeaderLayout.ViewHolder) {
+            override fun onItemClicked(viewHolder: HeaderLayout.ViewHolder) {
                 mViewPager.currentItem = viewHolder.mPosition
             }
         })

@@ -114,7 +114,7 @@ open class DefaultItemTransformer
         }
     }
 
-    override fun onItemClick(viewHolder: HeaderLayout.ViewHolder) {
+    override fun onItemClicked(viewHolder: HeaderLayout.ViewHolder) {
         mClickedItemIndex = mHeaderLayout?.indexOfChild(viewHolder.view)
         updatePoints(true)
     }

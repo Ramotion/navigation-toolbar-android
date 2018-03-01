@@ -75,11 +75,13 @@ class NavigationToolBarLayout : CoordinatorLayout {
         mScrollStateListeners -= listener
     }
 
-    fun addItemClickListener(listener: HeaderLayoutManager.ItemClickListener) =
-            mHeaderLayoutManager.addItemClickListener(listener)
+    fun addItemClickListener(listener: HeaderLayoutManager.ItemClickListener) {
+        mHeaderLayoutManager.mItemClickListeners += listener
+    }
 
-    fun removeItemClickListener(listener: HeaderLayoutManager.ItemClickListener) =
-            mHeaderLayoutManager.removeItemClickListener(listener)
+    fun removeItemClickListener(listener: HeaderLayoutManager.ItemClickListener) {
+        mHeaderLayoutManager.mItemClickListeners += listener
+    }
 
     fun setItemTransformer(newTransformer: ItemTransformer?) {
         mHeaderItemTransformer?.also {

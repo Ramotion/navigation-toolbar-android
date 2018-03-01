@@ -11,13 +11,10 @@ import android.support.design.widget.AppBarLayout
 import android.support.design.widget.CoordinatorLayout
 import android.support.v4.view.ViewCompat
 import android.util.AttributeSet
-import android.util.Log
 import android.util.SparseArray
 import android.view.View
 import android.widget.OverScroller
-import java.lang.ref.WeakReference
 import kotlin.math.abs
-import kotlin.math.max
 import kotlin.math.min
 
 typealias ItemChangeListener = (position: Int) -> Unit
@@ -58,7 +55,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     }
 
     interface ItemClickListener {
-        fun onItemClick(viewHolder: HeaderLayout.ViewHolder) // TODO: onItemClicked
+        fun onItemClicked(viewHolder: HeaderLayout.ViewHolder)
     }
 
     // TODO: init in constructor from attr
@@ -86,12 +83,12 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     private val mViewCache = SparseArray<View?>()
     private val mCenterIndex = mTabOnScreenCount % 2 + mTabOffsetCount
     private val mViewFlinger = ViewFlinger(context)
-    private val mItemClickListeners = mutableListOf<ItemClickListener>() // TODO: make mItemClickListeners internal
 
     internal val mAppBarBehavior = AppBarBehavior()
     internal val mHeaderScrollListener = HeaderScrollListener()
     internal val mHeaderChangeListener = mutableListOf<HeaderChangeListener>()
     internal val mHeaderUpdateListener = mutableListOf<HeaderUpdateListener>()
+    internal val mItemClickListeners = mutableListOf<ItemClickListener>()
 
     private var mOffsetAnimator: ValueAnimator? = null // TODO: add duration attribute
     private var mAppBar: AppBarLayout? = null
@@ -445,12 +442,6 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         return getAnchorView(header)?.let { HeaderLayout.getChildViewHolder(it) }?.mPosition
     }
 
-    // TODO: remove, make mItemClickListeners internal
-    fun addItemClickListener(listener: HeaderLayoutManager.ItemClickListener) = mItemClickListeners.add(listener)
-
-    // TODO: remove, make mItemClickListeners internal
-    fun removeItemClickListener(listener: HeaderLayoutManager.ItemClickListener) = mItemClickListeners.remove(listener)
-
     private fun getHorizontalAnchorPos(header: HeaderLayout): Int {
         return getHorizontalAnchorView(header)?.let { header.getAdapterPosition(it) } ?: HeaderLayout.INVALID_POSITION
     }
@@ -463,12 +454,12 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         return when {
             header.mIsHorizontalScrollEnabled -> {
                 smoothScrollToPosition(viewHolder.mPosition)
-                mItemClickListeners.forEach { it.onItemClick(viewHolder) }
+                mItemClickListeners.forEach { it.onItemClicked(viewHolder) }
                 true
             }
             header.mIsVerticalScrollEnabled -> {
                 smoothOffset(mScreenHalf.toInt())
-                mItemClickListeners.forEach { it.onItemClick(viewHolder) }
+                mItemClickListeners.forEach { it.onItemClicked(viewHolder) }
                 true
             }
             else -> false
