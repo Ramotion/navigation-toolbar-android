@@ -1,35 +1,33 @@
 package com.ramotion.navigationtoolbar.example.simple
 
+import com.ramotion.navigationtoolbar.HeaderLayoutManager
 import com.ramotion.navigationtoolbar.HeaderLayoutManager.ScrollState
-import com.ramotion.navigationtoolbar.HeaderLayoutManager.ScrollState.*
+import com.ramotion.navigationtoolbar.HeaderLayoutManager.ScrollState.IDLE
 import com.ramotion.navigationtoolbar.NavigationToolBarLayout
-import com.ramotion.navigationtoolbar.ScrollStateListener
 import java.lang.ref.WeakReference
 
-class SimpleSnapHelper {
+class SimpleSnapHelper : HeaderLayoutManager.ScrollStateListener {
 
     private var mToolBarRef: WeakReference<NavigationToolBarLayout>? = null
 
-    private val mScrollStateListener = object : ScrollStateListener {
-        override fun invoke(state: ScrollState) {
-            if (state != IDLE) {
-                return
-            }
+    override fun onScrollStateChanged(state: ScrollState) {
+        if (state != IDLE) {
+            return
+        }
 
-            mToolBarRef?.get()?.also { toolbar ->
-                toolbar.getAnchorPos()?.also { toolbar.smoothScrollToPosition(it) }
-            }
+        mToolBarRef?.get()?.also { toolbar ->
+            toolbar.getAnchorPos()?.also { toolbar.smoothScrollToPosition(it) }
         }
     }
 
     fun attach(toolbar: NavigationToolBarLayout) {
         mToolBarRef = WeakReference(toolbar)
-        toolbar.addScrollStateListener(mScrollStateListener)
+        toolbar.addScrollStateListener(this)
     }
 
     fun detach(toolbar: NavigationToolBarLayout) {
         mToolBarRef = null
-        toolbar.removeScrollStateListener(mScrollStateListener)
+        toolbar.removeScrollStateListener(this)
     }
 
 }

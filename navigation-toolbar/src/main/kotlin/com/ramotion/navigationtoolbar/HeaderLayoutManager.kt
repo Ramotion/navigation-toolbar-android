@@ -17,7 +17,6 @@ import android.widget.OverScroller
 import kotlin.math.abs
 import kotlin.math.min
 
-typealias ScrollStateListener = (state: HeaderLayoutManager.ScrollState) -> Unit
 
 /**
  * Moves header's views
@@ -61,6 +60,10 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         fun onItemChanged(position: Int)
     }
 
+    interface ScrollStateListener {
+        fun onScrollStateChanged(state: HeaderLayoutManager.ScrollState)
+    }
+
     // TODO: init in constructor from attr
     private val mTabOffsetCount = TAB_OFF_SCREEN_COUNT
     private val mTabOnScreenCount = TAB_ON_SCREEN_COUNT
@@ -93,6 +96,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     internal val mHeaderUpdateListener = mutableListOf<HeaderUpdateListener>()
     internal val mItemClickListeners = mutableListOf<ItemClickListener>()
     internal val mItemChangeListeners = mutableListOf<ItemChangeListener>()
+    internal val mScrollStateListeners = mutableListOf<ScrollStateListener>()
 
     private var mOffsetAnimator: ValueAnimator? = null // TODO: add duration attribute
     private var mAppBar: AppBarLayout? = null
@@ -108,8 +112,6 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
 
     private lateinit var mHPoint: PointF // TODO: replace with data class
     private lateinit var mVPoint: PointF // TODO: replace with data class
-
-    internal var mScrollStateListener: ScrollStateListener? = null
 
     inner class AppBarBehavior : AppBarLayout.Behavior() {
         init {
@@ -801,7 +803,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
             return
         }
 
-        mScrollStateListener?.invoke(state)
+        mScrollStateListeners.forEach { it.onScrollStateChanged(state) }
         mScrollState = state
     }
 }

@@ -10,6 +10,7 @@ import android.view.LayoutInflater
 import com.ramotion.navigationtoolbar.HeaderLayoutManager.HeaderChangeListener
 import com.ramotion.navigationtoolbar.HeaderLayoutManager.HeaderUpdateListener
 import com.ramotion.navigationtoolbar.HeaderLayoutManager.ItemChangeListener
+import com.ramotion.navigationtoolbar.HeaderLayoutManager.ScrollStateListener
 
 
 class NavigationToolBarLayout : CoordinatorLayout {
@@ -27,8 +28,6 @@ class NavigationToolBarLayout : CoordinatorLayout {
     val mHeaderLayoutManager: HeaderLayoutManager
     val mAppBarLayout: AppBarLayout
 
-    private val mScrollStateListeners = mutableListOf<ScrollStateListener>()
-
     private var mHeaderItemTransformer: ItemTransformer? = null
 
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
@@ -40,7 +39,6 @@ class NavigationToolBarLayout : CoordinatorLayout {
         mHeaderLayout = findViewById(R.id.com_ramotion_header_layout)
 
         mHeaderLayoutManager = (mHeaderLayout.layoutParams as CoordinatorLayout.LayoutParams).behavior as HeaderLayoutManager
-        mHeaderLayoutManager.mScrollStateListener = { state -> mScrollStateListeners.forEach { it.invoke(state) }}
 
         mAppBarLayout = findViewById(R.id.com_ramotion_app_bar)
         mAppBarLayout.outlineProvider = null
@@ -67,11 +65,11 @@ class NavigationToolBarLayout : CoordinatorLayout {
     }
 
     fun addScrollStateListener(listener: ScrollStateListener) {
-        mScrollStateListeners += listener
+        mHeaderLayoutManager.mScrollStateListeners += listener
     }
 
     fun removeScrollStateListener(listener: ScrollStateListener) {
-        mScrollStateListeners -= listener
+        mHeaderLayoutManager.mScrollStateListeners -= listener
     }
 
     fun addItemClickListener(listener: HeaderLayoutManager.ItemClickListener) {
