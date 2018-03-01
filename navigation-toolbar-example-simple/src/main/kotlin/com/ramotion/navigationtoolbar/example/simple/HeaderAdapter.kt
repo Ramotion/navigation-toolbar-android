@@ -4,7 +4,8 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.ramotion.navigationtoolbar.HeaderLayout
 
-class HeaderAdapter(private val mCount: Int) : HeaderLayout.Adapter<HeaderItem>() {
+class HeaderAdapter(private val mContent: Array<Int>,
+                    private val mCount: Int) : HeaderLayout.Adapter<HeaderItem>() {
 
     override fun getItemCount() = mCount
 
@@ -14,7 +15,7 @@ class HeaderAdapter(private val mCount: Int) : HeaderLayout.Adapter<HeaderItem>(
     }
 
     override fun onBindViewHolder(holder: HeaderItem, position: Int) {
-        holder.setContent()
+        holder.setContent(mContent[position % mContent.size])
     }
 
     override fun onViewRecycled(holder: HeaderItem) {

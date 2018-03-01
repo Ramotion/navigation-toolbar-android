@@ -13,9 +13,8 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
-    private companion object {
-        const val ITEM_COUNT = 20
-    }
+    private val mItemCount = 20
+    private val mPictures = intArrayOf(R.drawable.p1, R.drawable.p2, R.drawable.p3, R.drawable.p4, R.drawable.p5).toTypedArray()
 
     private lateinit var mViewPager: ViewPager
     private lateinit var mHeader: NavigationToolBarLayout
@@ -58,7 +57,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun initViewPager() {
         mViewPager = findViewById<ViewPager>(R.id.pager)
-        mViewPager.adapter = ViewPagerAdapter(ITEM_COUNT)
+        mViewPager.adapter = ViewPagerAdapter(mItemCount)
         mViewPager.addOnPageChangeListener(object : ViewPager.SimpleOnPageChangeListener() {
             override fun onPageSelected(position: Int) {
                 mHeader.smoothScrollToPosition(position)
@@ -69,7 +68,7 @@ class MainActivity : AppCompatActivity() {
     private fun initHeader() {
         mHeader = findViewById<NavigationToolBarLayout>(R.id.navigation_toolbar_layout)
         mHeader.setItemTransformer(HeaderItemTransformer(-50, 0.35f))
-        mHeader.setAdapter(HeaderAdapter(ITEM_COUNT))
+        mHeader.setAdapter(HeaderAdapter(mPictures, mItemCount))
 
         mHeader.addItemChangeListener(object : HeaderLayoutManager.ItemChangeListener {
             override fun onItemChanged(position: Int) {
