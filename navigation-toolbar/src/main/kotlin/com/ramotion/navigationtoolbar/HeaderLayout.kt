@@ -188,10 +188,10 @@ class HeaderLayout : FrameLayout {
     }
 
     override fun onDetachedFromWindow() {
-        super.onDetachedFromWindow()
-        for (i in 0 until childCount) {
-            mRecycler.recycleView(getChildAt(i), false) // TODO: fix NPE
+        while (childCount > 0) {
+            mRecycler.recycleView(getChildAt(0), false)
         }
+        super.onDetachedFromWindow()
     }
 
     fun getAdapterPosition(view: View) = (view.layoutParams as LayoutParams).getViewAdapterPosition()
