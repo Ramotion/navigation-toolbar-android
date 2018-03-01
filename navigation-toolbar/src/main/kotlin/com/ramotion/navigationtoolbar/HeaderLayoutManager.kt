@@ -17,7 +17,6 @@ import android.widget.OverScroller
 import kotlin.math.abs
 import kotlin.math.min
 
-typealias ItemChangeListener = (position: Int) -> Unit
 typealias ScrollStateListener = (state: HeaderLayoutManager.ScrollState) -> Unit
 
 /**
@@ -58,6 +57,10 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         fun onItemClicked(viewHolder: HeaderLayout.ViewHolder)
     }
 
+    interface ItemChangeListener {
+        fun onItemChanged(position: Int)
+    }
+
     // TODO: init in constructor from attr
     private val mTabOffsetCount = TAB_OFF_SCREEN_COUNT
     private val mTabOnScreenCount = TAB_ON_SCREEN_COUNT
@@ -89,6 +92,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     internal val mHeaderChangeListener = mutableListOf<HeaderChangeListener>()
     internal val mHeaderUpdateListener = mutableListOf<HeaderUpdateListener>()
     internal val mItemClickListeners = mutableListOf<ItemClickListener>()
+    internal val mItemChangeListeners = mutableListOf<ItemChangeListener>()
 
     private var mOffsetAnimator: ValueAnimator? = null // TODO: add duration attribute
     private var mAppBar: AppBarLayout? = null
@@ -105,17 +109,14 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     private lateinit var mHPoint: PointF // TODO: replace with data class
     private lateinit var mVPoint: PointF // TODO: replace with data class
 
-    internal var mItemChangeListener: ItemChangeListener? = null
     internal var mScrollStateListener: ScrollStateListener? = null
 
     inner class AppBarBehavior : AppBarLayout.Behavior() {
-
         init {
             setDragCallback(object : AppBarLayout.Behavior.DragCallback() {
                 override fun canDrag(appBarLayout: AppBarLayout) = mCanDrag
             })
         }
-
     }
 
     inner class HeaderScrollListener : HeaderLayout.ScrollListener {
@@ -289,7 +290,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
             onHeaderVerticalScroll(header, offset.toFloat())
         }
 
-        mItemChangeListener?.invoke(pos)
+        mItemChangeListeners.forEach { it.onItemChanged(pos) }
     }
 
     fun smoothScrollToPosition(pos: Int) {
@@ -307,7 +308,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
             return
         }
 
-        mItemChangeListener?.invoke(pos)
+        mItemChangeListeners.forEach { it.onItemChanged(pos) }
 
         if (header.mIsHorizontalScrollEnabled) {
             val anchorPos = getHorizontalAnchorPos(header)

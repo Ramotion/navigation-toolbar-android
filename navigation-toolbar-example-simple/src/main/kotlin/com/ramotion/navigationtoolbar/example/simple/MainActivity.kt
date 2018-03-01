@@ -70,7 +70,12 @@ class MainActivity : AppCompatActivity() {
         mHeader = findViewById<NavigationToolBarLayout>(R.id.navigation_toolbar_layout)
         mHeader.setItemTransformer(HeaderItemTransformer(-50, 0.35f))
         mHeader.setAdapter(HeaderAdapter(ITEM_COUNT))
-        mHeader.addItemChangeListener { mViewPager.currentItem = it }
+
+        mHeader.addItemChangeListener(object : HeaderLayoutManager.ItemChangeListener {
+            override fun onItemChanged(position: Int) {
+                mViewPager.currentItem = position
+            }
+        })
 
         mHeader.addItemClickListener(object : HeaderLayoutManager.ItemClickListener {
             override fun onItemClicked(viewHolder: HeaderLayout.ViewHolder) {

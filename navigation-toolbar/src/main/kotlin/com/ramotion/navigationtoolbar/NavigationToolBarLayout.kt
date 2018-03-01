@@ -9,6 +9,7 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import com.ramotion.navigationtoolbar.HeaderLayoutManager.HeaderChangeListener
 import com.ramotion.navigationtoolbar.HeaderLayoutManager.HeaderUpdateListener
+import com.ramotion.navigationtoolbar.HeaderLayoutManager.ItemChangeListener
 
 
 class NavigationToolBarLayout : CoordinatorLayout {
@@ -26,7 +27,6 @@ class NavigationToolBarLayout : CoordinatorLayout {
     val mHeaderLayoutManager: HeaderLayoutManager
     val mAppBarLayout: AppBarLayout
 
-    private val mItemChangeListeners = mutableListOf<ItemChangeListener>()
     private val mScrollStateListeners = mutableListOf<ScrollStateListener>()
 
     private var mHeaderItemTransformer: ItemTransformer? = null
@@ -40,7 +40,6 @@ class NavigationToolBarLayout : CoordinatorLayout {
         mHeaderLayout = findViewById(R.id.com_ramotion_header_layout)
 
         mHeaderLayoutManager = (mHeaderLayout.layoutParams as CoordinatorLayout.LayoutParams).behavior as HeaderLayoutManager
-        mHeaderLayoutManager.mItemChangeListener = { pos -> mItemChangeListeners.forEach { it.invoke(pos) }}
         mHeaderLayoutManager.mScrollStateListener = { state -> mScrollStateListeners.forEach { it.invoke(state) }}
 
         mAppBarLayout = findViewById(R.id.com_ramotion_app_bar)
@@ -60,11 +59,11 @@ class NavigationToolBarLayout : CoordinatorLayout {
     fun getAnchorPos(): Int? = mHeaderLayoutManager.getAnchorPos(mHeaderLayout)
 
     fun addItemChangeListener(listener: ItemChangeListener) {
-        mItemChangeListeners += listener
+        mHeaderLayoutManager.mItemChangeListeners += listener
     }
 
     fun removeItemChangeListener(listener: ItemChangeListener) {
-        mItemChangeListeners -= listener
+        mHeaderLayoutManager.mItemChangeListeners -= listener
     }
 
     fun addScrollStateListener(listener: ScrollStateListener) {
