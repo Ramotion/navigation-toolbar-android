@@ -783,7 +783,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
             animator.setIntValues(mAppBarBehavior.topAndBottomOffset, -offset)
             animator.addUpdateListener {
                 val value = it.animatedValue as Int
-                mAppBarBehavior.topAndBottomOffset = value
+                mAppBarBehavior.topAndBottomOffset = value // TODO: try mAppBar.Behavior::onStopNestedScroll
             }
             animator.addListener(object: AnimatorListenerAdapter() {
                 override fun onAnimationStart(animation: Animator?, isReverse: Boolean) {

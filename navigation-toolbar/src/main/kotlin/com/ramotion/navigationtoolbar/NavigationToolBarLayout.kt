@@ -7,10 +7,10 @@ import android.support.design.widget.CoordinatorLayout
 import android.support.v7.widget.Toolbar
 import android.util.AttributeSet
 import android.view.LayoutInflater
-import com.ramotion.navigationtoolbar.HeaderLayoutManager.HeaderChangeListener
-import com.ramotion.navigationtoolbar.HeaderLayoutManager.HeaderUpdateListener
-import com.ramotion.navigationtoolbar.HeaderLayoutManager.ItemChangeListener
-import com.ramotion.navigationtoolbar.HeaderLayoutManager.ScrollStateListener
+import android.view.ViewStub
+import android.widget.ImageView
+import com.ramotion.navigationtoolbar.HeaderLayoutManager.*
+import kotlin.math.min
 
 
 class NavigationToolBarLayout : CoordinatorLayout {
@@ -37,13 +37,33 @@ class NavigationToolBarLayout : CoordinatorLayout {
 
         mToolBar = findViewById(R.id.com_ramotion_toolbar)
         mHeaderLayout = findViewById(R.id.com_ramotion_header_layout)
-
         mHeaderLayoutManager = (mHeaderLayout.layoutParams as CoordinatorLayout.LayoutParams).behavior as HeaderLayoutManager
 
         mAppBarLayout = findViewById(R.id.com_ramotion_app_bar)
         mAppBarLayout.outlineProvider = null
         mAppBarLayout.addOnOffsetChangedListener(mHeaderLayoutManager)
         (mAppBarLayout.layoutParams as CoordinatorLayout.LayoutParams).behavior = mHeaderLayoutManager.mAppBarBehavior
+
+        attrs?.also {
+            val a = context.theme.obtainStyledAttributes(attrs, R.styleable.NavigationToolBarr, defStyleAttr, 0)
+            try {
+                val imgResID = a.getResourceId(R.styleable.NavigationToolBarr_headerBackgroundSrc, -1)
+                if (imgResID != -1) {
+                    val imageView = findViewById<ViewStub>(R.id.com_ramotion_background_stub).inflate() as ImageView
+                    imageView.setImageResource(imgResID)
+                    addHeaderChangeListener(object : HeaderChangeListener {
+                        val maxRatio = 0.8f
+                        override fun onHeaderChanged(headerBottom: Int) {
+                            val ratio = 1f - headerBottom / (mHeaderLayout.height + 1f)
+                            val alpha = (maxRatio - min(maxRatio, ratio)) / maxRatio
+                            imageView.alpha = alpha
+                        }
+                    })
+                }
+            } finally {
+                a.recycle()
+            }
+        }
 
         setItemTransformer(null)
     }
@@ -78,6 +98,14 @@ class NavigationToolBarLayout : CoordinatorLayout {
 
     fun removeItemClickListener(listener: HeaderLayoutManager.ItemClickListener) {
         mHeaderLayoutManager.mItemClickListeners += listener
+    }
+
+    fun addHeaderChangeListener(listener: HeaderChangeListener) {
+        mHeaderLayoutManager.mHeaderChangeListener += listener
+    }
+
+    fun removeHeaderChangeListener(listener: HeaderChangeListener) {
+        mHeaderLayoutManager.mHeaderChangeListener -= listener
     }
 
     fun setItemTransformer(newTransformer: ItemTransformer?) {
