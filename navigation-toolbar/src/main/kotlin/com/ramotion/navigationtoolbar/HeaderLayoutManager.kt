@@ -45,11 +45,11 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     }
 
     interface HeaderChangeListener {
-        fun onHeaderChanged(headerBottom: Int)
+        fun onHeaderChanged(lm: HeaderLayoutManager, header: HeaderLayout, headerBottom: Int)
     }
 
     interface HeaderUpdateListener {
-        fun onHeaderUpdated(headerBottom: Int)
+        fun onHeaderUpdated(lm: HeaderLayoutManager, header: HeaderLayout, headerBottom: Int)
     }
 
     interface ItemClickListener {
@@ -253,7 +253,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         header.y = (headerBottom - header.height).toFloat() // Offset header on collapsing
         mCurOrientation = null
         mViewFlinger.stop()
-        mHeaderChangeListener.forEach { it.onHeaderChanged(headerBottom) }
+        mHeaderChangeListener.forEach { it.onHeaderChanged(this, header, headerBottom) }
         return true
     }
 
@@ -429,7 +429,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         }
 
         val headerBottom = (header.y + header.height).toInt()
-        mHeaderUpdateListener.forEach { it.onHeaderUpdated(headerBottom) }
+        mHeaderUpdateListener.forEach { it.onHeaderUpdated(this, header, headerBottom) }
     }
 
     fun getAnchorView(header: HeaderLayout): View? {

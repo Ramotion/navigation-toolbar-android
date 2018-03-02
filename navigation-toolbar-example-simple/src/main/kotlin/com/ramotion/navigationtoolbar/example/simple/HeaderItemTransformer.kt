@@ -13,9 +13,6 @@ class HeaderItemTransformer(
         private val mHorizontalCenterOffsetRatio: Float)
     : DefaultItemTransformer() {
 
-    private var mLayoutManager: HeaderLayoutManager? = null
-    private var mHeaderLayout: HeaderLayout? = null
-
     private var mPrevChildCount = Int.MIN_VALUE
     private var mPrevHScrollOffset = Int.MIN_VALUE
     private var mPrevVScrollOffset = Int.MIN_VALUE
@@ -24,29 +21,17 @@ class HeaderItemTransformer(
     private var mTopTitlesAnimated = false
     private var mElevation: Float? = null
 
-    override fun attach(ntl: NavigationToolBarLayout) {
-        super.attach(ntl)
-        mLayoutManager = ntl.mHeaderLayoutManager
-        mHeaderLayout = ntl.mHeaderLayout
-    }
+    override fun transform(lm: HeaderLayoutManager, header: HeaderLayout, headerBottom: Int) {
+        super.transform(lm, header, headerBottom)
 
-    override fun detach() {
-        super.detach()
-        mLayoutManager = null
-        mHeaderLayout = null
-    }
-
-    override fun transform(headerBottom: Int) {
-        super.transform(headerBottom)
-
-        val header = mHeaderLayout ?: return
         val childCount = header.childCount
         if (childCount == 0) {
             return
         }
 
-        val hScrollOffset = header.getChildAt(0).left
-        val vScrollOffset = header.getChildAt(0).top
+        val child0 = header.getChildAt(0)
+        val hScrollOffset = child0.left
+        val vScrollOffset = child0.top
         val nothingChanged = hScrollOffset == mPrevHScrollOffset && vScrollOffset == mPrevVScrollOffset
                 && childCount == mPrevChildCount && mPrevHeaderBottom == headerBottom
         if (nothingChanged) {
@@ -58,7 +43,7 @@ class HeaderItemTransformer(
         mPrevVScrollOffset = vScrollOffset
         mPrevHeaderBottom = headerBottom
 
-        val elevation = mElevation ?: run { mElevation = header.getChildAt(0).elevation; mElevation!! }
+        val elevation = mElevation ?: run { mElevation = child0.elevation; mElevation!! }
 
         if (mCurrentRatioTopHalf in 0f..1f && mCurrentRatioBottomHalf == 0f) {
             var curZ = childCount / 2f + elevation
@@ -107,7 +92,6 @@ class HeaderItemTransformer(
                     transformTitle(it, 1f)
                 }
             }
-
             mTopTitlesAnimated = false
         }
     }

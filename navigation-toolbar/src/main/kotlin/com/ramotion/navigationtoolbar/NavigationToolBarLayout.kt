@@ -16,11 +16,17 @@ import kotlin.math.min
 class NavigationToolBarLayout : CoordinatorLayout {
 
     abstract class ItemTransformer : HeaderChangeListener, HeaderUpdateListener {
-        final override fun onHeaderChanged(headerBottom: Int) = transform(headerBottom)
-        final override fun onHeaderUpdated(headerBottom: Int) = transform(headerBottom)
         abstract fun attach(ntl: NavigationToolBarLayout)
+
         abstract fun detach()
-        abstract fun transform(headerBottom: Int)
+
+        abstract fun transform(lm: HeaderLayoutManager, header: HeaderLayout, headerBottom: Int)
+
+        final override fun onHeaderChanged(lm: HeaderLayoutManager, header: HeaderLayout, headerBottom: Int) =
+                transform(lm, header, headerBottom)
+
+        final override fun onHeaderUpdated(lm: HeaderLayoutManager, header: HeaderLayout, headerBottom: Int) =
+                transform(lm, header, headerBottom)
     }
 
     val mToolBar: Toolbar
@@ -53,7 +59,7 @@ class NavigationToolBarLayout : CoordinatorLayout {
                     imageView.setImageResource(imgResID)
                     addHeaderChangeListener(object : HeaderChangeListener {
                         val maxRatio = 0.8f
-                        override fun onHeaderChanged(headerBottom: Int) {
+                        override fun onHeaderChanged(lm: HeaderLayoutManager, header: HeaderLayout, headerBottom: Int) {
                             val ratio = 1f - headerBottom / (mHeaderLayout.height + 1f)
                             val alpha = (maxRatio - min(maxRatio, ratio)) / maxRatio
                             imageView.alpha = alpha

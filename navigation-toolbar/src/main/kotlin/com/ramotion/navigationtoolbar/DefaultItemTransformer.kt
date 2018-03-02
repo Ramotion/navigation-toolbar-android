@@ -11,8 +11,6 @@ open class DefaultItemTransformer
     private val mVPoints: MutableList<PointF> = mutableListOf()
 
     private var mNavigationToolBarLayout: NavigationToolBarLayout? = null
-    private var mLayoutManager: HeaderLayoutManager? = null
-    private var mHeaderLayout: HeaderLayout? = null
 
     private var mRatioWork = 0f
     private var mRatioTopHalf = 0f
@@ -27,9 +25,7 @@ open class DefaultItemTransformer
     protected var mCurrentRatioBottomHalf = -1f; private set
 
     override fun attach(ntl: NavigationToolBarLayout) {
-        mHeaderLayout = ntl.mHeaderLayout
-
-        mLayoutManager = ntl.mHeaderLayoutManager.also { lm ->
+        ntl.mHeaderLayoutManager.also { lm ->
             mRatioWork = lm.mWorkHeight / lm.mScreenHeight.toFloat()
             mRatioTopHalf = lm.mToolBarHeight / lm.mScreenHeight.toFloat()
             mRatioBottomHalf = lm.mScreenHalf / lm.mScreenHeight.toFloat()
@@ -43,23 +39,18 @@ open class DefaultItemTransformer
     override fun detach() {
         mNavigationToolBarLayout?.removeItemClickListener(this)
         mNavigationToolBarLayout = null
-        mLayoutManager = null
-        mHeaderLayout = null
     }
 
-    override fun transform(headerBottom: Int) {
-        val lm = mLayoutManager ?: return
-        val header = mHeaderLayout ?: return
-
+    override fun transform(lm: HeaderLayoutManager, header: HeaderLayout, headerBottom: Int) {
         val prevRatio = mCurrentRatio
         val prevRatioTopHalf = mCurrentRatioTopHalf
         val prevRatioBottomHalf = mCurrentRatioBottomHalf
 
         val prevItemCount = mPrevItemCount ?: 0
-        val curItemCount = mHeaderLayout?.childCount ?: 0
+        val curItemCount = header.childCount
         mPrevItemCount = curItemCount
 
-        updateRatios(headerBottom)
+        updateRatios(lm, headerBottom)
 
         val nothingChanged = prevRatio == mCurrentRatio && prevItemCount == curItemCount
         if (nothingChanged) {
@@ -73,7 +64,7 @@ open class DefaultItemTransformer
                 && prevRatioTopHalf < mCurrentRatioTopHalf && prevRatioTopHalf != -1f
         if (expandedToTopOfBottomHalf) {
             transformTopHalf(lm, header, headerBottom)
-            updatePoints(false)
+            updatePoints(lm, header, false)
             transformBottomHalf(lm, header)
             transformed = true
         } else {
@@ -91,8 +82,8 @@ open class DefaultItemTransformer
             if (collapsedToTopOfBottomHalf) {
                 transformBottomHalf(lm, header)
                 transformTopHalf(lm, header, headerBottom)
-                mHeaderLayout?.let { mLayoutManager?.fill(it) }
-                updatePoints(false)
+                lm.fill(header)
+                updatePoints(lm, header, false)
                 transformed = true
         } else {
             val collapsedToTopOfTopHalf = mCurrentRatioTopHalf == 0f
@@ -115,23 +106,20 @@ open class DefaultItemTransformer
     }
 
     override fun onItemClicked(viewHolder: HeaderLayout.ViewHolder) {
-        mClickedItemIndex = mHeaderLayout?.indexOfChild(viewHolder.view)
-        updatePoints(true)
+        mNavigationToolBarLayout?.also { it ->
+            mClickedItemIndex = it.mHeaderLayout.indexOfChild(viewHolder.view)
+            updatePoints(it.mHeaderLayoutManager, it.mHeaderLayout, true)
+        }
     }
 
-    private fun updateRatios(headerBottom: Int) {
-        val lm = mLayoutManager ?: return
-
+    private fun updateRatios(lm: HeaderLayoutManager, headerBottom: Int) {
         mCurrentRatio = max(0f, headerBottom / lm.mScreenHeight.toFloat())
         mCurrentRatioWork = max(0f, (headerBottom - lm.mToolBarHeight) / lm.mWorkHeight.toFloat())
         mCurrentRatioTopHalf = max(0f, 1 - (mRatioBottomHalf - min(max(mCurrentRatio, mRatioTopHalf), mRatioBottomHalf)) / (mRatioBottomHalf - mRatioTopHalf))
         mCurrentRatioBottomHalf = max(0f, (mCurrentRatio - mRatioBottomHalf) / mRatioBottomHalf)
     }
 
-    private fun updatePoints(up: Boolean) {
-        val lm = mLayoutManager ?: return
-        val header = mHeaderLayout ?: return
-
+    private fun updatePoints(lm: HeaderLayoutManager, header: HeaderLayout, up: Boolean) {
         val index = if (up) {
             mClickedItemIndex ?: throw RuntimeException("No vertical (clicked) item index")
         } else {
