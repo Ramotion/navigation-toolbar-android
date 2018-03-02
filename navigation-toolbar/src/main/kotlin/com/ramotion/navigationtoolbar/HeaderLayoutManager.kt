@@ -65,9 +65,8 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     }
 
     // TODO: init in constructor from attr
+    private val mTabOnScreenCount = TAB_ON_SCREEN_COUNT // TODO: check 0 on init from attr
     private val mTabOffsetCount = TAB_OFF_SCREEN_COUNT
-    private val mTabOnScreenCount = TAB_ON_SCREEN_COUNT
-    private val mTabCount = mTabOnScreenCount + mTabOffsetCount * 2
     private val mScrollUpAnimationDuration = SCROLL_UP_ANIMATION_DURATION
 
     val mScreenWidth = context.resources.displayMetrics.widthPixels
@@ -87,7 +86,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     val mVerticalTabWidth = (mScreenWidth * VERTICAL_TAB_WIDTH_RATIO).toInt()
 
     private val mViewCache = SparseArray<View?>()
-    private val mCenterIndex = mTabOnScreenCount % 2 + mTabOffsetCount
+    private val mCenterIndex = mTabOnScreenCount / 2
     private val mViewFlinger = ViewFlinger(context)
 
     internal val mAppBarBehavior = AppBarBehavior()
@@ -634,7 +633,8 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     }
 
     private fun fillRight(header: HeaderLayout, anchorPos: Int) {
-        if (header.mAdapter?.run { getItemCount() == 0 } != false) {
+        val count = header.mAdapter?.getItemCount() ?: 0
+        if (count == 0) {
             return
         }
 
@@ -645,7 +645,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
 
         val top = mAppBar?.let { header.height - it.bottom } ?: mHPoint.y.toInt()
         val bottom = mAppBar?.bottom ?: mHorizontalTabHeight
-        val maxPos = Math.min(header.mAdapter?.run { getItemCount() } ?: 0, startPos + mCenterIndex + 1 + mTabOffsetCount)
+        val maxPos = Math.min(count, startPos + mCenterIndex + 1 + mTabOffsetCount)
 
         var pos = startPos
         var left  = if (header.childCount > 0) {
@@ -680,7 +680,8 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     }
 
     private fun fillBottom(header: HeaderLayout, anchorPos: Int) {
-        if (header.mAdapter?.run { getItemCount() == 0 } != false) {
+        val count = header.mAdapter?.getItemCount() ?: 0
+        if (count == 0) {
             return
         }
 
@@ -689,7 +690,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
             else -> anchorPos
         }
 
-        val maxPos = Math.min(header.mAdapter?.run { getItemCount() } ?: 0, startPos + mCenterIndex + 1 + mTabOffsetCount)
+        val maxPos = Math.min(count, startPos + mCenterIndex + 1 + mTabOffsetCount)
         val left = mVPoint.x.toInt()
         var pos = startPos
 
