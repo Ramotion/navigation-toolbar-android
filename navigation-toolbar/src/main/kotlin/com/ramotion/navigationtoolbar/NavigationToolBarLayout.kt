@@ -43,7 +43,8 @@ class NavigationToolBarLayout : CoordinatorLayout {
 
         mToolBar = findViewById(R.id.com_ramotion_toolbar)
         mHeaderLayout = findViewById(R.id.com_ramotion_header_layout)
-        mHeaderLayoutManager = (mHeaderLayout.layoutParams as CoordinatorLayout.LayoutParams).behavior as HeaderLayoutManager
+        mHeaderLayoutManager = HeaderLayoutManager(context, attrs)
+        (mHeaderLayout.layoutParams as CoordinatorLayout.LayoutParams).behavior = mHeaderLayoutManager
 
         mAppBarLayout = findViewById(R.id.com_ramotion_app_bar)
         mAppBarLayout.outlineProvider = null

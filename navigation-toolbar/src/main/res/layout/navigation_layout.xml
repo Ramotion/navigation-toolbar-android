@@ -41,8 +41,7 @@
         android:layout_height="match_parent"
         android:fitsSystemWindows="true"
         android:clipToPadding="false"
-        android:clipChildren="false"
-        app:layout_behavior="com.ramotion.navigationtoolbar.HeaderLayoutManager"/>
+        android:clipChildren="false"/>
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/com_ramotion_toolbar"
