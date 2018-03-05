@@ -49,7 +49,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         const val TAB_OFF_SCREEN_COUNT = 1
         const val VERTICAL_TAB_WIDTH_RATIO = 4f / 5f
         const val SCROLL_STOP_CHECK_DELAY = 100L
-        const val SCROLL_UP_ANIMATION_DURATION = 500L
+        const val COLLAPSING_BY_SELECT_DURATION = 500
         const val SNAP_ANIMATION_DURATION = 300L
         const val MAX_SCROLL_DURATION = 600L
     }
@@ -75,14 +75,14 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     }
 
     private val mTabOffsetCount = TAB_OFF_SCREEN_COUNT
-    private val mScrollUpAnimationDuration = SCROLL_UP_ANIMATION_DURATION
     private val mViewCache = SparseArray<View?>()
     private val mViewFlinger = ViewFlinger(context)
     private val mVerticalGravity: VerticalGravity
+    private val mCollapsingBySelectDuration: Int
     private val mTabOnScreenCount: Int
     private val mCenterIndex: Int
     private val mTopSnapDistance: Int
-    private val mBottomSnapDistnace: Int
+    private val mBottomSnapDistance: Int
 
     val mScreenWidth = context.resources.displayMetrics.widthPixels
     val mScreenHeight = context.resources.displayMetrics.heightPixels
@@ -218,11 +218,17 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         var itemCount = TAB_ON_SCREEN_COUNT
         var verticalItemWidth = mScreenWidth * VERTICAL_TAB_WIDTH_RATIO
         var gravity = VerticalGravity.RIGHT
+        var collapsingDuration = COLLAPSING_BY_SELECT_DURATION
+
         attrs?.also {
             val a = context.theme.obtainStyledAttributes(attrs, R.styleable.NavigationToolBarr, 0, 0)
             try {
-                val ic = a.getInteger(R.styleable.NavigationToolBarr_headerItemsCount, -1)
-                itemCount = if (ic <= 0) TAB_ON_SCREEN_COUNT else ic
+                itemCount = a.getInteger(R.styleable.NavigationToolBarr_headerItemsCount, -1)
+                        .let { if (it <= 0) TAB_ON_SCREEN_COUNT else it }
+
+                gravity = VerticalGravity.fromInt(a.getInteger(R.styleable.NavigationToolBarr_headerVerticalGravity, VerticalGravity.RIGHT.value))
+
+                collapsingDuration = a.getInteger(R.styleable.NavigationToolBarr_headerCollapsingBySelectDuration, COLLAPSING_BY_SELECT_DURATION)
 
                 if (a.hasValue(R.styleable.NavigationToolBarr_headerVerticalItemWidth)) {
                     verticalItemWidth = if (a.getType(R.styleable.NavigationToolBarr_headerVerticalItemWidth) == TypedValue.TYPE_DIMENSION) {
@@ -231,8 +237,6 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
                         mScreenWidth.toFloat()
                     }
                 }
-
-                gravity = VerticalGravity.fromInt(a.getInteger(R.styleable.NavigationToolBarr_headerVerticalGravity, VerticalGravity.RIGHT.value))
             } finally {
                 a.recycle()
             }
@@ -243,6 +247,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         mVerticalTabHeight = (mScreenHeight * (1f / mTabOnScreenCount)).toInt()
         mVerticalTabWidth = verticalItemWidth.toInt()
         mVerticalGravity = gravity
+        mCollapsingBySelectDuration = collapsingDuration
 
         val resourceId = context.resources.getIdentifier("status_bar_height", "dimen", "android")
         val statusBarHeight = if (resourceId > 0) {
@@ -261,7 +266,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         mWorkHeight = mScreenHeight - mTopBorder
 
         mTopSnapDistance = (mTopBorder + (mScreenHalf - mTopBorder) / 2).toInt()
-        mBottomSnapDistnace = (mScreenHalf + mScreenHalf / 2).toInt()
+        mBottomSnapDistance = (mScreenHalf + mScreenHalf / 2).toInt()
     }
 
     override fun layoutDependsOn(parent: CoordinatorLayout, child: HeaderLayout, dependency: View): Boolean {
@@ -805,7 +810,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
             in mTopBorder..(mTopSnapDistance - 1) -> {
                 appBar.setExpanded(false, true)
             }
-            in mTopSnapDistance..(mBottomSnapDistnace - 1) -> {
+            in mTopSnapDistance..(mBottomSnapDistance - 1) -> {
                 smoothOffset(mScreenHalf.toInt(), SNAP_ANIMATION_DURATION)
             }
             else -> {
@@ -817,7 +822,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         header.mIsVerticalScrollEnabled = vScrollEnable
     }
 
-    private fun smoothOffset(offset: Int, duration: Long = mScrollUpAnimationDuration) {
+    private fun smoothOffset(offset: Int, duration: Long = mCollapsingBySelectDuration.toLong()) {
         val header = mHeaderLayout ?: return
 
         mOffsetAnimator?.cancel()
