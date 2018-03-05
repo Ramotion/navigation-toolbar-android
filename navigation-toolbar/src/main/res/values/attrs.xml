@@ -7,5 +7,10 @@
             <enum name="fill_parent" value="-1"/>
             <enum name="match_parent" value="-1"/>
         </attr>
+        <attr name="headerVerticalGravity" format="enum">
+            <enum name="left" value="-1"/>
+            <enum name="center" value="-2"/>
+            <enum name="right" value="-3"/>
+        </attr>
     </declare-styleable>
 </resources>

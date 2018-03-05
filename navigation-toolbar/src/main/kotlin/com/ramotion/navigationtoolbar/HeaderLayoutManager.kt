@@ -33,6 +33,17 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         IDLE, DRAGGING, FLING
     }
 
+    enum class VerticalGravity(val value: Int) {
+        LEFT(-1),
+        CENTER(-2),
+        RIGHT(-3);
+
+        companion object {
+            private val map = VerticalGravity.values().associateBy(VerticalGravity::value);
+            fun fromInt(type: Int, defaultValue: VerticalGravity = RIGHT) = map.getOrElse(type, {defaultValue})
+        }
+    }
+
     internal companion object {
         const val TAB_ON_SCREEN_COUNT = 5
         const val TAB_OFF_SCREEN_COUNT = 1
@@ -67,6 +78,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     private val mTabOnScreenCount: Int
     private val mTabOffsetCount = TAB_OFF_SCREEN_COUNT
     private val mScrollUpAnimationDuration = SCROLL_UP_ANIMATION_DURATION
+    private val mVerticalGravity: VerticalGravity
 
     val mScreenWidth = context.resources.displayMetrics.widthPixels
     val mScreenHeight = context.resources.displayMetrics.heightPixels
@@ -210,6 +222,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
 
         var itemCount = TAB_ON_SCREEN_COUNT
         var verticalItemWidth = mScreenWidth * VERTICAL_TAB_WIDTH_RATIO
+        var gravity = VerticalGravity.RIGHT
         attrs?.also {
             val a = context.theme.obtainStyledAttributes(attrs, R.styleable.NavigationToolBarr, 0, 0)
             try {
@@ -223,6 +236,8 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
                         mScreenWidth.toFloat()
                     }
                 }
+
+                gravity = VerticalGravity.fromInt(a.getInteger(R.styleable.NavigationToolBarr_headerVerticalGravity, VerticalGravity.RIGHT.value))
             } finally {
                 a.recycle()
             }
@@ -232,6 +247,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         mCenterIndex = mTabOnScreenCount / 2
         mVerticalTabHeight = (mScreenHeight * (1f / mTabOnScreenCount)).toInt()
         mVerticalTabWidth = verticalItemWidth.toInt()
+        mVerticalGravity = gravity
 
         val resourceId = context.resources.getIdentifier("status_bar_height", "dimen", "android")
         mStatusBarHeight = if (resourceId > 0) {
@@ -618,8 +634,12 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     private fun initPoints(header: HeaderLayout) {
         val hx = 0f
         val hy = mScreenHalf // - mStatusBarHeight
-        val vx = (header.width - mVerticalTabWidth).toFloat()
         val vy = ((1f * mScreenHeight) / mTabOnScreenCount) * mCenterIndex
+        val vx = when (mVerticalGravity) {
+            HeaderLayoutManager.VerticalGravity.LEFT -> 0f
+            HeaderLayoutManager.VerticalGravity.CENTER -> (header.width - mVerticalTabWidth) / 2f
+            HeaderLayoutManager.VerticalGravity.RIGHT -> (header.width - mVerticalTabWidth).toFloat()
+        }
 
         mHPoint = PointF(hx, hy)
         mVPoint = PointF(vx, vy)
