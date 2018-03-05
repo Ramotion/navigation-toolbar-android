@@ -74,31 +74,26 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         fun onScrollStateChanged(state: HeaderLayoutManager.ScrollState)
     }
 
-    // TODO: init in constructor from attr
-    private val mTabOnScreenCount: Int
     private val mTabOffsetCount = TAB_OFF_SCREEN_COUNT
     private val mScrollUpAnimationDuration = SCROLL_UP_ANIMATION_DURATION
+    private val mViewCache = SparseArray<View?>()
+    private val mViewFlinger = ViewFlinger(context)
     private val mVerticalGravity: VerticalGravity
+    private val mTabOnScreenCount: Int
+    private val mCenterIndex: Int
+    private val mTopSnapDistance: Int
+    private val mBottomSnapDistnace: Int
 
     val mScreenWidth = context.resources.displayMetrics.widthPixels
     val mScreenHeight = context.resources.displayMetrics.heightPixels
     val mScreenHalf = mScreenHeight / 2f
-    val mStatusBarHeight: Int
-    val mToolBarHeight: Int
-    val mWorkHeight: Int
-
-    val mTopSnapDistance: Int
-    val mBottomSnapDistnace: Int
-
-    // TODO: add getters
     val mHorizontalTabWidth = mScreenWidth
     val mHorizontalTabHeight = mScreenHalf.toInt()
-    val mVerticalTabWidth: Int // TODO: add align left | right
-    val mVerticalTabHeight: Int
 
-    private val mViewCache = SparseArray<View?>()
-    private val mCenterIndex: Int
-    private val mViewFlinger = ViewFlinger(context)
+    val mTopBorder: Int
+    val mWorkHeight: Int
+    val mVerticalTabWidth: Int
+    val mVerticalTabHeight: Int
 
     internal val mAppBarBehavior = AppBarBehavior()
     internal val mHeaderScrollListener = HeaderScrollListener()
@@ -250,7 +245,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         mVerticalGravity = gravity
 
         val resourceId = context.resources.getIdentifier("status_bar_height", "dimen", "android")
-        mStatusBarHeight = if (resourceId > 0) {
+        val statusBarHeight = if (resourceId > 0) {
             context.resources.getDimensionPixelSize(resourceId)
         } else 0
 
@@ -262,10 +257,10 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
             styledAttributes.recycle()
         }
 
-        mToolBarHeight = actionBarSize + mStatusBarHeight
-        mWorkHeight = mScreenHeight - mToolBarHeight
+        mTopBorder = actionBarSize + statusBarHeight
+        mWorkHeight = mScreenHeight - mTopBorder
 
-        mTopSnapDistance = (mToolBarHeight + (mScreenHalf - mToolBarHeight) / 2).toInt()
+        mTopSnapDistance = (mTopBorder + (mScreenHalf - mTopBorder) / 2).toInt()
         mBottomSnapDistnace = (mScreenHalf + mScreenHalf / 2).toInt()
     }
 
@@ -803,11 +798,11 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
                 hScrollEnable = true
                 mCanDrag = false
             }
-            mToolBarHeight -> {
+            mTopBorder -> {
                 hScrollEnable = true
                 mCanDrag = true
             }
-            in mToolBarHeight..(mTopSnapDistance - 1) -> {
+            in mTopBorder..(mTopSnapDistance - 1) -> {
                 appBar.setExpanded(false, true)
             }
             in mTopSnapDistance..(mBottomSnapDistnace - 1) -> {
