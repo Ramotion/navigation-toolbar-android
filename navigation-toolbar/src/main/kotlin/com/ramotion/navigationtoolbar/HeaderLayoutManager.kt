@@ -35,7 +35,6 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     internal companion object {
         const val TAB_ON_SCREEN_COUNT = 5
         const val TAB_OFF_SCREEN_COUNT = 1
-        const val VERTICAL_TAB_HEIGHT_RATIO = 1f / TAB_ON_SCREEN_COUNT
         const val VERTICAL_TAB_WIDTH_RATIO = 4f / 5f
         const val SCROLL_STOP_CHECK_DELAY = 100L
         const val SCROLL_UP_ANIMATION_DURATION = 500L
@@ -65,7 +64,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     }
 
     // TODO: init in constructor from attr
-    private val mTabOnScreenCount = TAB_ON_SCREEN_COUNT // TODO: check 0 on init from attr
+    private val mTabOnScreenCount: Int
     private val mTabOffsetCount = TAB_OFF_SCREEN_COUNT
     private val mScrollUpAnimationDuration = SCROLL_UP_ANIMATION_DURATION
 
@@ -82,11 +81,11 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     // TODO: add getters
     val mHorizontalTabWidth = mScreenWidth
     val mHorizontalTabHeight = mScreenHalf.toInt()
-    val mVerticalTabHeight = (mScreenHeight * VERTICAL_TAB_HEIGHT_RATIO).toInt()
-    val mVerticalTabWidth = (mScreenWidth * VERTICAL_TAB_WIDTH_RATIO).toInt()
+    val mVerticalTabWidth = (mScreenWidth * VERTICAL_TAB_WIDTH_RATIO).toInt() // TODO: add align left | right
+    val mVerticalTabHeight: Int
 
     private val mViewCache = SparseArray<View?>()
-    private val mCenterIndex = mTabOnScreenCount / 2
+    private val mCenterIndex: Int
     private val mViewFlinger = ViewFlinger(context)
 
     internal val mAppBarBehavior = AppBarBehavior()
@@ -209,14 +208,33 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
             true
         }
 
+        var itemCount = TAB_ON_SCREEN_COUNT
+        attrs?.also {
+            val a = context.theme.obtainStyledAttributes(attrs, R.styleable.NavigationToolBarr, 0, 0)
+            try {
+                val ic = a.getInteger(R.styleable.NavigationToolBarr_headerItemsCount, -1)
+                itemCount = if (ic <= 0) TAB_ON_SCREEN_COUNT else ic
+            } finally {
+                a.recycle()
+            }
+        }
+
+        mTabOnScreenCount = itemCount
+        mVerticalTabHeight = (mScreenHeight * (1f / mTabOnScreenCount)).toInt()
+        mCenterIndex = mTabOnScreenCount / 2
+
         val resourceId = context.resources.getIdentifier("status_bar_height", "dimen", "android")
         mStatusBarHeight = if (resourceId > 0) {
             context.resources.getDimensionPixelSize(resourceId)
         } else 0
 
+        val actionBarSize: Int
         val styledAttributes = context.theme.obtainStyledAttributes(intArrayOf(android.R.attr.actionBarSize))
-        val actionBarSize = styledAttributes.getDimension(0, 0f).toInt()
-        styledAttributes.recycle()
+        try {
+            actionBarSize = styledAttributes.getDimension(0, 0f).toInt()
+        } finally {
+            styledAttributes.recycle()
+        }
 
         mToolBarHeight = actionBarSize + mStatusBarHeight
         mWorkHeight = mScreenHeight - mToolBarHeight

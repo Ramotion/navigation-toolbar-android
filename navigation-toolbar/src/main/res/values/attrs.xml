@@ -2,5 +2,6 @@
 <resources>
     <declare-styleable name="NavigationToolBarr">
         <attr name="headerBackgroundSrc" format="reference"/>
+        <attr name="headerItemsCount" format="integer"/>
     </declare-styleable>
 </resources>
