@@ -56,7 +56,9 @@ class HeaderLayout : FrameLayout {
                 rect.offset(location[0], location[1])
                 val contains = rect.contains(e.rawX.toInt(), e.rawY.toInt())
                 if (contains) {
-                    return listener.onItemClick(this@HeaderLayout, getChildViewHolder(child)!!)
+                    return getChildViewHolder(child)
+                            ?.let { listener.onItemClick(this@HeaderLayout, it) }
+                            ?: throw RuntimeException("View holder not found")
                 }
             }
             return false

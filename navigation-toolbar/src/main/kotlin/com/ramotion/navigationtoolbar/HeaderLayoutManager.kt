@@ -453,7 +453,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         }
 
         for (i in 0 until mViewCache.size()) {
-            header.detachView(mViewCache.valueAt(i)!!)
+            mViewCache.valueAt(i)?.also { header.detachView(it) }
         }
 
         when (orientation) {
@@ -468,7 +468,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         }
 
         for (i in 0 until mViewCache.size()) {
-            header.mRecycler.recycleView(mViewCache.valueAt(i)!!)
+            mViewCache.valueAt(i)?.also { header.mRecycler.recycleView(it) }
         }
 
         val headerBottom = (header.y + header.height).toInt()
@@ -622,13 +622,15 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     }
 
     private fun getStartX(view: View): Int {
-        val pos = HeaderLayout.getChildViewHolder(view)!!.mPosition
-        return view.left - pos * mHorizontalTabWidth
+        return HeaderLayout.getChildViewHolder(view)
+                ?.let { view.left - it.mPosition * mHorizontalTabWidth }
+                ?: throw RuntimeException("View holder not found")
     }
 
     private fun getStartY(view: View): Int {
-        val pos = HeaderLayout.getChildViewHolder(view)!!.mPosition
-        return view.top - pos * mVerticalTabHeight
+        return HeaderLayout.getChildViewHolder(view)
+                ?.let { view.top - it.mPosition * mVerticalTabHeight }
+                ?: throw RuntimeException("View holder not found")
     }
 
     private fun initPoints(header: HeaderLayout) {
@@ -650,12 +652,13 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     private fun getOrientation(getRatio: () -> Float, force: Boolean = false): Orientation {
         return if (force) {
             val ratio = getRatio()
-            mCurOrientation = when {
+            when {
                 ratio <= 0.5f -> Orientation.HORIZONTAL
                 ratio < 1 -> Orientation.TRANSITIONAL
                 else -> Orientation.VERTICAL
+            }.also {
+                mCurOrientation = it
             }
-            mCurOrientation!!
         } else {
             mCurOrientation ?: getOrientation(getRatio, true)
         }

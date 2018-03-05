@@ -43,7 +43,7 @@ class HeaderItemTransformer(
         mPrevVScrollOffset = vScrollOffset
         mPrevHeaderBottom = headerBottom
 
-        val elevation = mElevation ?: run { mElevation = child0.elevation; mElevation!! }
+        val elevation = mElevation ?: run { child0.elevation.also { mElevation = it }}
 
         if (mCurrentRatioTopHalf in 0f..1f && mCurrentRatioBottomHalf == 0f) {
             var curZ = childCount / 2f + elevation
