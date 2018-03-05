@@ -12,6 +12,7 @@ import android.support.design.widget.CoordinatorLayout
 import android.support.v4.view.ViewCompat
 import android.util.AttributeSet
 import android.util.SparseArray
+import android.util.TypedValue
 import android.view.View
 import android.widget.OverScroller
 import kotlin.math.abs
@@ -40,7 +41,6 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         const val SCROLL_UP_ANIMATION_DURATION = 500L
         const val SNAP_ANIMATION_DURATION = 300L
         const val MAX_SCROLL_DURATION = 600L
-
     }
 
     interface HeaderChangeListener {
@@ -81,7 +81,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     // TODO: add getters
     val mHorizontalTabWidth = mScreenWidth
     val mHorizontalTabHeight = mScreenHalf.toInt()
-    val mVerticalTabWidth = (mScreenWidth * VERTICAL_TAB_WIDTH_RATIO).toInt() // TODO: add align left | right
+    val mVerticalTabWidth: Int // TODO: add align left | right
     val mVerticalTabHeight: Int
 
     private val mViewCache = SparseArray<View?>()
@@ -209,19 +209,29 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         }
 
         var itemCount = TAB_ON_SCREEN_COUNT
+        var verticalItemWidth = mScreenWidth * VERTICAL_TAB_WIDTH_RATIO
         attrs?.also {
             val a = context.theme.obtainStyledAttributes(attrs, R.styleable.NavigationToolBarr, 0, 0)
             try {
                 val ic = a.getInteger(R.styleable.NavigationToolBarr_headerItemsCount, -1)
                 itemCount = if (ic <= 0) TAB_ON_SCREEN_COUNT else ic
+
+                if (a.hasValue(R.styleable.NavigationToolBarr_headerVerticalItemWidth)) {
+                    verticalItemWidth = if (a.getType(R.styleable.NavigationToolBarr_headerVerticalItemWidth) == TypedValue.TYPE_DIMENSION) {
+                        a.getDimension(R.styleable.NavigationToolBarr_headerVerticalItemWidth, verticalItemWidth)
+                    } else {
+                        mScreenWidth.toFloat()
+                    }
+                }
             } finally {
                 a.recycle()
             }
         }
 
         mTabOnScreenCount = itemCount
-        mVerticalTabHeight = (mScreenHeight * (1f / mTabOnScreenCount)).toInt()
         mCenterIndex = mTabOnScreenCount / 2
+        mVerticalTabHeight = (mScreenHeight * (1f / mTabOnScreenCount)).toInt()
+        mVerticalTabWidth = verticalItemWidth.toInt()
 
         val resourceId = context.resources.getIdentifier("status_bar_height", "dimen", "android")
         mStatusBarHeight = if (resourceId > 0) {
