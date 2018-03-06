@@ -489,11 +489,15 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     }
 
     private fun getHorizontalAnchorPos(header: HeaderLayout): Int {
-        return getHorizontalAnchorView(header)?.let { header.getAdapterPosition(it) } ?: HeaderLayout.INVALID_POSITION
+        return getHorizontalAnchorView(header)
+                ?.let { header.getAdapterPosition(it) }
+                ?: HeaderLayout.INVALID_POSITION
     }
 
     private fun getVerticalAnchorPos(header: HeaderLayout): Int {
-        return getVerticalAnchorView(header)?.let { header.getAdapterPosition(it) } ?: HeaderLayout.INVALID_POSITION
+        return getVerticalAnchorView(header)
+                ?.let { header.getAdapterPosition(it) }
+                ?: HeaderLayout.INVALID_POSITION
     }
 
     private fun onHeaderItemClick(header: HeaderLayout, viewHolder: HeaderLayout.ViewHolder): Boolean {

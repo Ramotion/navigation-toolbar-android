@@ -123,7 +123,8 @@ open class DefaultItemTransformer
         val index = if (up) {
             clickedItemIndex ?: throw RuntimeException("No vertical (clicked) item index")
         } else {
-            lm.getHorizontalAnchorView(header)?.let { header.indexOfChild(it) }
+            lm.getHorizontalAnchorView(header)
+                    ?.let { header.indexOfChild(it) }
                     ?: throw RuntimeException("No horizontal item index")
         }
 

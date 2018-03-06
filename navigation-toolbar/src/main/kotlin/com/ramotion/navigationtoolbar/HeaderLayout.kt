@@ -65,7 +65,9 @@ class HeaderLayout : FrameLayout {
         }
 
         override fun onDown(e: MotionEvent?): Boolean {
-            return scrollListener?.onHeaderDown(this@HeaderLayout) ?: false
+            return scrollListener
+                    ?.onHeaderDown(this@HeaderLayout)
+                    ?: false
         }
 
         override fun onScroll(e1: MotionEvent?, e2: MotionEvent?, distanceX: Float, distanceY: Float): Boolean {
@@ -151,7 +153,8 @@ class HeaderLayout : FrameLayout {
 
         fun getViewForPosition(position: Int): View {
             val adapter = adapter ?: throw RuntimeException("No adapter set")
-            val holder = viewCache.firstOrNull()?.let { viewCache.remove(it); getChildViewHolder(it) }
+            val holder = viewCache.firstOrNull()
+                    ?.let { viewCache.remove(it); getChildViewHolder(it) }
                     ?: adapter.createViewHolder(this@HeaderLayout)
             bindViewToPosition(holder, position)
             return holder.view
