@@ -18,7 +18,7 @@ class HeaderLayout : FrameLayout {
     companion object {
         const val INVALID_POSITION = -1
 
-        fun getChildViewHolder(child: View): ViewHolder? = (child.layoutParams as LayoutParams).mViewHolder
+        fun getChildViewHolder(child: View): ViewHolder? = (child.layoutParams as LayoutParams).viewHolder
     }
 
     internal interface ScrollListener {
@@ -31,20 +31,20 @@ class HeaderLayout : FrameLayout {
         fun onHeaderVerticalFling(header: HeaderLayout, velocity: Float): Boolean
     }
 
-    private val mTouchGestureDetector: GestureDetectorCompat
+    private val gestureDetector: GestureDetectorCompat
 
-    internal val mRecycler = Recycler()
+    internal val recycler = Recycler()
 
-    internal var mIsHorizontalScrollEnabled = false
-    internal var mIsVerticalScrollEnabled = false
+    internal var isHorizontalScrollEnabled = false
+    internal var isVerticalScrollEnabled = false
 
-    internal var mScrollListener: ScrollListener? = null
+    internal var scrollListener: ScrollListener? = null
 
-    var mAdapter: Adapter<ViewHolder>? = null; private set
+    var adapter: Adapter<ViewHolder>? = null; private set
 
     private inner class TouchGestureListener : GestureDetector.SimpleOnGestureListener() {
         override fun onSingleTapUp(e: MotionEvent): Boolean {
-            val listener = mScrollListener ?: return false
+            val listener = scrollListener ?: return false
 
             val rect = Rect()
             val location = IntArray(2)
@@ -65,24 +65,24 @@ class HeaderLayout : FrameLayout {
         }
 
         override fun onDown(e: MotionEvent?): Boolean {
-            return mScrollListener?.onHeaderDown(this@HeaderLayout) ?: false
+            return scrollListener?.onHeaderDown(this@HeaderLayout) ?: false
         }
 
         override fun onScroll(e1: MotionEvent?, e2: MotionEvent?, distanceX: Float, distanceY: Float): Boolean {
-            return mScrollListener?.run {
+            return scrollListener?.run {
                 when {
-                    mIsHorizontalScrollEnabled -> onHeaderHorizontalScroll(this@HeaderLayout, distanceX)
-                    mIsVerticalScrollEnabled -> onHeaderVerticalScroll(this@HeaderLayout, distanceY)
+                    isHorizontalScrollEnabled -> onHeaderHorizontalScroll(this@HeaderLayout, distanceX)
+                    isVerticalScrollEnabled -> onHeaderVerticalScroll(this@HeaderLayout, distanceY)
                     else -> false
                 }
             } ?: false
         }
 
         override fun onFling(e1: MotionEvent?, e2: MotionEvent?, velocityX: Float, velocityY: Float): Boolean {
-            return mScrollListener?.run {
+            return scrollListener?.run {
                 when {
-                    mIsHorizontalScrollEnabled -> onHeaderHorizontalFling(this@HeaderLayout, velocityX)
-                    mIsVerticalScrollEnabled -> onHeaderVerticalFling(this@HeaderLayout, velocityY)
+                    isHorizontalScrollEnabled -> onHeaderHorizontalFling(this@HeaderLayout, velocityX)
+                    isVerticalScrollEnabled -> onHeaderVerticalFling(this@HeaderLayout, velocityY)
                     else -> false
                 }
             } ?: false
@@ -91,14 +91,14 @@ class HeaderLayout : FrameLayout {
 
     open class ViewHolder(val view: View) {
 
-        var mPosition: Int = INVALID_POSITION
+        var position: Int = INVALID_POSITION
             internal set
 
     }
 
     open class LayoutParams : FrameLayout.LayoutParams {
 
-        internal var mViewHolder: ViewHolder? = null
+        internal var viewHolder: ViewHolder? = null
 
         constructor(c: Context, attrs: AttributeSet) : super(c, attrs)
 
@@ -106,11 +106,11 @@ class HeaderLayout : FrameLayout {
 
         constructor(source: ViewGroup.MarginLayoutParams) : super(source)
 
-        constructor(source: ViewGroup.LayoutParams): super(source)
+        constructor(source: ViewGroup.LayoutParams) : super(source)
 
-        constructor(source: LayoutParams): super(source as ViewGroup.LayoutParams)
+        constructor(source: LayoutParams) : super(source as ViewGroup.LayoutParams)
 
-        fun getViewAdapterPosition() = mViewHolder?.mPosition ?: INVALID_POSITION;
+        fun getViewAdapterPosition() = viewHolder?.position ?: INVALID_POSITION
 
     }
 
@@ -127,7 +127,7 @@ class HeaderLayout : FrameLayout {
         fun createViewHolder(parent: ViewGroup): VH = onCreateViewHolder(parent)
 
         fun bindViewHolder(holder: VH, position: Int) {
-            holder.mPosition = position
+            holder.position = position
             onBindViewHolder(holder, position)
 
             val lp = holder.view.layoutParams
@@ -137,7 +137,7 @@ class HeaderLayout : FrameLayout {
                 else -> lp
             }
 
-            hlp.mViewHolder = holder
+            hlp.viewHolder = holder
             holder.view.layoutParams = hlp
         }
 
@@ -147,29 +147,29 @@ class HeaderLayout : FrameLayout {
 
     internal inner class Recycler {
 
-        private val mViewCache = mutableListOf<View>()
+        private val viewCache = mutableListOf<View>()
 
         fun getViewForPosition(position: Int): View {
-            val adapter = mAdapter ?: throw RuntimeException("No adapter set")
-            val holder = mViewCache.firstOrNull()?.let { mViewCache.remove(it); getChildViewHolder(it) }
+            val adapter = adapter ?: throw RuntimeException("No adapter set")
+            val holder = viewCache.firstOrNull()?.let { viewCache.remove(it); getChildViewHolder(it) }
                     ?: adapter.createViewHolder(this@HeaderLayout)
             bindViewToPosition(holder, position)
             return holder.view
         }
 
         fun recycleView(view: View, cache: Boolean = true) {
-            val adapter = mAdapter ?: throw RuntimeException("No adapter set")
+            val adapter = adapter ?: throw RuntimeException("No adapter set")
             val holder = getChildViewHolder(view) ?: throw RuntimeException("No view holder")
             adapter.recycleView(holder)
             this@HeaderLayout.removeView(view)
             if (cache) {
-                holder.mPosition = INVALID_POSITION
-                mViewCache.add(holder.view)
+                holder.position = INVALID_POSITION
+                viewCache.add(holder.view)
             }
         }
 
         private fun bindViewToPosition(holder: ViewHolder, position: Int) {
-            val adapter = mAdapter ?: throw RuntimeException("No adapter set")
+            val adapter = adapter ?: throw RuntimeException("No adapter set")
             adapter.bindViewHolder(holder, position)
         }
 
@@ -178,20 +178,20 @@ class HeaderLayout : FrameLayout {
     constructor(context: Context, attrs: AttributeSet) : this(context, attrs, 0)
 
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
-        mTouchGestureDetector = GestureDetectorCompat(context, TouchGestureListener())
+        gestureDetector = GestureDetectorCompat(context, TouchGestureListener())
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        val res = mTouchGestureDetector.onTouchEvent(event)
+        val res = gestureDetector.onTouchEvent(event)
         if (event.action == MotionEvent.ACTION_UP) {
-            mScrollListener?.onHeaderUp(this)
+            scrollListener?.onHeaderUp(this)
         }
         return res
     }
 
     override fun onDetachedFromWindow() {
         while (childCount > 0) {
-            mRecycler.recycleView(getChildAt(0), false)
+            recycler.recycleView(getChildAt(0), false)
         }
         super.onDetachedFromWindow()
     }
@@ -203,7 +203,7 @@ class HeaderLayout : FrameLayout {
     internal fun attachView(child: View) = attachViewToParent(child, -1, child.layoutParams)
 
     internal fun setAdapter(adapter: Adapter<out ViewHolder>) {
-        mAdapter = adapter as Adapter<ViewHolder> // TODO: fix?
+        this.adapter = adapter as Adapter<ViewHolder> // TODO: fix?
     }
 
 }

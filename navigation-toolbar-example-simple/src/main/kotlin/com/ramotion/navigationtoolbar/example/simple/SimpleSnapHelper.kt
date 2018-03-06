@@ -8,25 +8,25 @@ import java.lang.ref.WeakReference
 
 class SimpleSnapHelper : HeaderLayoutManager.ScrollStateListener {
 
-    private var mToolBarRef: WeakReference<NavigationToolBarLayout>? = null
+    private var toolBarRef: WeakReference<NavigationToolBarLayout>? = null
 
     override fun onScrollStateChanged(state: ScrollState) {
         if (state != IDLE) {
             return
         }
 
-        mToolBarRef?.get()?.also { toolbar ->
+        toolBarRef?.get()?.also { toolbar ->
             toolbar.getAnchorPos()?.also { toolbar.smoothScrollToPosition(it) }
         }
     }
 
     fun attach(toolbar: NavigationToolBarLayout) {
-        mToolBarRef = WeakReference(toolbar)
+        toolBarRef = WeakReference(toolbar)
         toolbar.addScrollStateListener(this)
     }
 
     fun detach(toolbar: NavigationToolBarLayout) {
-        mToolBarRef = null
+        toolBarRef = null
         toolbar.removeScrollStateListener(this)
     }
 

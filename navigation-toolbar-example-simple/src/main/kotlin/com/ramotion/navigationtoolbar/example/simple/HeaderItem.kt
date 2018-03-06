@@ -8,17 +8,17 @@ import com.ramotion.navigationtoolbar.HeaderLayout
 
 class HeaderItem(view: View) : HeaderLayout.ViewHolder(view) {
 
-    private val mBackground = view.findViewById<ImageView>(R.id.background)
+    private val background = view.findViewById<ImageView>(R.id.background)
 
-    internal val mTitle = view.findViewById<TextView>(R.id.title)
+    internal val title = view.findViewById<TextView>(R.id.title)
 
     fun setContent(imgId: Int) {
-        mBackground.setImageResource(imgId)
-        mTitle.text = "Title ${mPosition}"
+        background.setImageResource(imgId)
+        title.text = "Title $position"
     }
 
     fun clearContent() {
-        Log.d("D", "clearContent| position: $mPosition")
+        Log.d("D", "clearContent| position: $position")
     }
 
 }

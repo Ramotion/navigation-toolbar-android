@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 
 
-class ViewPagerAdapter(val size: Int) : PagerAdapter() {
+class ViewPagerAdapter(private val size: Int) : PagerAdapter() {
 
     override fun getCount(): Int = size
 

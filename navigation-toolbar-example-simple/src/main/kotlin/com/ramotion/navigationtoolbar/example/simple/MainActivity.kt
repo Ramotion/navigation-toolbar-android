@@ -13,17 +13,17 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
-    private val mItemCount = 20
-    private val mPictures = intArrayOf(R.drawable.p1, R.drawable.p2, R.drawable.p3, R.drawable.p4, R.drawable.p5).toTypedArray()
+    private val itemCount = 20
+    private val pictures = intArrayOf(R.drawable.p1, R.drawable.p2, R.drawable.p3, R.drawable.p4, R.drawable.p5).toTypedArray()
 
-    private lateinit var mViewPager: ViewPager
-    private lateinit var mHeader: NavigationToolBarLayout
+    private lateinit var viewPager: ViewPager
+    private lateinit var header: NavigationToolBarLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        setSupportActionBar(navigation_toolbar_layout.mToolBar)
+        setSupportActionBar(navigation_toolbar_layout.toolBar)
         supportActionBar?.apply {
             setDisplayShowTitleEnabled(false)
             setDisplayHomeAsUpEnabled(true)
@@ -56,33 +56,33 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initViewPager() {
-        mViewPager = findViewById<ViewPager>(R.id.pager)
-        mViewPager.adapter = ViewPagerAdapter(mItemCount)
-        mViewPager.addOnPageChangeListener(object : ViewPager.SimpleOnPageChangeListener() {
+        viewPager = findViewById(R.id.pager)
+        viewPager.adapter = ViewPagerAdapter(itemCount)
+        viewPager.addOnPageChangeListener(object : ViewPager.SimpleOnPageChangeListener() {
             override fun onPageSelected(position: Int) {
-                mHeader.smoothScrollToPosition(position)
+                header.smoothScrollToPosition(position)
             }
         })
     }
 
     private fun initHeader() {
-        mHeader = findViewById<NavigationToolBarLayout>(R.id.navigation_toolbar_layout)
-        mHeader.setItemTransformer(HeaderItemTransformer(-50, 0.35f))
-        mHeader.setAdapter(HeaderAdapter(mPictures, mItemCount))
+        header = findViewById(R.id.navigation_toolbar_layout)
+        header.setItemTransformer(HeaderItemTransformer(-50, 0.35f))
+        header.setAdapter(HeaderAdapter(pictures, itemCount))
 
-        mHeader.addItemChangeListener(object : HeaderLayoutManager.ItemChangeListener {
+        header.addItemChangeListener(object : HeaderLayoutManager.ItemChangeListener {
             override fun onItemChanged(position: Int) {
-                mViewPager.currentItem = position
+                viewPager.currentItem = position
             }
         })
 
-        mHeader.addItemClickListener(object : HeaderLayoutManager.ItemClickListener {
+        header.addItemClickListener(object : HeaderLayoutManager.ItemClickListener {
             override fun onItemClicked(viewHolder: HeaderLayout.ViewHolder) {
-                mViewPager.currentItem = viewHolder.mPosition
+                viewPager.currentItem = viewHolder.position
             }
         })
 
-        SimpleSnapHelper().attach(mHeader)
+        SimpleSnapHelper().attach(header)
     }
 
 }

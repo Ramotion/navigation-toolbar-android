@@ -7,52 +7,52 @@ import kotlin.math.min
 open class DefaultItemTransformer
     : NavigationToolBarLayout.ItemTransformer(), HeaderLayoutManager.ItemClickListener {
 
-    private val mHPoints: MutableList<PointF> = mutableListOf()
-    private val mVPoints: MutableList<PointF> = mutableListOf()
+    private val hPoints: MutableList<PointF> = mutableListOf()
+    private val vPoints: MutableList<PointF> = mutableListOf()
 
-    private var mNavigationToolBarLayout: NavigationToolBarLayout? = null
+    private var navigationToolBarLayout: NavigationToolBarLayout? = null
 
-    private var mRatioWork = 0f
-    private var mRatioTopHalf = 0f
-    private var mRatioBottomHalf = 0f
+    private var ratioWork = 0f
+    private var ratioTopHalf = 0f
+    private var ratioBottomHalf = 0f
 
-    private var mClickedItemIndex: Int? = null
-    private var mPrevItemCount: Int? = null
+    private var clickedItemIndex: Int? = null
+    private var prevItemCount: Int? = null
 
-    protected var mCurrentRatio = -1f; private set
-    protected var mCurrentRatioWork = -1f; private set
-    protected var mCurrentRatioTopHalf = -1f; private set
-    protected var mCurrentRatioBottomHalf = -1f; private set
+    protected var currentRatio = -1f; private set
+    protected var currentRatioWork = -1f; private set
+    protected var currentRatioTopHalf = -1f; private set
+    protected var currentRatioBottomHalf = -1f; private set
 
     override fun attach(ntl: NavigationToolBarLayout) {
-        ntl.mHeaderLayoutManager.also { lm ->
-            mRatioWork = lm.mWorkHeight / lm.mScreenHeight.toFloat()
-            mRatioTopHalf = lm.mTopBorder / lm.mScreenHeight.toFloat()
-            mRatioBottomHalf = lm.mScreenHalf / lm.mScreenHeight.toFloat()
+        ntl.layoutManager.also { lm ->
+            ratioWork = lm.workHeight / lm.screenHeight.toFloat()
+            ratioTopHalf = lm.topBorder / lm.screenHeight.toFloat()
+            ratioBottomHalf = lm.screenHalf / lm.screenHeight.toFloat()
         }
 
-        mNavigationToolBarLayout = ntl.also {
+        navigationToolBarLayout = ntl.also {
             it.addItemClickListener(this)
         }
     }
 
     override fun detach() {
-        mNavigationToolBarLayout?.removeItemClickListener(this)
-        mNavigationToolBarLayout = null
+        navigationToolBarLayout?.removeItemClickListener(this)
+        navigationToolBarLayout = null
     }
 
     override fun transform(lm: HeaderLayoutManager, header: HeaderLayout, headerBottom: Int) {
-        val prevRatio = mCurrentRatio
-        val prevRatioTopHalf = mCurrentRatioTopHalf
-        val prevRatioBottomHalf = mCurrentRatioBottomHalf
+        val prevRatio = currentRatio
+        val prevRatioTopHalf = currentRatioTopHalf
+        val prevRatioBottomHalf = currentRatioBottomHalf
 
-        val prevItemCount = mPrevItemCount ?: 0
+        val prevItemCount = prevItemCount ?: 0
         val curItemCount = header.childCount
-        mPrevItemCount = curItemCount
+        this.prevItemCount = curItemCount
 
         updateRatios(lm, headerBottom)
 
-        val nothingChanged = prevRatio == mCurrentRatio && prevItemCount == curItemCount
+        val nothingChanged = prevRatio == currentRatio && prevItemCount == curItemCount
         if (nothingChanged) {
             return
         }
@@ -60,8 +60,8 @@ open class DefaultItemTransformer
         var transformed = false
 
         // On scroll from top (top half) to bottom (bottom half)
-        val expandedToTopOfBottomHalf = mCurrentRatioTopHalf == 1f
-                && prevRatioTopHalf < mCurrentRatioTopHalf && prevRatioTopHalf != -1f
+        val expandedToTopOfBottomHalf = currentRatioTopHalf == 1f
+                && prevRatioTopHalf < currentRatioTopHalf && prevRatioTopHalf != -1f
         if (expandedToTopOfBottomHalf) {
             transformTopHalf(lm, header, headerBottom)
             updatePoints(lm, header, false)
@@ -69,16 +69,16 @@ open class DefaultItemTransformer
             transformed = true
         } else {
             // On scroll from top to bottom
-            val expandedToBottomOfBottomHalf = mCurrentRatioBottomHalf == 1f
-                    && prevRatioBottomHalf <= mCurrentRatioBottomHalf
+            val expandedToBottomOfBottomHalf = currentRatioBottomHalf == 1f
+                    && prevRatioBottomHalf <= currentRatioBottomHalf
             if (expandedToBottomOfBottomHalf) {
                 transformBottomHalf(lm, header)
                 clearPoints()
                 transformed = true
         } else {
             // On scroll from bottom to top
-            val collapsedToTopOfBottomHalf = mCurrentRatioBottomHalf == 0f
-                    && prevRatioBottomHalf > mCurrentRatioBottomHalf
+            val collapsedToTopOfBottomHalf = currentRatioBottomHalf == 0f
+                    && prevRatioBottomHalf > currentRatioBottomHalf
             if (collapsedToTopOfBottomHalf) {
                 transformBottomHalf(lm, header)
                 transformTopHalf(lm, header, headerBottom)
@@ -86,8 +86,8 @@ open class DefaultItemTransformer
                 updatePoints(lm, header, false)
                 transformed = true
         } else {
-            val collapsedToTopOfTopHalf = mCurrentRatioTopHalf == 0f
-                    && prevRatioTopHalf > mCurrentRatioTopHalf && prevRatioTopHalf != -1f
+            val collapsedToTopOfTopHalf = currentRatioTopHalf == 0f
+                    && prevRatioTopHalf > currentRatioTopHalf && prevRatioTopHalf != -1f
             if (collapsedToTopOfTopHalf) {
                 transformTopHalf(lm, header, headerBottom)
                 clearPoints()
@@ -96,7 +96,7 @@ open class DefaultItemTransformer
         }}}
 
         if (!transformed) {
-            val isAtBottomHalf = mCurrentRatioBottomHalf > 0f && mCurrentRatioBottomHalf < 1f
+            val isAtBottomHalf = currentRatioBottomHalf > 0f && currentRatioBottomHalf < 1f
             if (isAtBottomHalf) {
                 transformBottomHalf(lm, header)
             } else {
@@ -106,22 +106,22 @@ open class DefaultItemTransformer
     }
 
     override fun onItemClicked(viewHolder: HeaderLayout.ViewHolder) {
-        mNavigationToolBarLayout?.also { it ->
-            mClickedItemIndex = it.mHeaderLayout.indexOfChild(viewHolder.view)
-            updatePoints(it.mHeaderLayoutManager, it.mHeaderLayout, true)
+        navigationToolBarLayout?.also { it ->
+            clickedItemIndex = it.headerLayout.indexOfChild(viewHolder.view)
+            updatePoints(it.layoutManager, it.headerLayout, true)
         }
     }
 
     private fun updateRatios(lm: HeaderLayoutManager, headerBottom: Int) {
-        mCurrentRatio = max(0f, headerBottom / lm.mScreenHeight.toFloat())
-        mCurrentRatioWork = max(0f, (headerBottom - lm.mTopBorder) / lm.mWorkHeight.toFloat())
-        mCurrentRatioTopHalf = max(0f, 1 - (mRatioBottomHalf - min(max(mCurrentRatio, mRatioTopHalf), mRatioBottomHalf)) / (mRatioBottomHalf - mRatioTopHalf))
-        mCurrentRatioBottomHalf = max(0f, (mCurrentRatio - mRatioBottomHalf) / mRatioBottomHalf)
+        currentRatio = max(0f, headerBottom / lm.screenHeight.toFloat())
+        currentRatioWork = max(0f, (headerBottom - lm.topBorder) / lm.workHeight.toFloat())
+        currentRatioTopHalf = max(0f, 1 - (ratioBottomHalf - min(max(currentRatio, ratioTopHalf), ratioBottomHalf)) / (ratioBottomHalf - ratioTopHalf))
+        currentRatioBottomHalf = max(0f, (currentRatio - ratioBottomHalf) / ratioBottomHalf)
     }
 
     private fun updatePoints(lm: HeaderLayoutManager, header: HeaderLayout, up: Boolean) {
         val index = if (up) {
-            mClickedItemIndex ?: throw RuntimeException("No vertical (clicked) item index")
+            clickedItemIndex ?: throw RuntimeException("No vertical (clicked) item index")
         } else {
             lm.getHorizontalAnchorView(header)?.let { header.indexOfChild(it) }
                     ?: throw RuntimeException("No horizontal item index")
@@ -130,27 +130,27 @@ open class DefaultItemTransformer
         clearPoints()
 
         if (up) {
-            val left = -index * lm.mHorizontalTabWidth
+            val left = -index * lm.horizontalTabWidth
             val (x, y) = lm.getPoints().first.run { x to y }
 
             for (i in 0 until header.childCount) {
-                mVPoints.add(header.getChildAt(i).let { PointF(it.x, it.y) })
-                mHPoints.add(PointF(x + left + i * lm.mHorizontalTabWidth, y))
+                vPoints.add(header.getChildAt(i).let { PointF(it.x, it.y) })
+                hPoints.add(PointF(x + left + i * lm.horizontalTabWidth, y))
             }
         } else {
-            val top = -index * lm.mVerticalTabHeight
+            val top = -index * lm.verticalTabHeight
             val (x, y) = lm.getPoints().second.run { x to y }
 
             for (i in 0 until header.childCount) {
-                mHPoints.add(header.getChildAt(i).let { PointF(it.x, it.y) })
-                mVPoints.add(PointF(x, y + top + i * lm.mVerticalTabHeight))
+                hPoints.add(header.getChildAt(i).let { PointF(it.x, it.y) })
+                vPoints.add(PointF(x, y + top + i * lm.verticalTabHeight))
             }
         }
     }
 
     private fun clearPoints() {
-        mHPoints.clear()
-        mVPoints.clear()
+        hPoints.clear()
+        vPoints.clear()
     }
 
     private fun transformTopHalf(lm: HeaderLayoutManager, header: HeaderLayout, headerBottom: Int) {
@@ -161,20 +161,20 @@ open class DefaultItemTransformer
     }
 
     private fun transformBottomHalf(lm: HeaderLayoutManager, header: HeaderLayout) {
-        val hw = lm.mHorizontalTabWidth
-        val hh = lm.mHorizontalTabHeight
-        val vw = lm.mVerticalTabWidth
-        val vh = lm.mVerticalTabHeight
+        val hw = lm.horizontalTabWidth
+        val hh = lm.horizontalTabHeight
+        val vw = lm.verticalTabWidth
+        val vh = lm.verticalTabHeight
 
-        val newWidth = hw - (hw - vw) * mCurrentRatioBottomHalf
-        val newHeight = hh - (hh - vh) * mCurrentRatioBottomHalf
+        val newWidth = hw - (hw - vw) * currentRatioBottomHalf
+        val newHeight = hh - (hh - vh) * currentRatioBottomHalf
 
-        val count = min(header.childCount, mHPoints.size)
+        val count = min(header.childCount, hPoints.size)
         for (i in 0 until count) {
-            val hp = mHPoints[i]
-            val vp = mVPoints[i]
-            val hDiff = (vp.x - hp.x) * mCurrentRatioBottomHalf
-            val vDiff = (vp.y - hp.y) * mCurrentRatioBottomHalf
+            val hp = hPoints[i]
+            val vp = vPoints[i]
+            val hDiff = (vp.x - hp.x) * currentRatioBottomHalf
+            val vDiff = (vp.y - hp.y) * currentRatioBottomHalf
 
             val x = (hp.x + hDiff).toInt()
             val y = (hp.y + vDiff).toInt()

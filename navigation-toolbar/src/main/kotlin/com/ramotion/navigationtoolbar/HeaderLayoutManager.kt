@@ -39,7 +39,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         RIGHT(-3);
 
         companion object {
-            private val map = VerticalGravity.values().associateBy(VerticalGravity::value);
+            private val map = VerticalGravity.values().associateBy(VerticalGravity::value)
             fun fromInt(type: Int, defaultValue: VerticalGravity = RIGHT) = map.getOrElse(type, {defaultValue})
         }
     }
@@ -74,54 +74,54 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         fun onScrollStateChanged(state: HeaderLayoutManager.ScrollState)
     }
 
-    private val mTabOffsetCount = TAB_OFF_SCREEN_COUNT
-    private val mViewCache = SparseArray<View?>()
-    private val mViewFlinger = ViewFlinger(context)
-    private val mVerticalGravity: VerticalGravity
-    private val mCollapsingBySelectDuration: Int
-    private val mTabOnScreenCount: Int
-    private val mCenterIndex: Int
-    private val mTopSnapDistance: Int
-    private val mBottomSnapDistance: Int
+    private val tabOffsetCount = TAB_OFF_SCREEN_COUNT
+    private val viewCache = SparseArray<View?>()
+    private val viewFlinger = ViewFlinger(context)
+    private val verticalGravity: VerticalGravity
+    private val collapsingBySelectDuration: Int
+    private val tabOnScreenCount: Int
+    private val centerIndex: Int
+    private val topSnapDistance: Int
+    private val bottomSnapDistance: Int
 
-    val mScreenWidth = context.resources.displayMetrics.widthPixels
-    val mScreenHeight = context.resources.displayMetrics.heightPixels
-    val mScreenHalf = mScreenHeight / 2f
-    val mHorizontalTabWidth = mScreenWidth
-    val mHorizontalTabHeight = mScreenHalf.toInt()
+    val screenWidth = context.resources.displayMetrics.widthPixels
+    val screenHeight = context.resources.displayMetrics.heightPixels
+    val screenHalf = screenHeight / 2f
+    val horizontalTabWidth = screenWidth
+    val horizontalTabHeight = screenHalf.toInt()
 
-    val mTopBorder: Int
-    val mWorkHeight: Int
-    val mVerticalTabWidth: Int
-    val mVerticalTabHeight: Int
+    val topBorder: Int
+    val workHeight: Int
+    val verticalTabWidth: Int
+    val verticalTabHeight: Int
 
-    internal val mAppBarBehavior = AppBarBehavior()
-    internal val mHeaderScrollListener = HeaderScrollListener()
-    internal val mHeaderChangeListener = mutableListOf<HeaderChangeListener>()
-    internal val mHeaderUpdateListener = mutableListOf<HeaderUpdateListener>()
-    internal val mItemClickListeners = mutableListOf<ItemClickListener>()
-    internal val mItemChangeListeners = mutableListOf<ItemChangeListener>()
-    internal val mScrollStateListeners = mutableListOf<ScrollStateListener>()
+    internal val appBarBehavior = AppBarBehavior()
+    internal val scrollListener = HeaderScrollListener()
+    internal val changeListener = mutableListOf<HeaderChangeListener>()
+    internal val updateListener = mutableListOf<HeaderUpdateListener>()
+    internal val itemClickListeners = mutableListOf<ItemClickListener>()
+    internal val itemChangeListeners = mutableListOf<ItemChangeListener>()
+    internal val scrollStateListeners = mutableListOf<ScrollStateListener>()
 
-    private var mOffsetAnimator: ValueAnimator? = null // TODO: add duration attribute
-    private var mAppBar: AppBarLayout? = null
-    private var mHeaderLayout: HeaderLayout? = null
+    private var offsetAnimator: ValueAnimator? = null
+    private var appBar: AppBarLayout? = null
+    private var headerLayout: HeaderLayout? = null
 
-    private var mInitialized = false
-    private var mCanDrag = true
-    private var mOffsetChanged = false
-    private var mIsCheckingScrollStop =false
+    private var isInitialized = false
+    private var isCanDrag = true
+    private var isOffsetChanged = false
+    private var isCheckingScrollStop =false
 
-    private var mScrollState = ScrollState.IDLE
-    private var mCurOrientation: Orientation? = null
+    private var scrollState = ScrollState.IDLE
+    private var curOrientation: Orientation? = null
 
-    private lateinit var mHPoint: PointF // TODO: replace with data class
-    private lateinit var mVPoint: PointF // TODO: replace with data class
+    private lateinit var hPoint: PointF // TODO: replace with data class
+    private lateinit var vPoint: PointF // TODO: replace with data class
 
     inner class AppBarBehavior : AppBarLayout.Behavior() {
         init {
             setDragCallback(object : AppBarLayout.Behavior.DragCallback() {
-                override fun canDrag(appBarLayout: AppBarLayout) = mCanDrag
+                override fun canDrag(appBarLayout: AppBarLayout) = isCanDrag
             })
         }
     }
@@ -150,21 +150,21 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     }
 
     private inner class ViewFlinger(context: Context) : Runnable {
-        private val mScroller = OverScroller(context)
+        private val scroller = OverScroller(context)
 
         override fun run() {
-            val header = mHeaderLayout ?: return
+            val header = headerLayout ?: return
 
-            val x = mScroller.currX
-            val y = mScroller.currY
+            val x = scroller.currX
+            val y = scroller.currY
 
-            if (!mScroller.computeScrollOffset()) {
+            if (!scroller.computeScrollOffset()) {
                 setScrollState(ScrollState.IDLE)
                 return
             }
 
-            val diffX = mScroller.currX - x
-            val diffY = mScroller.currY - y
+            val diffX = scroller.currX - x
+            val diffY = scroller.currY - y
 
             if (diffX == 0 && diffY == 0) {
                 ViewCompat.postOnAnimation(header, this)
@@ -184,39 +184,39 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
 
         fun fling(startX: Int, startY: Int, velocityX: Int, velocityY: Int, minX: Int, maxX: Int, minY: Int, maxY: Int) {
             setScrollState(ScrollState.FLING)
-            mScroller.forceFinished(true)
-            mScroller.fling(startX, startY, velocityX, velocityY, minX, maxX, minY, maxY)
-            ViewCompat.postOnAnimation(mHeaderLayout, this)
+            scroller.forceFinished(true)
+            scroller.fling(startX, startY, velocityX, velocityY, minX, maxX, minY, maxY)
+            ViewCompat.postOnAnimation(headerLayout, this)
         }
 
         fun startScroll(startX: Int, startY: Int, dx: Int, dy: Int, duration: Int) {
             setScrollState(ScrollState.FLING)
-            mScroller.forceFinished(true)
-            mScroller.startScroll(startX, startY, dx, dy, duration)
+            scroller.forceFinished(true)
+            scroller.startScroll(startX, startY, dx, dy, duration)
             if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.LOLLIPOP_MR1) {
-                mScroller.computeScrollOffset()
+                scroller.computeScrollOffset()
             }
-            ViewCompat.postOnAnimation(mHeaderLayout, this)
+            ViewCompat.postOnAnimation(headerLayout, this)
         }
 
         fun stop() {
-            if (!mScroller.isFinished) {
+            if (!scroller.isFinished) {
                 setScrollState(ScrollState.IDLE)
-                mScroller.abortAnimation()
+                scroller.abortAnimation()
             }
         }
     }
 
     init {
         Looper.myQueue().addIdleHandler {
-            if (mOffsetChanged && !mIsCheckingScrollStop) {
+            if (isOffsetChanged && !isCheckingScrollStop) {
                 checkIfOffsetChangingStopped()
             }
             true
         }
 
         var itemCount = TAB_ON_SCREEN_COUNT
-        var verticalItemWidth = mScreenWidth * VERTICAL_TAB_WIDTH_RATIO
+        var verticalItemWidth = screenWidth * VERTICAL_TAB_WIDTH_RATIO
         var gravity = VerticalGravity.RIGHT
         var collapsingDuration = COLLAPSING_BY_SELECT_DURATION
 
@@ -234,7 +234,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
                     verticalItemWidth = if (a.getType(R.styleable.NavigationToolBarr_headerVerticalItemWidth) == TypedValue.TYPE_DIMENSION) {
                         a.getDimension(R.styleable.NavigationToolBarr_headerVerticalItemWidth, verticalItemWidth)
                     } else {
-                        mScreenWidth.toFloat()
+                        screenWidth.toFloat()
                     }
                 }
             } finally {
@@ -242,12 +242,12 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
             }
         }
 
-        mTabOnScreenCount = itemCount
-        mCenterIndex = mTabOnScreenCount / 2
-        mVerticalTabHeight = (mScreenHeight * (1f / mTabOnScreenCount)).toInt()
-        mVerticalTabWidth = verticalItemWidth.toInt()
-        mVerticalGravity = gravity
-        mCollapsingBySelectDuration = collapsingDuration
+        tabOnScreenCount = itemCount
+        centerIndex = tabOnScreenCount / 2
+        verticalTabHeight = (screenHeight * (1f / tabOnScreenCount)).toInt()
+        verticalTabWidth = verticalItemWidth.toInt()
+        verticalGravity = gravity
+        collapsingBySelectDuration = collapsingDuration
 
         val resourceId = context.resources.getIdentifier("status_bar_height", "dimen", "android")
         val statusBarHeight = if (resourceId > 0) {
@@ -262,11 +262,11 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
             styledAttributes.recycle()
         }
 
-        mTopBorder = actionBarSize + statusBarHeight
-        mWorkHeight = mScreenHeight - mTopBorder
+        topBorder = actionBarSize + statusBarHeight
+        workHeight = screenHeight - topBorder
 
-        mTopSnapDistance = (mTopBorder + (mScreenHalf - mTopBorder) / 2).toInt()
-        mBottomSnapDistance = (mScreenHalf + mScreenHalf / 2).toInt()
+        topSnapDistance = (topBorder + (screenHalf - topBorder) / 2).toInt()
+        bottomSnapDistance = (screenHalf + screenHalf / 2).toInt()
     }
 
     override fun layoutDependsOn(parent: CoordinatorLayout, child: HeaderLayout, dependency: View): Boolean {
@@ -277,15 +277,15 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         if (!parent.isLaidOut) {
             parent.onLayoutChild(header, layoutDirection)
 
-            mAppBar = parent.findViewById(R.id.com_ramotion_app_bar)
+            appBar = parent.findViewById(R.id.com_ramotion_app_bar)
 
-            mHeaderLayout = header
-            header.mScrollListener = mHeaderScrollListener
+            headerLayout = header
+            header.scrollListener = scrollListener
 
             initPoints(header)
             fill(header)
 
-            mInitialized = true
+            isInitialized = true
         }
 
         return true
@@ -294,30 +294,30 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     override fun onDependentViewChanged(parent: CoordinatorLayout, header: HeaderLayout, dependency: View): Boolean {
         val headerBottom = dependency.bottom
         header.y = (headerBottom - header.height).toFloat() // Offset header on collapsing
-        mCurOrientation = null
-        mViewFlinger.stop()
-        mHeaderChangeListener.forEach { it.onHeaderChanged(this, header, headerBottom) }
+        curOrientation = null
+        viewFlinger.stop()
+        changeListener.forEach { it.onHeaderChanged(this, header, headerBottom) }
         return true
     }
 
     override fun onOffsetChanged(appBarLayout: AppBarLayout?, verticalOffset: Int) {
-        mOffsetChanged = true
+        isOffsetChanged = true
     }
 
     // TODO: fun scroll(distance)
 
     fun scrollToPosition(pos: Int) {
-        val header = mHeaderLayout ?: return
+        val header = headerLayout ?: return
         if (header.childCount == 0) {
             return
         }
 
-        val itemCount = header.mAdapter?.getItemCount() ?: -1
+        val itemCount = header.adapter?.getItemCount() ?: -1
         if (pos < 0 || pos > itemCount) {
             return
         }
 
-        if (header.mIsHorizontalScrollEnabled) {
+        if (header.isHorizontalScrollEnabled) {
             val anchorPos = getHorizontalAnchorPos(header)
             if (anchorPos == pos) {
                 return
@@ -325,7 +325,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
 
             val offset = (pos - anchorPos) * header.getChildAt(0).width
             onHeaderHorizontalScroll(header, offset.toFloat())
-        } else if (header.mIsVerticalScrollEnabled) {
+        } else if (header.isVerticalScrollEnabled) {
             val anchorPos = getVerticalAnchorPos(header)
             if (anchorPos == pos) {
                 return
@@ -335,27 +335,27 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
             onHeaderVerticalScroll(header, offset.toFloat())
         }
 
-        mItemChangeListeners.forEach { it.onItemChanged(pos) }
+        itemChangeListeners.forEach { it.onItemChanged(pos) }
     }
 
     fun smoothScrollToPosition(pos: Int) {
-        if (mOffsetAnimator?.isRunning == true) {
+        if (offsetAnimator?.isRunning == true) {
             return
         }
 
-        val header = mHeaderLayout ?: return
+        val header = headerLayout ?: return
         if (header.childCount == 0) {
             return
         }
 
-        val itemCount = header.mAdapter?.getItemCount() ?: -1
+        val itemCount = header.adapter?.getItemCount() ?: -1
         if (pos < 0 || pos > itemCount) {
             return
         }
 
-        mItemChangeListeners.forEach { it.onItemChanged(pos) }
+        itemChangeListeners.forEach { it.onItemChanged(pos) }
 
-        if (header.mIsHorizontalScrollEnabled) {
+        if (header.isHorizontalScrollEnabled) {
             val anchorPos = getHorizontalAnchorPos(header)
             if (anchorPos == HeaderLayout.INVALID_POSITION) {
                 return
@@ -363,7 +363,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
 
             val anchorView = getHorizontalAnchorView(header) ?: return
             val childWidth = anchorView.width
-            val offset = ((pos - anchorPos) * childWidth + (anchorView.left - mHPoint.x)).toInt()
+            val offset = ((pos - anchorPos) * childWidth + (anchorView.left - hPoint.x)).toInt()
             if (offset == 0) {
                 return
             }
@@ -371,8 +371,8 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
             val startX = getStartX(anchorView)
             val delta = abs(offset) / childWidth.toFloat()
             val duration = min(((delta + 1) * 100).toInt(), MAX_SCROLL_DURATION.toInt())
-            mViewFlinger.startScroll(startX, 0, -offset, 0, duration)
-        } else if (header.mIsVerticalScrollEnabled) {
+            viewFlinger.startScroll(startX, 0, -offset, 0, duration)
+        } else if (header.isVerticalScrollEnabled) {
             val anchorPos = getVerticalAnchorPos(header)
             if (anchorPos == HeaderLayout.INVALID_POSITION) {
                 return
@@ -380,7 +380,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
 
             val anchorView = getVerticalAnchorView(header) ?: return
             val childHeight = anchorView.height
-            val offset = ((pos - anchorPos) * childHeight + (anchorView.top - mVPoint.y)).toInt()
+            val offset = ((pos - anchorPos) * childHeight + (anchorView.top - vPoint.y)).toInt()
             if (offset == 0) {
                 return
             }
@@ -388,14 +388,14 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
             val startY = getStartY(anchorView)
             val delta = abs(offset) / childHeight.toFloat()
             val duration = min(((delta + 1) * 100).toInt(), MAX_SCROLL_DURATION.toInt())
-            mViewFlinger.startScroll(0, startY, 0, -offset, duration)
+            viewFlinger.startScroll(0, startY, 0, -offset, duration)
         }
     }
 
-    fun getPoints(): Pair<PointF, PointF> = Pair(PointF(mHPoint.x, mHPoint.y), PointF(mVPoint.x, mVPoint.y))
+    fun getPoints(): Pair<PointF, PointF> = Pair(PointF(hPoint.x, hPoint.y), PointF(vPoint.x, vPoint.y))
 
     fun getHorizontalAnchorView(header: HeaderLayout): View? {
-        val centerLeft = mHPoint.x
+        val centerLeft = hPoint.x
 
         var result: View? = null
         var lastDiff = Int.MAX_VALUE
@@ -413,7 +413,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     }
 
     fun getVerticalAnchorView(header: HeaderLayout): View? {
-        val centerTop = mVPoint.y
+        val centerTop = vPoint.y
 
         var result: View? = null
         var lastDiff = Int.MAX_VALUE
@@ -445,15 +445,15 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
             Orientation.TRANSITIONAL -> return
         }
 
-        mViewCache.clear()
+        viewCache.clear()
 
         for (i in 0 until header.childCount) {
             val view = header.getChildAt(i)
-            mViewCache.put(header.getAdapterPosition(view), view)
+            viewCache.put(header.getAdapterPosition(view), view)
         }
 
-        for (i in 0 until mViewCache.size()) {
-            mViewCache.valueAt(i)?.also { header.detachView(it) }
+        for (i in 0 until viewCache.size()) {
+            viewCache.valueAt(i)?.also { header.detachView(it) }
         }
 
         when (orientation) {
@@ -467,12 +467,12 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
             }
         }
 
-        for (i in 0 until mViewCache.size()) {
-            mViewCache.valueAt(i)?.also { header.mRecycler.recycleView(it) }
+        for (i in 0 until viewCache.size()) {
+            viewCache.valueAt(i)?.also { header.recycler.recycleView(it) }
         }
 
         val headerBottom = (header.y + header.height).toInt()
-        mHeaderUpdateListener.forEach { it.onHeaderUpdated(this, header, headerBottom) }
+        updateListener.forEach { it.onHeaderUpdated(this, header, headerBottom) }
     }
 
     fun getAnchorView(header: HeaderLayout): View? {
@@ -485,7 +485,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     }
 
     fun getAnchorPos(header: HeaderLayout): Int? {
-        return getAnchorView(header)?.let { HeaderLayout.getChildViewHolder(it) }?.mPosition
+        return getAnchorView(header)?.let { HeaderLayout.getChildViewHolder(it) }?.position
     }
 
     private fun getHorizontalAnchorPos(header: HeaderLayout): Int {
@@ -498,14 +498,14 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
 
     private fun onHeaderItemClick(header: HeaderLayout, viewHolder: HeaderLayout.ViewHolder): Boolean {
         return when {
-            header.mIsHorizontalScrollEnabled -> {
-                smoothScrollToPosition(viewHolder.mPosition)
-                mItemClickListeners.forEach { it.onItemClicked(viewHolder) }
+            header.isHorizontalScrollEnabled -> {
+                smoothScrollToPosition(viewHolder.position)
+                itemClickListeners.forEach { it.onItemClicked(viewHolder) }
                 true
             }
-            header.mIsVerticalScrollEnabled -> {
-                smoothOffset(mScreenHalf.toInt())
-                mItemClickListeners.forEach { it.onItemClicked(viewHolder) }
+            header.isVerticalScrollEnabled -> {
+                smoothOffset(screenHalf.toInt())
+                itemClickListeners.forEach { it.onItemClicked(viewHolder) }
                 true
             }
             else -> false
@@ -517,12 +517,12 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
             return false
         }
 
-        mViewFlinger.stop()
+        viewFlinger.stop()
         return true
     }
 
     private fun onHeaderUp(header: HeaderLayout): Unit {
-        if (mScrollState != ScrollState.FLING) {
+        if (scrollState != ScrollState.FLING) {
             setScrollState(ScrollState.IDLE)
         }
     }
@@ -595,12 +595,12 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
             return false
         }
 
-        val itemCount = header.mAdapter?.getItemCount() ?: return false
+        val itemCount = header.adapter?.getItemCount() ?: return false
         val startX = getStartX(header.getChildAt(0))
-        val min = -itemCount * mHorizontalTabWidth + header.width
+        val min = -itemCount * horizontalTabWidth + header.width
         val max = 0
 
-        mViewFlinger.fling(startX, 0, velocity.toInt(), 0, min, max, 0, 0)
+        viewFlinger.fling(startX, 0, velocity.toInt(), 0, min, max, 0, 0)
 
         return true
     }
@@ -611,43 +611,43 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
             return false
         }
 
-        val itemCount = header.mAdapter?.getItemCount() ?: return false
+        val itemCount = header.adapter?.getItemCount() ?: return false
         val startY = getStartY(header.getChildAt(0))
-        val min = -itemCount * mVerticalTabHeight + header.height
+        val min = -itemCount * verticalTabHeight + header.height
         val max = 0
 
-        mViewFlinger.fling(0, startY, 0, velocity.toInt(), 0, 0, min, max)
+        viewFlinger.fling(0, startY, 0, velocity.toInt(), 0, 0, min, max)
 
         return true
     }
 
     private fun getStartX(view: View): Int {
         return HeaderLayout.getChildViewHolder(view)
-                ?.let { view.left - it.mPosition * mHorizontalTabWidth }
+                ?.let { view.left - it.position * horizontalTabWidth }
                 ?: throw RuntimeException("View holder not found")
     }
 
     private fun getStartY(view: View): Int {
         return HeaderLayout.getChildViewHolder(view)
-                ?.let { view.top - it.mPosition * mVerticalTabHeight }
+                ?.let { view.top - it.position * verticalTabHeight }
                 ?: throw RuntimeException("View holder not found")
     }
 
     private fun initPoints(header: HeaderLayout) {
         val hx = 0f
-        val hy = mScreenHalf // - mStatusBarHeight
-        val vy = ((1f * mScreenHeight) / mTabOnScreenCount) * mCenterIndex
-        val vx = when (mVerticalGravity) {
+        val hy = screenHalf // - mStatusBarHeight
+        val vy = ((1f * screenHeight) / tabOnScreenCount) * centerIndex
+        val vx = when (verticalGravity) {
             HeaderLayoutManager.VerticalGravity.LEFT -> 0f
-            HeaderLayoutManager.VerticalGravity.CENTER -> (header.width - mVerticalTabWidth) / 2f
-            HeaderLayoutManager.VerticalGravity.RIGHT -> (header.width - mVerticalTabWidth).toFloat()
+            HeaderLayoutManager.VerticalGravity.CENTER -> (header.width - verticalTabWidth) / 2f
+            HeaderLayoutManager.VerticalGravity.RIGHT -> (header.width - verticalTabWidth).toFloat()
         }
 
-        mHPoint = PointF(hx, hy)
-        mVPoint = PointF(vx, vy)
+        hPoint = PointF(hx, hy)
+        vPoint = PointF(vx, vy)
     }
 
-    private fun getPositionRatio() = mAppBar?.let { Math.max(0f, it.bottom / mScreenHeight.toFloat()) } ?: 0f
+    private fun getPositionRatio() = appBar?.let { Math.max(0f, it.bottom / screenHeight.toFloat()) } ?: 0f
 
     private fun getOrientation(getRatio: () -> Float, force: Boolean = false): Orientation {
         return if (force) {
@@ -657,10 +657,10 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
                 ratio < 1 -> Orientation.TRANSITIONAL
                 else -> Orientation.VERTICAL
             }.also {
-                mCurOrientation = it
+                curOrientation = it
             }
         } else {
-            mCurOrientation ?: getOrientation(getRatio, true)
+            curOrientation ?: getOrientation(getRatio, true)
         }
     }
 
@@ -669,22 +669,22 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
             return
         }
 
-        val top = mAppBar?.let { header.height - it.bottom } ?: mHPoint.y.toInt()
-        val bottom = mAppBar?.bottom ?: mHorizontalTabHeight
-        val leftDiff = mHPoint.x.toInt() - (mViewCache.get(anchorPos)?.left ?: 0)
+        val top = appBar?.let { header.height - it.bottom } ?: hPoint.y.toInt()
+        val bottom = appBar?.bottom ?: horizontalTabHeight
+        val leftDiff = hPoint.x.toInt() - (viewCache.get(anchorPos)?.left ?: 0)
 
-        var pos = Math.max(0, anchorPos - mCenterIndex - mTabOffsetCount)
-        var left = (mHPoint.x.toInt() -(anchorPos - pos) * mHorizontalTabWidth) - leftDiff
+        var pos = Math.max(0, anchorPos - centerIndex - tabOffsetCount)
+        var left = (hPoint.x.toInt() -(anchorPos - pos) * horizontalTabWidth) - leftDiff
 
         while (pos < anchorPos) {
-            val view = getPlacedChildForPosition(header, pos, left, top, mHorizontalTabWidth, bottom)
+            val view = getPlacedChildForPosition(header, pos, left, top, horizontalTabWidth, bottom)
             left = view.right
             pos++
         }
     }
 
     private fun fillRight(header: HeaderLayout, anchorPos: Int) {
-        val count = header.mAdapter?.getItemCount() ?: 0
+        val count = header.adapter?.getItemCount() ?: 0
         if (count == 0) {
             return
         }
@@ -694,19 +694,19 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
             else -> anchorPos
         }
 
-        val top = mAppBar?.let { header.height - it.bottom } ?: mHPoint.y.toInt()
-        val bottom = mAppBar?.bottom ?: mHorizontalTabHeight
-        val maxPos = Math.min(count, startPos + mCenterIndex + 1 + mTabOffsetCount)
+        val top = appBar?.let { header.height - it.bottom } ?: hPoint.y.toInt()
+        val bottom = appBar?.bottom ?: horizontalTabHeight
+        val maxPos = Math.min(count, startPos + centerIndex + 1 + tabOffsetCount)
 
         var pos = startPos
         var left  = if (header.childCount > 0) {
             header.getChildAt(header.childCount - 1).right
         } else {
-            mHPoint.x.toInt()
+            hPoint.x.toInt()
         }
 
         while (pos <  maxPos) {
-            val view = getPlacedChildForPosition(header, pos, left, top, mHorizontalTabWidth, bottom)
+            val view = getPlacedChildForPosition(header, pos, left, top, horizontalTabWidth, bottom)
             left = view.right
             pos++
         }
@@ -717,21 +717,21 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
             return
         }
 
-        val topDiff = mVPoint.y.toInt() - (mViewCache.get(anchorPos)?.top ?: 0)
-        val left = mVPoint.x.toInt()
+        val topDiff = vPoint.y.toInt() - (viewCache.get(anchorPos)?.top ?: 0)
+        val left = vPoint.x.toInt()
 
-        var pos = Math.max(0, anchorPos - mCenterIndex - mTabOffsetCount)
-        var top = (mVPoint.y.toInt() -(anchorPos - pos) * mVerticalTabHeight) - topDiff
+        var pos = Math.max(0, anchorPos - centerIndex - tabOffsetCount)
+        var top = (vPoint.y.toInt() -(anchorPos - pos) * verticalTabHeight) - topDiff
 
         while (pos < anchorPos) {
-            val view = getPlacedChildForPosition(header, pos, left, top, mVerticalTabWidth, mVerticalTabHeight)
+            val view = getPlacedChildForPosition(header, pos, left, top, verticalTabWidth, verticalTabHeight)
             top = view.bottom
             pos++
         }
     }
 
     private fun fillBottom(header: HeaderLayout, anchorPos: Int) {
-        val count = header.mAdapter?.getItemCount() ?: 0
+        val count = header.adapter?.getItemCount() ?: 0
         if (count == 0) {
             return
         }
@@ -741,47 +741,47 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
             else -> anchorPos
         }
 
-        val maxPos = Math.min(count, startPos + mCenterIndex + 1 + mTabOffsetCount)
-        val left = mVPoint.x.toInt()
+        val maxPos = Math.min(count, startPos + centerIndex + 1 + tabOffsetCount)
+        val left = vPoint.x.toInt()
         var pos = startPos
 
         var top  = if (header.childCount > 0) {
             header.getChildAt(header.childCount - 1).bottom
         } else {
-            mVPoint.y.toInt()
+            vPoint.y.toInt()
         }
 
         while (pos <  maxPos) {
-            val view = getPlacedChildForPosition(header, pos, left, top, mVerticalTabWidth, mVerticalTabHeight)
+            val view = getPlacedChildForPosition(header, pos, left, top, verticalTabWidth, verticalTabHeight)
             top = view.bottom
             pos++
         }
     }
 
     private fun getPlacedChildForPosition(header: HeaderLayout, pos: Int, x: Int, y: Int, w: Int, h: Int): View {
-        val cacheView = mViewCache.get(pos)
+        val cacheView = viewCache.get(pos)
         if (cacheView != null) {
             header.attachView(cacheView)
-            mViewCache.remove(pos)
+            viewCache.remove(pos)
             return cacheView
         }
 
-        val view = header.mRecycler.getViewForPosition(pos)
+        val view = header.recycler.getViewForPosition(pos)
         header.addView(view)
         layoutChild(view, x, y, w, h)
         return view
     }
 
     private fun checkIfOffsetChangingStopped() {
-        val header = mHeaderLayout ?: return
+        val header = headerLayout ?: return
 
-        mOffsetChanged = false
-        mIsCheckingScrollStop = true
+        isOffsetChanged = false
+        isCheckingScrollStop = true
 
-        val startOffset = mAppBarBehavior.topAndBottomOffset
+        val startOffset = appBarBehavior.topAndBottomOffset
         header.postOnAnimationDelayed({
-            mIsCheckingScrollStop = false
-            val currentOffset = mAppBarBehavior.topAndBottomOffset
+            isCheckingScrollStop = false
+            val currentOffset = appBarBehavior.topAndBottomOffset
             val scrollStopped = currentOffset == startOffset
             if (scrollStopped) {
                 onOffsetChangingStopped(currentOffset)
@@ -790,57 +790,57 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     }
 
     private fun onOffsetChangingStopped(offset: Int) {
-        val header = mHeaderLayout ?: return
-        val appBar = mAppBar ?: return
+        val header = headerLayout ?: return
+        val appBar = appBar ?: return
 
         var hScrollEnable = false
         var vScrollEnable = false
 
-        val invertedOffset = mScreenHeight + offset
+        val invertedOffset = screenHeight + offset
         when (invertedOffset) {
-            mScreenHeight -> {
+            screenHeight -> {
                 vScrollEnable = true
-                mCanDrag = false
+                isCanDrag = false
             }
-            mScreenHalf.toInt() -> {
+            screenHalf.toInt() -> {
                 hScrollEnable = true
-                mCanDrag = false
+                isCanDrag = false
             }
-            mTopBorder -> {
+            topBorder -> {
                 hScrollEnable = true
-                mCanDrag = true
+                isCanDrag = true
             }
-            in mTopBorder..(mTopSnapDistance - 1) -> {
+            in topBorder..(topSnapDistance - 1) -> {
                 appBar.setExpanded(false, true)
             }
-            in mTopSnapDistance..(mBottomSnapDistance - 1) -> {
-                smoothOffset(mScreenHalf.toInt(), SNAP_ANIMATION_DURATION)
+            in topSnapDistance..(bottomSnapDistance - 1) -> {
+                smoothOffset(screenHalf.toInt(), SNAP_ANIMATION_DURATION)
             }
             else -> {
                 appBar.setExpanded(true, true)
             }
         }
 
-        header.mIsHorizontalScrollEnabled = hScrollEnable
-        header.mIsVerticalScrollEnabled = vScrollEnable
+        header.isHorizontalScrollEnabled = hScrollEnable
+        header.isVerticalScrollEnabled = vScrollEnable
     }
 
-    private fun smoothOffset(offset: Int, duration: Long = mCollapsingBySelectDuration.toLong()) {
-        val header = mHeaderLayout ?: return
+    private fun smoothOffset(offset: Int, duration: Long = collapsingBySelectDuration.toLong()) {
+        val header = headerLayout ?: return
 
-        mOffsetAnimator?.cancel()
+        offsetAnimator?.cancel()
 
-        mOffsetAnimator = ValueAnimator().also { animator ->
+        offsetAnimator = ValueAnimator().also { animator ->
             animator.duration = duration
-            animator.setIntValues(mAppBarBehavior.topAndBottomOffset, -offset)
+            animator.setIntValues(appBarBehavior.topAndBottomOffset, -offset)
             animator.addUpdateListener {
                 val value = it.animatedValue as Int
-                mAppBarBehavior.topAndBottomOffset = value // TODO: try mAppBar.Behavior::onStopNestedScroll
+                appBarBehavior.topAndBottomOffset = value // TODO: try appBar.Behavior::onStopNestedScroll
             }
             animator.addListener(object: AnimatorListenerAdapter() {
                 override fun onAnimationStart(animation: Animator?, isReverse: Boolean) {
-                    header.mIsHorizontalScrollEnabled = false
-                    header.mIsVerticalScrollEnabled = false
+                    header.isHorizontalScrollEnabled = false
+                    header.isVerticalScrollEnabled = false
                 }
                 override fun onAnimationEnd(animation: Animator?) {
                     this@HeaderLayoutManager.onOffsetChangingStopped(-offset)
@@ -851,11 +851,11 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     }
 
     private fun setScrollState(state: ScrollState) {
-        if (mScrollState == state) {
+        if (scrollState == state) {
             return
         }
 
-        mScrollStateListeners.forEach { it.onScrollStateChanged(state) }
-        mScrollState = state
+        scrollStateListeners.forEach { it.onScrollStateChanged(state) }
+        scrollState = state
     }
 }

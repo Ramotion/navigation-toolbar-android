@@ -4,22 +4,20 @@ import android.view.View
 import com.ramotion.navigationtoolbar.DefaultItemTransformer
 import com.ramotion.navigationtoolbar.HeaderLayout
 import com.ramotion.navigationtoolbar.HeaderLayoutManager
-import com.ramotion.navigationtoolbar.NavigationToolBarLayout
 import kotlin.math.abs
 import kotlin.math.min
 
 class HeaderItemTransformer(
-        private val mVerticalLeftOffset: Int,
-        private val mHorizontalCenterOffsetRatio: Float)
-    : DefaultItemTransformer() {
+        private val verticalLeftOffset: Int,
+        private val horizontalCenterOffsetRatio: Float) : DefaultItemTransformer() {
 
-    private var mPrevChildCount = Int.MIN_VALUE
-    private var mPrevHScrollOffset = Int.MIN_VALUE
-    private var mPrevVScrollOffset = Int.MIN_VALUE
-    private var mPrevHeaderBottom = Int.MIN_VALUE
+    private var prevChildCount = Int.MIN_VALUE
+    private var prevHScrollOffset = Int.MIN_VALUE
+    private var prevVScrollOffset = Int.MIN_VALUE
+    private var prevHeaderBottom = Int.MIN_VALUE
 
-    private var mTopTitlesAnimated = false
-    private var mElevation: Float? = null
+    private var topTitlesAnimated = false
+    private var elevation: Float? = null
 
     override fun transform(lm: HeaderLayoutManager, header: HeaderLayout, headerBottom: Int) {
         super.transform(lm, header, headerBottom)
@@ -32,21 +30,21 @@ class HeaderItemTransformer(
         val child0 = header.getChildAt(0)
         val hScrollOffset = child0.left
         val vScrollOffset = child0.top
-        val nothingChanged = hScrollOffset == mPrevHScrollOffset && vScrollOffset == mPrevVScrollOffset
-                && childCount == mPrevChildCount && mPrevHeaderBottom == headerBottom
+        val nothingChanged = hScrollOffset == prevHScrollOffset && vScrollOffset == prevVScrollOffset
+                && childCount == prevChildCount && prevHeaderBottom == headerBottom
         if (nothingChanged) {
             return
         }
 
-        mPrevChildCount = childCount
-        mPrevHScrollOffset = hScrollOffset
-        mPrevVScrollOffset = vScrollOffset
-        mPrevHeaderBottom = headerBottom
+        prevChildCount = childCount
+        prevHScrollOffset = hScrollOffset
+        prevVScrollOffset = vScrollOffset
+        prevHeaderBottom = headerBottom
 
-        val elevation = mElevation ?: run { child0.elevation.also { mElevation = it }}
+        val initialZ = this.elevation ?: run { child0.elevation.also { this.elevation = it }}
 
-        if (mCurrentRatioTopHalf in 0f..1f && mCurrentRatioBottomHalf == 0f) {
-            var curZ = childCount / 2f + elevation
+        if (currentRatioTopHalf in 0f..1f && currentRatioBottomHalf == 0f) {
+            var curZ = childCount / 2f + initialZ
             var prevZDiff = Int.MAX_VALUE
             for (i in 0 until childCount) {
                 val item = header.getChildAt(i)
@@ -55,19 +53,19 @@ class HeaderItemTransformer(
                 val headerCenter = header.width / 2
                 val itemCenter = item.left + item.width / 2
                 val headerCenterDiff = itemCenter - headerCenter
-                val itemNewCenter = headerCenter + headerCenterDiff * mHorizontalCenterOffsetRatio
+                val itemNewCenter = headerCenter + headerCenterDiff * horizontalCenterOffsetRatio
                 val itemNewCenterDiff = itemNewCenter - itemCenter
 
                 val hcDiff = abs(headerCenterDiff)
                 curZ += if (prevZDiff > hcDiff) { prevZDiff = hcDiff; -1f } else { prevZDiff = hcDiff; 1f }
                 item.z = curZ
 
-                val titleInitialLeft = item.width / 2 - holder.mTitle.width / 2
-                val titleNewLeft = titleInitialLeft + itemNewCenterDiff * mCurrentRatioTopHalf
+                val titleInitialLeft = item.width / 2 - holder.title.width / 2
+                val titleNewLeft = titleInitialLeft + itemNewCenterDiff * currentRatioTopHalf
                 val ratio = 1.5f - min(headerCenter.toFloat(), abs(headerCenter - itemNewCenter)) / headerCenter
 
-                holder.mTitle.also {
-                    if (mCurrentRatioTopHalf > 0.5f && !mTopTitlesAnimated) {
+                holder.title.also {
+                    if (currentRatioTopHalf > 0.5f && !topTitlesAnimated) {
                         it.animate().x(titleNewLeft).start()
                     } else {
                         it.x = titleNewLeft
@@ -75,24 +73,24 @@ class HeaderItemTransformer(
                     transformTitle(it, ratio)
                 }
             }
-            mTopTitlesAnimated = true
-        } else if (mCurrentRatioBottomHalf in 0f .. 1f && mCurrentRatioTopHalf == 1f) {
+            topTitlesAnimated = true
+        } else if (currentRatioBottomHalf in 0f .. 1f && currentRatioTopHalf == 1f) {
             for (i in 0 until childCount) {
                 val item = header.getChildAt(i)
                 val holder = HeaderLayout.getChildViewHolder(item) as HeaderItem
 
-                item.z = elevation
+                item.z = initialZ
 
                 val itemWidth = item.width
-                val titleInitialLeft = itemWidth / 2 - holder.mTitle.width / 2
-                val titleNewLeft = titleInitialLeft - abs(titleInitialLeft - mVerticalLeftOffset) * mCurrentRatioBottomHalf
+                val titleInitialLeft = itemWidth / 2 - holder.title.width / 2
+                val titleNewLeft = titleInitialLeft - abs(titleInitialLeft - verticalLeftOffset) * currentRatioBottomHalf
 
-                holder.mTitle.also {
+                holder.title.also {
                     it.x = titleNewLeft
                     transformTitle(it, 1f)
                 }
             }
-            mTopTitlesAnimated = false
+            topTitlesAnimated = false
         }
     }
 

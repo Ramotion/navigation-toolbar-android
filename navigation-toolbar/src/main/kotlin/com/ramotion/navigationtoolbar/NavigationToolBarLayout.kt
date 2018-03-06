@@ -29,27 +29,27 @@ class NavigationToolBarLayout : CoordinatorLayout {
                 transform(lm, header, headerBottom)
     }
 
-    val mToolBar: Toolbar
-    val mHeaderLayout: HeaderLayout
-    val mHeaderLayoutManager: HeaderLayoutManager
-    val mAppBarLayout: AppBarLayout
+    val toolBar: Toolbar
+    val headerLayout: HeaderLayout
+    val layoutManager: HeaderLayoutManager
+    val appBarLayout: AppBarLayout
 
-    private var mHeaderItemTransformer: ItemTransformer? = null
+    private var itemTransformer: ItemTransformer? = null
 
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
 
     constructor(context: Context, attrs: AttributeSet?, @AttrRes defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
         LayoutInflater.from(context).inflate(R.layout.navigation_layout, this, true)
 
-        mToolBar = findViewById(R.id.com_ramotion_toolbar)
-        mHeaderLayout = findViewById(R.id.com_ramotion_header_layout)
-        mHeaderLayoutManager = HeaderLayoutManager(context, attrs)
-        (mHeaderLayout.layoutParams as CoordinatorLayout.LayoutParams).behavior = mHeaderLayoutManager
+        toolBar = findViewById(R.id.com_ramotion_toolbar)
+        headerLayout = findViewById(R.id.com_ramotion_header_layout)
+        layoutManager = HeaderLayoutManager(context, attrs)
+        (headerLayout.layoutParams as CoordinatorLayout.LayoutParams).behavior = layoutManager
 
-        mAppBarLayout = findViewById(R.id.com_ramotion_app_bar)
-        mAppBarLayout.outlineProvider = null
-        mAppBarLayout.addOnOffsetChangedListener(mHeaderLayoutManager)
-        (mAppBarLayout.layoutParams as CoordinatorLayout.LayoutParams).behavior = mHeaderLayoutManager.mAppBarBehavior
+        appBarLayout = findViewById(R.id.com_ramotion_app_bar)
+        appBarLayout.outlineProvider = null
+        appBarLayout.addOnOffsetChangedListener(layoutManager)
+        (appBarLayout.layoutParams as CoordinatorLayout.LayoutParams).behavior = layoutManager.appBarBehavior
 
         attrs?.also {
             val a = context.theme.obtainStyledAttributes(attrs, R.styleable.NavigationToolBarr, defStyleAttr, 0)
@@ -61,7 +61,7 @@ class NavigationToolBarLayout : CoordinatorLayout {
                     addHeaderChangeListener(object : HeaderChangeListener {
                         val maxRatio = 0.8f
                         override fun onHeaderChanged(lm: HeaderLayoutManager, header: HeaderLayout, headerBottom: Int) {
-                            val ratio = 1f - headerBottom / (mHeaderLayout.height + 1f)
+                            val ratio = 1f - headerBottom / (headerLayout.height + 1f)
                             val alpha = (maxRatio - min(maxRatio, ratio)) / maxRatio
                             imageView.alpha = alpha
                         }
@@ -75,58 +75,58 @@ class NavigationToolBarLayout : CoordinatorLayout {
         setItemTransformer(null)
     }
 
-    fun setAdapter(adapter: HeaderLayout.Adapter<out HeaderLayout.ViewHolder>) = mHeaderLayout.setAdapter(adapter)
+    fun setAdapter(adapter: HeaderLayout.Adapter<out HeaderLayout.ViewHolder>) = headerLayout.setAdapter(adapter)
 
-    fun scrollToPosition(pos: Int) = mHeaderLayoutManager.scrollToPosition(pos)
+    fun scrollToPosition(pos: Int) = layoutManager.scrollToPosition(pos)
 
-    fun smoothScrollToPosition(pos: Int) = mHeaderLayoutManager.smoothScrollToPosition(pos)
+    fun smoothScrollToPosition(pos: Int) = layoutManager.smoothScrollToPosition(pos)
 
-    fun getAnchorPos(): Int? = mHeaderLayoutManager.getAnchorPos(mHeaderLayout)
+    fun getAnchorPos(): Int? = layoutManager.getAnchorPos(headerLayout)
 
     fun addItemChangeListener(listener: ItemChangeListener) {
-        mHeaderLayoutManager.mItemChangeListeners += listener
+        layoutManager.itemChangeListeners += listener
     }
 
     fun removeItemChangeListener(listener: ItemChangeListener) {
-        mHeaderLayoutManager.mItemChangeListeners -= listener
+        layoutManager.itemChangeListeners -= listener
     }
 
     fun addScrollStateListener(listener: ScrollStateListener) {
-        mHeaderLayoutManager.mScrollStateListeners += listener
+        layoutManager.scrollStateListeners += listener
     }
 
     fun removeScrollStateListener(listener: ScrollStateListener) {
-        mHeaderLayoutManager.mScrollStateListeners -= listener
+        layoutManager.scrollStateListeners -= listener
     }
 
     fun addItemClickListener(listener: HeaderLayoutManager.ItemClickListener) {
-        mHeaderLayoutManager.mItemClickListeners += listener
+        layoutManager.itemClickListeners += listener
     }
 
     fun removeItemClickListener(listener: HeaderLayoutManager.ItemClickListener) {
-        mHeaderLayoutManager.mItemClickListeners += listener
+        layoutManager.itemClickListeners += listener
     }
 
     fun addHeaderChangeListener(listener: HeaderChangeListener) {
-        mHeaderLayoutManager.mHeaderChangeListener += listener
+        layoutManager.changeListener += listener
     }
 
     fun removeHeaderChangeListener(listener: HeaderChangeListener) {
-        mHeaderLayoutManager.mHeaderChangeListener -= listener
+        layoutManager.changeListener -= listener
     }
 
     fun setItemTransformer(newTransformer: ItemTransformer?) {
-        mHeaderItemTransformer?.also {
-            mHeaderLayoutManager.mHeaderChangeListener -= it
-            mHeaderLayoutManager.mHeaderUpdateListener -= it
+        itemTransformer?.also {
+            layoutManager.changeListener -= it
+            layoutManager.updateListener -= it
             it.detach()
         }
 
         (newTransformer ?: DefaultItemTransformer()).also {
             it.attach(this)
-            mHeaderLayoutManager.mHeaderChangeListener += it
-            mHeaderLayoutManager.mHeaderUpdateListener += it
-            mHeaderItemTransformer = it
+            layoutManager.changeListener += it
+            layoutManager.updateListener += it
+            itemTransformer = it
         }
     }
 
