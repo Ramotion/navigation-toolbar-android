@@ -1,14 +1,14 @@
 package com.ramotion.navigationtoolbar
 
-import android.graphics.PointF
+import com.ramotion.navigationtoolbar.HeaderLayoutManager.Point
 import kotlin.math.max
 import kotlin.math.min
 
 open class DefaultItemTransformer
     : NavigationToolBarLayout.ItemTransformer(), HeaderLayoutManager.ItemClickListener {
 
-    private val hPoints: MutableList<PointF> = mutableListOf()
-    private val vPoints: MutableList<PointF> = mutableListOf()
+    private val hPoints: MutableList<Point> = mutableListOf()
+    private val vPoints: MutableList<Point> = mutableListOf()
 
     private var navigationToolBarLayout: NavigationToolBarLayout? = null
 
@@ -132,19 +132,19 @@ open class DefaultItemTransformer
 
         if (up) {
             val left = -index * lm.horizontalTabWidth
-            val (x, y) = lm.getPoints().first.run { x to y }
+            val (x, y) = lm.getHorizontalPoint()
 
             for (i in 0 until header.childCount) {
-                vPoints.add(header.getChildAt(i).let { PointF(it.x, it.y) })
-                hPoints.add(PointF(x + left + i * lm.horizontalTabWidth, y))
+                vPoints.add(header.getChildAt(i).let { Point(it.left, it.top) })
+                hPoints.add(Point(x + left + i * lm.horizontalTabWidth, y))
             }
         } else {
             val top = -index * lm.verticalTabHeight
-            val (x, y) = lm.getPoints().second.run { x to y }
+            val (x, y) = lm.getVerticalPoint()
 
             for (i in 0 until header.childCount) {
-                hPoints.add(header.getChildAt(i).let { PointF(it.x, it.y) })
-                vPoints.add(PointF(x, y + top + i * lm.verticalTabHeight))
+                hPoints.add(header.getChildAt(i).let { Point(it.left, it.top) })
+                vPoints.add(Point(x, y + top + i * lm.verticalTabHeight))
             }
         }
     }
