@@ -1,5 +1,6 @@
 package com.ramotion.navigationtoolbar.example.simple
 
+import android.graphics.Rect
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v4.view.ViewPager
@@ -79,6 +80,17 @@ class MainActivity : AppCompatActivity() {
         header.addItemClickListener(object : HeaderLayoutManager.ItemClickListener {
             override fun onItemClicked(viewHolder: HeaderLayout.ViewHolder) {
                 viewPager.currentItem = viewHolder.position
+            }
+        })
+
+        header.addItemDecoration(object : HeaderLayoutManager.ItemDecoration {
+            val right = resources.getDimensionPixelSize(R.dimen.decor_right)
+            val left = resources.getDimensionPixelSize(R.dimen.decor_right)
+            val bottom = resources.getDimensionPixelSize(R.dimen.decor_bottom)
+            override fun getItemOffsets(outRect: Rect, viewHolder: HeaderLayout.ViewHolder) {
+                outRect.left = left
+                outRect.right = right
+                outRect.bottom = bottom
             }
         })
 

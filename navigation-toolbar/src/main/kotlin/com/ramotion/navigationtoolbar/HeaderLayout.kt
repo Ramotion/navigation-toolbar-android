@@ -18,7 +18,9 @@ class HeaderLayout : FrameLayout {
     companion object {
         const val INVALID_POSITION = -1
 
-        fun getChildViewHolder(child: View): ViewHolder? = (child.layoutParams as LayoutParams).viewHolder
+        fun getChildLayoutParams(child: View) = child.layoutParams as? LayoutParams
+
+        fun getChildViewHolder(child: View) = getChildLayoutParams(child)?.viewHolder
     }
 
     internal interface ScrollListener {
@@ -100,6 +102,9 @@ class HeaderLayout : FrameLayout {
 
     open class LayoutParams : FrameLayout.LayoutParams {
 
+        internal val decorRect = Rect()
+
+        internal var decorRectValid = false
         internal var viewHolder: ViewHolder? = null
 
         constructor(c: Context, attrs: AttributeSet) : super(c, attrs)
@@ -140,6 +145,7 @@ class HeaderLayout : FrameLayout {
             }
 
             hlp.viewHolder = holder
+            hlp.decorRectValid = false
             holder.view.layoutParams = hlp
         }
 
@@ -162,10 +168,12 @@ class HeaderLayout : FrameLayout {
 
         fun recycleView(view: View, cache: Boolean = true) {
             val adapter = adapter ?: throw RuntimeException("No adapter set")
-            val holder = getChildViewHolder(view) ?: throw RuntimeException("No view holder")
+            val lp = getChildLayoutParams(view) ?: throw RuntimeException("Invalid layout paramsr")
+            val holder = lp.viewHolder ?: throw RuntimeException("No view holder")
             adapter.recycleView(holder)
             this@HeaderLayout.removeView(view)
             if (cache) {
+                lp.decorRectValid = false
                 holder.position = INVALID_POSITION
                 viewCache.add(holder.view)
             }

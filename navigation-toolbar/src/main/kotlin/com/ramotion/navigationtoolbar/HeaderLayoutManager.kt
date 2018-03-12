@@ -4,7 +4,7 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.content.Context
-import android.graphics.PointF
+import android.graphics.Rect
 import android.os.Build
 import android.os.Looper
 import android.support.design.widget.AppBarLayout
@@ -76,10 +76,16 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         fun onScrollStateChanged(state: HeaderLayoutManager.ScrollState)
     }
 
+    interface ItemDecoration {
+        fun getItemOffsets(outRect: Rect, viewHolder: HeaderLayout.ViewHolder)
+    }
+
     private val tabOffsetCount = TAB_OFF_SCREEN_COUNT
     private val viewCache = SparseArray<View?>()
     private val viewFlinger = ViewFlinger(context)
     private val verticalGravity: VerticalGravity
+    private val tempDecorRect = Rect()
+
     private val collapsingBySelectDuration: Int
     private val tabOnScreenCount: Int
     private val centerIndex: Int
@@ -104,6 +110,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     internal val itemClickListeners = mutableListOf<ItemClickListener>()
     internal val itemChangeListeners = mutableListOf<ItemChangeListener>()
     internal val scrollStateListeners = mutableListOf<ScrollStateListener>()
+    internal val itemDecorations = mutableListOf<ItemDecoration>() // TODO: update items decorator flags
 
     private var offsetAnimator: ValueAnimator? = null
     private var appBar: AppBarLayout? = null
@@ -880,5 +887,33 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
 
         scrollStateListeners.forEach { it.onScrollStateChanged(state) }
         scrollState = state
+    }
+
+    private fun getDecorInsetsForChild(child: View): Rect {
+        val lp = HeaderLayout.getChildLayoutParams(child)
+                ?: throw RuntimeException("Invalid layout params")
+
+        val vh = lp.viewHolder
+                ?: throw RuntimeException("No view holder")
+
+        val decorRect = lp.decorRect
+
+        if (lp.decorRectValid) {
+            return decorRect
+        }
+
+        decorRect.set(0, 0, 0, 0)
+        for (decoration in itemDecorations) {
+            tempDecorRect.set(0, 0, 0, 0)
+            decoration.getItemOffsets(tempDecorRect, vh)
+            decorRect.left += tempDecorRect.left
+            decorRect.top += tempDecorRect.top
+            decorRect.right += tempDecorRect.right
+            decorRect.bottom += tempDecorRect.bottom
+        }
+
+        lp.decorRectValid = true
+
+        return decorRect
     }
 }
