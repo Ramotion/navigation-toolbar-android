@@ -340,7 +340,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
                 return
             }
 
-            val offset = (pos - anchorPos) * header.getChildAt(0).height
+            val offset = (pos - anchorPos) * getDecoratedHeight(header.getChildAt(0))
             onHeaderVerticalScroll(header, offset.toFloat())
         }
 
@@ -391,8 +391,8 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
             }
 
             val anchorView = getVerticalAnchorView(header) ?: return
-            val childHeight = anchorView.height
-            val offset = (pos - anchorPos) * childHeight + (anchorView.top - vy)
+            val childHeight = getDecoratedHeight(anchorView)
+            val offset = (pos - anchorPos) * childHeight + (getDecoratedTop(anchorView) - vy)
             if (offset == 0) {
                 return
             }
@@ -438,7 +438,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
 
         for (i in 0 until header.childCount) {
             val child = header.getChildAt(i)
-            val diff = Math.abs(child.top - centerTop).toInt()
+            val diff = Math.abs(getDecoratedTop(child) - centerTop)
             if (diff < lastDiff) {
                 lastDiff = diff
                 result = child
@@ -449,10 +449,17 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     }
 
     fun layoutChild(child: View, x: Int, y: Int, w: Int, h: Int) {
+        val inset = getDecorInsetsForChild(child)
+
+        val hPadding = inset.top + inset.bottom
+        val ph = h - hPadding
+
         val ws = View.MeasureSpec.makeMeasureSpec(w, View.MeasureSpec.EXACTLY)
-        val hs = View.MeasureSpec.makeMeasureSpec(h, View.MeasureSpec.EXACTLY)
+        val hs = View.MeasureSpec.makeMeasureSpec(ph, View.MeasureSpec.EXACTLY)
         child.measure(ws, hs)
-        child.layout(x, y, x + w, y + h)
+
+        val t = y + inset.top
+        child.layout(x, t, x + w, t + ph)
     }
 
     fun fill(header: HeaderLayout) {
@@ -504,6 +511,20 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
 
     fun getAnchorPos(header: HeaderLayout): Int? {
         return getAnchorView(header)?.let { HeaderLayout.getChildViewHolder(it) }?.position
+    }
+
+    fun getDecoratedHeight(child: View): Int {
+        val height = child.height
+        val inset = getDecorInsetsForChild(child)
+        return height + inset.top + inset.bottom
+    }
+
+    fun getDecoratedTop(child: View): Int {
+        return child.top - getDecorInsetsForChild(child).top
+    }
+
+    fun getDecoratedBottom(child: View): Int {
+        return child.bottom + getDecorInsetsForChild(child).bottom
     }
 
     private fun getHorizontalAnchorPos(header: HeaderLayout): Int {
@@ -590,11 +611,11 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
 
         val scrollUp = distance >= 0
         val offset = if (scrollUp) {
-            val lastBottom = header.getChildAt(childCount - 1).bottom
+            val lastBottom = getDecoratedBottom(header.getChildAt(childCount - 1))
             val newBottom = lastBottom - distance
             if (newBottom > header.height) distance.toInt() else lastBottom - header.height
         } else {
-            val firstTop = header.getChildAt(0).top
+            val firstTop = getDecoratedTop(header.getChildAt(0))
             if (firstTop > 0) { // TODO: firstTop > border, border - center or systemBar height
                 0
             } else {
@@ -651,7 +672,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
 
     private fun getStartY(view: View): Int {
         return HeaderLayout.getChildViewHolder(view)
-                ?.let { view.top - it.position * verticalTabHeight }
+                ?.let { getDecoratedTop(view) - it.position * verticalTabHeight }
                 ?: throw RuntimeException("View holder not found")
     }
 
@@ -739,27 +760,25 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     }
 
     private fun fillTop(header: HeaderLayout, anchorPos: Int) {
-        val (vx, vy) = vPoint ?: return
+        val (left, vy) = vPoint ?: return
 
         if (anchorPos == HeaderLayout.INVALID_POSITION) {
             return
         }
 
-        val topDiff = vy - (viewCache.get(anchorPos)?.top ?: 0)
-        val left = vx
-
         var pos = Math.max(0, anchorPos - centerIndex - tabOffsetCount)
+        val topDiff = vy - (viewCache.get(anchorPos)?.let { getDecoratedTop(it) } ?: 0)
         var top = (vy - (anchorPos - pos) * verticalTabHeight) - topDiff
 
         while (pos < anchorPos) {
             val view = getPlacedChildForPosition(header, pos, left, top, verticalTabWidth, verticalTabHeight)
-            top = view.bottom
+            top = getDecoratedBottom(view)
             pos++
         }
     }
 
     private fun fillBottom(header: HeaderLayout, anchorPos: Int) {
-        val (vx, vy) = vPoint ?: return
+        val (left, vy) = vPoint ?: return
 
         val count = header.adapter?.getItemCount() ?: 0
         if (count == 0) {
@@ -772,18 +791,17 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         }
 
         val maxPos = Math.min(count, startPos + centerIndex + 1 + tabOffsetCount)
-        val left = vx
         var pos = startPos
 
         var top  = if (header.childCount > 0) {
-            header.getChildAt(header.childCount - 1).bottom
+            getDecoratedBottom(header.getChildAt(header.childCount - 1))
         } else {
             vy
         }
 
         while (pos <  maxPos) {
             val view = getPlacedChildForPosition(header, pos, left, top, verticalTabWidth, verticalTabHeight)
-            top = view.bottom
+            top = getDecoratedBottom(view)
             pos++
         }
     }
@@ -897,7 +915,6 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
                 ?: throw RuntimeException("No view holder")
 
         val decorRect = lp.decorRect
-
         if (lp.decorRectValid) {
             return decorRect
         }
@@ -911,7 +928,6 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
             decorRect.right += tempDecorRect.right
             decorRect.bottom += tempDecorRect.bottom
         }
-
         lp.decorRectValid = true
 
         return decorRect

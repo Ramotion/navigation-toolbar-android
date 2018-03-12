@@ -135,7 +135,7 @@ open class DefaultItemTransformer
             val (x, y) = lm.getHorizontalPoint()
 
             for (i in 0 until header.childCount) {
-                vPoints.add(header.getChildAt(i).let { Point(it.left, it.top) })
+                vPoints.add(header.getChildAt(i).let { Point(it.left, lm.getDecoratedTop(it)) })
                 hPoints.add(Point(x + left + i * lm.horizontalTabWidth, y))
             }
         } else {
@@ -143,7 +143,7 @@ open class DefaultItemTransformer
             val (x, y) = lm.getVerticalPoint()
 
             for (i in 0 until header.childCount) {
-                hPoints.add(header.getChildAt(i).let { Point(it.left, it.top) })
+                hPoints.add(header.getChildAt(i).let { Point(it.left, lm.getDecoratedTop(it)) })
                 vPoints.add(Point(x, y + top + i * lm.verticalTabHeight))
             }
         }
