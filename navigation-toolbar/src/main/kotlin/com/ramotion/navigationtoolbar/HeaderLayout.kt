@@ -4,10 +4,7 @@ import android.content.Context
 import android.graphics.Rect
 import android.support.v4.view.GestureDetectorCompat
 import android.util.AttributeSet
-import android.view.GestureDetector
-import android.view.MotionEvent
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.FrameLayout
 
 /**
@@ -131,7 +128,11 @@ class HeaderLayout : FrameLayout {
 
         open fun onViewRecycled(holder: VH) {}
 
-        fun createViewHolder(parent: ViewGroup): VH = onCreateViewHolder(parent)
+        fun createViewHolder(parent: ViewGroup): VH {
+            val holder = onCreateViewHolder(parent)
+            holder.view.outlineProvider = ViewOutlineProvider.BOUNDS
+            return holder
+        }
 
         fun bindViewHolder(holder: VH, position: Int) {
             holder.position = position

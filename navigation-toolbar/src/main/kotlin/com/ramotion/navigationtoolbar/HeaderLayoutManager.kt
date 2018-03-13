@@ -709,7 +709,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
 
     private fun getPositionRatio() = appBar?.let { Math.max(0f, it.bottom / screenHeight.toFloat()) } ?: 0f
 
-    private fun getOrientation(getRatio: () -> Float, force: Boolean = false): Orientation {
+    private tailrec fun getOrientation(getRatio: () -> Float, force: Boolean = false): Orientation {
         return if (force) {
             val ratio = getRatio()
             when {
