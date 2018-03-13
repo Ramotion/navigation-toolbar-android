@@ -85,6 +85,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     private val viewFlinger = ViewFlinger(context)
     private val verticalGravity: VerticalGravity
     private val tempDecorRect = Rect()
+    private val itemDecorations = mutableListOf<ItemDecoration>()
 
     private val collapsingBySelectDuration: Int
     private val tabOnScreenCount: Int
@@ -110,7 +111,6 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     internal val itemClickListeners = mutableListOf<ItemClickListener>()
     internal val itemChangeListeners = mutableListOf<ItemChangeListener>()
     internal val scrollStateListeners = mutableListOf<ScrollStateListener>()
-    internal val itemDecorations = mutableListOf<ItemDecoration>() // TODO: update items decorator flags
 
     private var offsetAnimator: ValueAnimator? = null
     private var appBar: AppBarLayout? = null
@@ -542,6 +542,27 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
 
     fun getDecoratedBottom(child: View): Int {
         return child.bottom + getDecorInsetsForChild(child).bottom
+    }
+
+    internal fun addItemDecoration(decoration: ItemDecoration) {
+        itemDecorations += decoration
+        markItemDecorInsetsDirty()
+    }
+
+    internal fun removeItemDecoration(decoration: ItemDecoration) {
+        itemDecorations -= decoration
+        markItemDecorInsetsDirty()
+    }
+
+    private fun markItemDecorInsetsDirty() {
+        headerLayout?.also { header ->
+            val childCount = header.childCount
+            for (i in 0 until childCount) {
+                HeaderLayout.getChildLayoutParams(header.getChildAt(i))
+                        ?.let { it.decorRectValid = false }
+            }
+            header.recycler.markItemDecorInsetsDirty()
+        }
     }
 
     private fun getHorizontalAnchorPos(header: HeaderLayout): Int {

@@ -116,11 +116,11 @@ class NavigationToolBarLayout : CoordinatorLayout {
     }
 
     fun addItemDecoration(decoration: ItemDecoration) {
-        layoutManager.itemDecorations += decoration
+        layoutManager.addItemDecoration(decoration)
     }
 
     fun removeItemDecoration(decoration: ItemDecoration) {
-        layoutManager.itemDecorations -= decoration
+        layoutManager.removeItemDecoration(decoration)
     }
 
     fun setItemTransformer(newTransformer: ItemTransformer?) {

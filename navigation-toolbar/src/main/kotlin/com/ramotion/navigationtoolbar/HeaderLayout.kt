@@ -180,6 +180,13 @@ class HeaderLayout : FrameLayout {
             }
         }
 
+        internal fun markItemDecorInsetsDirty() {
+            viewCache.forEach { view ->
+                HeaderLayout.getChildLayoutParams(view)
+                        ?.let { it.decorRectValid = false }
+            }
+        }
+
         private fun bindViewToPosition(holder: ViewHolder, position: Int) {
             val adapter = adapter ?: throw RuntimeException("No adapter set")
             adapter.bindViewHolder(holder, position)
