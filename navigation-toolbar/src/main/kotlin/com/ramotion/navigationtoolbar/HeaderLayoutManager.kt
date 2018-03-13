@@ -332,7 +332,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
                 return
             }
 
-            val offset = (pos - anchorPos) * header.getChildAt(0).width
+            val offset = (pos - anchorPos) * getDecoratedWidth(header.getChildAt(0))
             onHeaderHorizontalScroll(header, offset.toFloat())
         } else if (header.isVerticalScrollEnabled) {
             val anchorPos = getVerticalAnchorPos(header)
@@ -374,8 +374,8 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
             }
 
             val anchorView = getHorizontalAnchorView(header) ?: return
-            val childWidth = anchorView.width
-            val offset = (pos - anchorPos) * childWidth + (anchorView.left - hx)
+            val childWidth = getDecoratedWidth(anchorView)
+            val offset = (pos - anchorPos) * childWidth + (getDecoratedLeft(anchorView) - hx)
             if (offset == 0) {
                 return
             }
@@ -420,7 +420,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
 
         for (i in 0 until header.childCount) {
             val child = header.getChildAt(i)
-            val diff = Math.abs(child.left - centerLeft).toInt()
+            val diff = Math.abs(getDecoratedLeft(child) - centerLeft)
             if (diff < lastDiff) {
                 lastDiff = diff
                 result = child
@@ -451,15 +451,18 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     fun layoutChild(child: View, x: Int, y: Int, w: Int, h: Int) {
         val inset = getDecorInsetsForChild(child)
 
+        val wPadding = inset.left + inset.right
         val hPadding = inset.top + inset.bottom
+        val pw = w - wPadding
         val ph = h - hPadding
 
-        val ws = View.MeasureSpec.makeMeasureSpec(w, View.MeasureSpec.EXACTLY)
+        val ws = View.MeasureSpec.makeMeasureSpec(pw, View.MeasureSpec.EXACTLY)
         val hs = View.MeasureSpec.makeMeasureSpec(ph, View.MeasureSpec.EXACTLY)
         child.measure(ws, hs)
 
+        val l = x + inset.left
         val t = y + inset.top
-        child.layout(x, t, x + w, t + ph)
+        child.layout(l, t, l + pw, t + ph)
     }
 
     fun fill(header: HeaderLayout) {
@@ -513,10 +516,24 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         return getAnchorView(header)?.let { HeaderLayout.getChildViewHolder(it) }?.position
     }
 
+    fun getDecoratedWidth(child: View): Int {
+        val width = child.width
+        val inset = getDecorInsetsForChild(child)
+        return width + inset.left + inset.right
+    }
+
     fun getDecoratedHeight(child: View): Int {
         val height = child.height
         val inset = getDecorInsetsForChild(child)
         return height + inset.top + inset.bottom
+    }
+
+    fun getDecoratedLeft(child: View): Int {
+        return child.left - getDecorInsetsForChild(child).left
+    }
+
+    fun getDecoratedRight(child: View): Int {
+        return child.right + getDecorInsetsForChild(child).right
     }
 
     fun getDecoratedTop(child: View): Int {
@@ -580,11 +597,11 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
 
         val scrollLeft = distance >= 0
         val offset = if (scrollLeft) {
-            val lastRight = header.getChildAt(childCount - 1).right
+            val lastRight = getDecoratedRight(header.getChildAt(childCount - 1))
             val newRight = lastRight - distance
             if (newRight > header.width) distance.toInt() else lastRight - header.width
         } else {
-            val firstLeft = header.getChildAt(0).left
+            val firstLeft = getDecoratedLeft(header.getChildAt(0))
             if (firstLeft > 0) { // TODO: firstTop > border, border - center or systemBar height
                 0
             } else {
@@ -666,7 +683,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
 
     private fun getStartX(view: View): Int {
         return HeaderLayout.getChildViewHolder(view)
-                ?.let { view.left - it.position * horizontalTabWidth }
+                ?.let { getDecoratedLeft(view) - it.position * horizontalTabWidth }
                 ?: throw RuntimeException("View holder not found")
     }
 
@@ -716,14 +733,14 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
 
         val top = appBar?.let { header.height - it.bottom } ?: hy
         val bottom = appBar?.bottom ?: horizontalTabHeight
-        val leftDiff = hx - (viewCache.get(anchorPos)?.left ?: 0)
+        val leftDiff = hx - (viewCache.get(anchorPos)?.let { getDecoratedLeft(it) } ?: 0)
 
         var pos = Math.max(0, anchorPos - centerIndex - tabOffsetCount)
         var left = (hx - (anchorPos - pos) * horizontalTabWidth) - leftDiff
 
         while (pos < anchorPos) {
             val view = getPlacedChildForPosition(header, pos, left, top, horizontalTabWidth, bottom)
-            left = view.right
+            left = getDecoratedRight(view)
             pos++
         }
     }
@@ -747,14 +764,14 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
 
         var pos = startPos
         var left  = if (header.childCount > 0) {
-            header.getChildAt(header.childCount - 1).right
+            getDecoratedRight(header.getChildAt(header.childCount - 1))
         } else {
             hx
         }
 
         while (pos <  maxPos) {
             val view = getPlacedChildForPosition(header, pos, left, top, horizontalTabWidth, bottom)
-            left = view.right
+            left = getDecoratedRight(view)
             pos++
         }
     }

@@ -135,7 +135,7 @@ open class DefaultItemTransformer
             val (x, y) = lm.getHorizontalPoint()
 
             for (i in 0 until header.childCount) {
-                vPoints.add(header.getChildAt(i).let { Point(it.left, lm.getDecoratedTop(it)) })
+                vPoints.add(header.getChildAt(i).let { Point(lm.getDecoratedLeft(it), lm.getDecoratedTop(it)) })
                 hPoints.add(Point(x + left + i * lm.horizontalTabWidth, y))
             }
         } else {
@@ -143,7 +143,7 @@ open class DefaultItemTransformer
             val (x, y) = lm.getVerticalPoint()
 
             for (i in 0 until header.childCount) {
-                hPoints.add(header.getChildAt(i).let { Point(it.left, lm.getDecoratedTop(it)) })
+                hPoints.add(header.getChildAt(i).let { Point(lm.getDecoratedLeft(it), lm.getDecoratedTop(it)) })
                 vPoints.add(Point(x, y + top + i * lm.verticalTabHeight))
             }
         }
@@ -158,7 +158,7 @@ open class DefaultItemTransformer
         val top = header.height - headerBottom
         (0 until header.childCount)
                 .map { header.getChildAt(it) }
-                .forEach { lm.layoutChild(it, it.left, top, it.width, headerBottom) }
+                .forEach { lm.layoutChild(it, lm.getDecoratedLeft(it), top, lm.getDecoratedWidth(it), headerBottom) }
     }
 
     private fun transformBottomHalf(lm: HeaderLayoutManager, header: HeaderLayout) {
