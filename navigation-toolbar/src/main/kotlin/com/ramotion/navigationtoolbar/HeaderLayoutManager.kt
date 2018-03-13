@@ -123,6 +123,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
 
     private var scrollState = ScrollState.IDLE
     private var curOrientation: Orientation? = null
+    private var prevOffset: Int = Int.MAX_VALUE
 
     var hPoint: Point? = null
     var vPoint: Point? = null
@@ -876,6 +877,11 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     }
 
     private fun onOffsetChangingStopped(offset: Int) {
+        if (offset == prevOffset) {
+            return
+        }
+        prevOffset = offset
+
         val header = headerLayout ?: return
         val appBar = appBar ?: return
 
