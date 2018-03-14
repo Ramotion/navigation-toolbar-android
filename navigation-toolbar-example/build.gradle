@@ -6,7 +6,7 @@ android {
     compileSdkVersion 26
 
     defaultConfig {
-        applicationId "com.ramotion.navigationtoolbar.example.simple"
+        applicationId "com.ramotion.navigationtoolbar.example"
         minSdkVersion 21
         targetSdkVersion 26
         versionCode 1

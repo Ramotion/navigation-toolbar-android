@@ -1,4 +1,4 @@
-package com.ramotion.navigationtoolbar.example.simple
+package com.ramotion.navigationtoolbar.example
 
 import android.graphics.Rect
 import android.os.Bundle

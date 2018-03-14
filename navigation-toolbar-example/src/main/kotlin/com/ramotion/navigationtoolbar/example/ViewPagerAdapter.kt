@@ -1,4 +1,4 @@
-package com.ramotion.navigationtoolbar.example.simple
+package com.ramotion.navigationtoolbar.example
 
 import android.support.v4.view.PagerAdapter
 import android.view.LayoutInflater

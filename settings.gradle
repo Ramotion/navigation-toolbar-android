@@ -1,1 +1,1 @@
-include ':navigation-toolbar', ':navigation-toolbar-example-simple'
+include ':navigation-toolbar', ':navigation-toolbar-example'

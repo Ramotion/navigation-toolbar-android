@@ -1,4 +1,4 @@
-package com.ramotion.navigationtoolbar.example.simple
+package com.ramotion.navigationtoolbar.example
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
