@@ -10,6 +10,7 @@ import android.view.MenuItem
 import com.ramotion.navigationtoolbar.HeaderLayout
 import com.ramotion.navigationtoolbar.HeaderLayoutManager
 import com.ramotion.navigationtoolbar.NavigationToolBarLayout
+import com.ramotion.navigationtoolbar.SimpleSnapHelper
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlin.math.ceil
 import kotlin.math.max

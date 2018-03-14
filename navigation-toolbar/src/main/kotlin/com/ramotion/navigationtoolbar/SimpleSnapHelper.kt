@@ -1,9 +1,7 @@
-package com.ramotion.navigationtoolbar.example.simple
+package com.ramotion.navigationtoolbar
 
-import com.ramotion.navigationtoolbar.HeaderLayoutManager
 import com.ramotion.navigationtoolbar.HeaderLayoutManager.ScrollState
 import com.ramotion.navigationtoolbar.HeaderLayoutManager.ScrollState.IDLE
-import com.ramotion.navigationtoolbar.NavigationToolBarLayout
 import java.lang.ref.WeakReference
 
 class SimpleSnapHelper : HeaderLayoutManager.ScrollStateListener {
