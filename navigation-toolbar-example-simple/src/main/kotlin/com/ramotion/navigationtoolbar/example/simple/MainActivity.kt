@@ -11,6 +11,8 @@ import com.ramotion.navigationtoolbar.HeaderLayout
 import com.ramotion.navigationtoolbar.HeaderLayoutManager
 import com.ramotion.navigationtoolbar.NavigationToolBarLayout
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlin.math.ceil
+import kotlin.math.max
 
 class MainActivity : AppCompatActivity() {
 
@@ -83,16 +85,26 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
-        header.addItemDecoration(object : HeaderLayoutManager.ItemDecoration {
-            val right = resources.getDimensionPixelSize(R.dimen.decor_right)
-            val left = resources.getDimensionPixelSize(R.dimen.decor_right)
-            val bottom = resources.getDimensionPixelSize(R.dimen.decor_bottom)
-            override fun getItemOffsets(outRect: Rect, viewHolder: HeaderLayout.ViewHolder) {
-                outRect.left = left
-                outRect.right = right
-                outRect.bottom = bottom
+        val decorator = object :
+                HeaderLayoutManager.ItemDecoration,
+                HeaderLayoutManager.HeaderChangeListener {
+
+            private val dp5 = resources.getDimensionPixelSize(R.dimen.decor_bottom)
+
+            private var bottomOffset = dp5
+
+            override fun onHeaderChanged(lm: HeaderLayoutManager, header: HeaderLayout, headerBottom: Int) {
+                val ratio = max(0f, headerBottom.toFloat() / header.height - 0.5f) / 0.5f
+                bottomOffset = ceil(dp5 * ratio).toInt()
             }
-        })
+
+            override fun getItemOffsets(outRect: Rect, viewHolder: HeaderLayout.ViewHolder) {
+                outRect.bottom = bottomOffset
+            }
+        }
+
+        header.addItemDecoration(decorator)
+        header.addHeaderChangeListener(decorator)
 
         SimpleSnapHelper().attach(header)
     }

@@ -120,6 +120,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     private var isCanDrag = true
     private var isOffsetChanged = false
     private var isCheckingScrollStop =false
+    private var isHeaderChanging = false
 
     private var scrollState = ScrollState.IDLE
     private var curOrientation: Orientation? = null
@@ -305,6 +306,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         val headerBottom = dependency.bottom
         header.y = (headerBottom - header.height).toFloat() // Offset header on collapsing
         curOrientation = null
+        isHeaderChanging = true
         viewFlinger.stop()
         changeListener.forEach { it.onHeaderChanged(this, header, headerBottom) }
         return true
@@ -877,6 +879,8 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     }
 
     private fun onOffsetChangingStopped(offset: Int) {
+        isHeaderChanging = false
+
         if (offset == prevOffset) {
             return
         }
@@ -959,7 +963,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
                 ?: throw RuntimeException("No view holder")
 
         val decorRect = lp.decorRect
-        if (lp.decorRectValid) {
+        if (!isHeaderChanging && lp.decorRectValid) {
             return decorRect
         }
 
