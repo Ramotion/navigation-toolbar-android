@@ -81,6 +81,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     }
 
     private val tabOffsetCount = TAB_OFF_SCREEN_COUNT
+    private val verticalScrollTopBorder: Int
     private val viewCache = SparseArray<View?>()
     private val viewFlinger = ViewFlinger(context)
     private val verticalGravity: VerticalGravity
@@ -99,7 +100,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     val horizontalTabWidth = screenWidth
     val horizontalTabHeight = screenHalf.toInt()
 
-    val topBorder: Int
+    val workTopBorder: Int
     val workHeight: Int
     val verticalTabWidth: Int
     val verticalTabHeight: Int
@@ -230,16 +231,16 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         var verticalItemWidth = screenWidth * VERTICAL_TAB_WIDTH_RATIO
         var gravity = VerticalGravity.RIGHT
         var collapsingDuration = COLLAPSING_BY_SELECT_DURATION
+        var vScrollTopBorder = false
 
         attrs?.also {
             val a = context.theme.obtainStyledAttributes(attrs, R.styleable.NavigationToolBarr, 0, 0)
             try {
                 itemCount = a.getInteger(R.styleable.NavigationToolBarr_headerItemsCount, -1)
                         .let { if (it <= 0) TAB_ON_SCREEN_COUNT else it }
-
                 gravity = VerticalGravity.fromInt(a.getInteger(R.styleable.NavigationToolBarr_headerVerticalGravity, VerticalGravity.RIGHT.value))
-
                 collapsingDuration = a.getInteger(R.styleable.NavigationToolBarr_headerCollapsingBySelectDuration, COLLAPSING_BY_SELECT_DURATION)
+                vScrollTopBorder = a.getBoolean(R.styleable.NavigationToolBarr_headerTopBorderAtSystemBar, false)
 
                 if (a.hasValue(R.styleable.NavigationToolBarr_headerVerticalItemWidth)) {
                     verticalItemWidth = if (a.getType(R.styleable.NavigationToolBarr_headerVerticalItemWidth) == TypedValue.TYPE_DIMENSION) {
@@ -273,11 +274,13 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
             styledAttributes.recycle()
         }
 
-        topBorder = actionBarSize + statusBarHeight
-        workHeight = screenHeight - topBorder
+        workTopBorder = actionBarSize + statusBarHeight
+        workHeight = screenHeight - workTopBorder
 
-        topSnapDistance = (topBorder + (screenHalf - topBorder) / 2).toInt()
+        topSnapDistance = (workTopBorder + (screenHalf - workTopBorder) / 2).toInt()
         bottomSnapDistance = (screenHalf + screenHalf / 2).toInt()
+
+        verticalScrollTopBorder = if (vScrollTopBorder) statusBarHeight else 0
     }
 
     override fun layoutDependsOn(parent: CoordinatorLayout, child: HeaderLayout, dependency: View): Boolean {
@@ -657,11 +660,11 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
             if (newBottom > header.height) distance.toInt() else lastBottom - header.height
         } else {
             val firstTop = getDecoratedTop(header.getChildAt(0))
-            if (firstTop > 0) { // TODO: firstTop > border, border - center or systemBar height
+            if (firstTop > verticalScrollTopBorder) {
                 0
             } else {
                 val newTop = firstTop - distance
-                if (newTop < 0) distance.toInt() else firstTop
+                if (newTop < verticalScrollTopBorder) distance.toInt() else firstTop - verticalScrollTopBorder
             }
         }
 
@@ -720,7 +723,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     private fun initPoints(header: HeaderLayout) {
         val hx = 0
         val hy = screenHalf.toInt()
-        val vy = (screenHeight / tabOnScreenCount) * centerIndex
+        val vy = (screenHeight / tabOnScreenCount) * centerIndex + verticalScrollTopBorder
         val vx = when (verticalGravity) {
             HeaderLayoutManager.VerticalGravity.LEFT -> 0
             HeaderLayoutManager.VerticalGravity.CENTER -> header.width - verticalTabWidth / 2
@@ -902,11 +905,11 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
                 hScrollEnable = true
                 isCanDrag = false
             }
-            topBorder -> {
+            workTopBorder -> {
                 hScrollEnable = true
                 isCanDrag = true
             }
-            in topBorder..(topSnapDistance - 1) -> {
+            in workTopBorder..(topSnapDistance - 1) -> {
                 appBar.setExpanded(false, true)
             }
             in topSnapDistance..(bottomSnapDistance - 1) -> {

@@ -27,7 +27,7 @@ open class DefaultItemTransformer
     override fun attach(ntl: NavigationToolBarLayout) {
         ntl.layoutManager.also { lm ->
             ratioWork = lm.workHeight / lm.screenHeight.toFloat()
-            ratioTopHalf = lm.topBorder / lm.screenHeight.toFloat()
+            ratioTopHalf = lm.workTopBorder / lm.screenHeight.toFloat()
             ratioBottomHalf = lm.screenHalf / lm.screenHeight.toFloat()
         }
 
@@ -114,7 +114,7 @@ open class DefaultItemTransformer
 
     private fun updateRatios(lm: HeaderLayoutManager, headerBottom: Int) {
         currentRatio = max(0f, headerBottom / lm.screenHeight.toFloat())
-        currentRatioWork = max(0f, (headerBottom - lm.topBorder) / lm.workHeight.toFloat())
+        currentRatioWork = max(0f, (headerBottom - lm.workTopBorder) / lm.workHeight.toFloat())
         currentRatioTopHalf = max(0f, 1 - (ratioBottomHalf - min(max(currentRatio, ratioTopHalf), ratioBottomHalf)) / (ratioBottomHalf - ratioTopHalf))
         currentRatioBottomHalf = max(0f, (currentRatio - ratioBottomHalf) / ratioBottomHalf)
     }

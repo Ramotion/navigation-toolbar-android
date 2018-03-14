@@ -4,6 +4,7 @@
         <attr name="headerBackgroundSrc" format="reference"/>
         <attr name="headerItemsCount" format="integer"/>
         <attr name="headerCollapsingBySelectDuration" format="integer"/>
+        <attr name="headerTopBorderAtSystemBar" format="boolean"/>
         <attr name="headerVerticalItemWidth" format="dimension">
             <enum name="fill_parent" value="-1"/>
             <enum name="match_parent" value="-1"/>
