@@ -403,6 +403,15 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
                 return
             }
 
+            if (pos == anchorPos) {
+                val lastChild = header.getChildAt(header.childCount - 1)
+                val lastChildPos = HeaderLayout.getChildViewHolder(lastChild)?.position ?: HeaderLayout.INVALID_POSITION
+                val lastChildIsLastItem = lastChildPos == itemCount - 1
+                if (lastChildIsLastItem && lastChild.bottom <= header.height) {
+                    return
+                }
+            }
+
             val startY = getStartY(anchorView)
             val delta = abs(offset) / childHeight.toFloat()
             val duration = min(((delta + 1) * 100).toInt(), MAX_SCROLL_DURATION.toInt())
