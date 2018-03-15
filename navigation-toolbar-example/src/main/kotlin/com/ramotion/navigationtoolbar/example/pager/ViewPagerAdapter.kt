@@ -1,13 +1,20 @@
-package com.ramotion.navigationtoolbar.example
+package com.ramotion.navigationtoolbar.example.pager
 
 import android.support.v4.view.PagerAdapter
+import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
+import com.ramotion.navigationtoolbar.example.R
+import java.util.*
 
 
-class ViewPagerAdapter(private val size: Int) : PagerAdapter() {
+class ViewPagerAdapter(private val content: Array<Int>,
+                       private val size: Int) : PagerAdapter() {
+
+    private companion object {
+        val random = Random()
+    }
 
     override fun getCount(): Int = size
 
@@ -15,7 +22,7 @@ class ViewPagerAdapter(private val size: Int) : PagerAdapter() {
 
     override fun instantiateItem(container: ViewGroup, position: Int): Any {
         val view = LayoutInflater.from(container.context).inflate(R.layout.pager_item, container, false)
-        view.findViewById<TextView>(R.id.number).text = position.toString()
+        initRecyclerView(view as RecyclerView, position)
         container.addView(view)
         return view
     }
@@ -25,4 +32,10 @@ class ViewPagerAdapter(private val size: Int) : PagerAdapter() {
     }
 
     override fun getPageTitle(position: Int): CharSequence = position.toString()
+
+    private fun initRecyclerView(recyclerView: RecyclerView, position: Int) {
+        val adapter = PageAdapter(random.nextInt(10) + 5, content[position % content.size])
+        recyclerView.adapter = adapter
+    }
+
 }
