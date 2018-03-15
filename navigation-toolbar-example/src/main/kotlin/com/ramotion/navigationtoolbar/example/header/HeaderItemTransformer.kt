@@ -1,4 +1,4 @@
-package com.ramotion.navigationtoolbar.example
+package com.ramotion.navigationtoolbar.example.header
 
 import android.view.View
 import com.ramotion.navigationtoolbar.DefaultItemTransformer

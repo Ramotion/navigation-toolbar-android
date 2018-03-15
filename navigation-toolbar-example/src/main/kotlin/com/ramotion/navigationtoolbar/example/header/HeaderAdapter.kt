@@ -1,8 +1,9 @@
-package com.ramotion.navigationtoolbar.example
+package com.ramotion.navigationtoolbar.example.header
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.ramotion.navigationtoolbar.HeaderLayout
+import com.ramotion.navigationtoolbar.example.R
 
 class HeaderAdapter(private val content: Array<Int>,
                     private val count: Int) : HeaderLayout.Adapter<HeaderItem>() {

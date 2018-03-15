@@ -1,10 +1,11 @@
-package com.ramotion.navigationtoolbar.example
+package com.ramotion.navigationtoolbar.example.header
 
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import com.ramotion.navigationtoolbar.HeaderLayout
+import com.ramotion.navigationtoolbar.example.R
 
 class HeaderItem(view: View) : HeaderLayout.ViewHolder(view) {
 
