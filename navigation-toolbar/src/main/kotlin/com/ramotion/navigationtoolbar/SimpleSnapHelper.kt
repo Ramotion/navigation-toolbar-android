@@ -14,7 +14,7 @@ class SimpleSnapHelper : HeaderLayoutManager.ScrollStateListener {
         }
 
         toolBarRef?.get()?.also { toolbar ->
-            toolbar.getAnchorPos()?.also { toolbar.smoothScrollToPosition(it) }
+            toolbar.smoothScrollToPosition(toolbar.getAnchorPos())
         }
     }
 

@@ -354,6 +354,10 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     }
 
     fun smoothScrollToPosition(pos: Int) {
+        if (pos == HeaderLayout.INVALID_POSITION) {
+            return
+        }
+
         val hx = hPoint?.x ?: return
         val vy = vPoint?.y ?: return
 
@@ -405,7 +409,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
 
             if (pos == anchorPos) {
                 val lastChild = header.getChildAt(header.childCount - 1)
-                val lastChildPos = HeaderLayout.getChildViewHolder(lastChild)?.position ?: HeaderLayout.INVALID_POSITION
+                val lastChildPos = HeaderLayout.getChildPosition(lastChild)
                 val lastChildIsLastItem = lastChildPos == itemCount - 1
                 if (lastChildIsLastItem && lastChild.bottom <= header.height) {
                     return
@@ -492,22 +496,19 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
 
         for (i in 0 until header.childCount) {
             val view = header.getChildAt(i)
-            viewCache.put(header.getAdapterPosition(view), view)
+            viewCache.put(HeaderLayout.getChildPosition(view), view)
         }
 
         for (i in 0 until viewCache.size()) {
             viewCache.valueAt(i)?.also { header.detachView(it) }
         }
 
-        when (orientation) {
-            Orientation.HORIZONTAL -> {
-                fillLeft(header, pos)
-                fillRight(header, pos)
-            }
-            Orientation.VERTICAL -> {
-                fillTop(header, pos)
-                fillBottom(header, pos)
-            }
+        if (orientation == Orientation.HORIZONTAL) {
+            fillLeft(header, pos)
+            fillRight(header, pos)
+        } else{
+            fillTop(header, pos)
+            fillBottom(header, pos)
         }
 
         for (i in 0 until viewCache.size()) {
@@ -527,8 +528,10 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         }
     }
 
-    fun getAnchorPos(header: HeaderLayout): Int? {
-        return getAnchorView(header)?.let { HeaderLayout.getChildViewHolder(it) }?.position
+    fun getAnchorPos(header: HeaderLayout): Int {
+        return getAnchorView(header)
+                ?.let { HeaderLayout.getChildPosition(it) }
+                ?: HeaderLayout.INVALID_POSITION
     }
 
     fun getDecoratedWidth(child: View): Int {
@@ -582,13 +585,13 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
 
     private fun getHorizontalAnchorPos(header: HeaderLayout): Int {
         return getHorizontalAnchorView(header)
-                ?.let { header.getAdapterPosition(it) }
+                ?.let { HeaderLayout.getChildPosition(it) }
                 ?: HeaderLayout.INVALID_POSITION
     }
 
     private fun getVerticalAnchorPos(header: HeaderLayout): Int {
         return getVerticalAnchorView(header)
-                ?.let { header.getAdapterPosition(it) }
+                ?.let { HeaderLayout.getChildPosition(it) }
                 ?: HeaderLayout.INVALID_POSITION
     }
 

@@ -18,6 +18,8 @@ class HeaderLayout : FrameLayout {
         fun getChildLayoutParams(child: View) = child.layoutParams as? LayoutParams
 
         fun getChildViewHolder(child: View) = getChildLayoutParams(child)?.viewHolder
+
+        fun getChildPosition(child: View) = getChildViewHolder(child)?.position ?: INVALID_POSITION
     }
 
     internal interface ScrollListener {
@@ -113,9 +115,6 @@ class HeaderLayout : FrameLayout {
         constructor(source: ViewGroup.LayoutParams) : super(source)
 
         constructor(source: LayoutParams) : super(source as ViewGroup.LayoutParams)
-
-        fun getViewAdapterPosition() = viewHolder?.position ?: INVALID_POSITION
-
     }
 
     abstract class Adapter<VH : ViewHolder> {
@@ -214,8 +213,6 @@ class HeaderLayout : FrameLayout {
         }
         super.onDetachedFromWindow()
     }
-
-    fun getAdapterPosition(view: View) = (view.layoutParams as LayoutParams).getViewAdapterPosition()
 
     internal fun detachView(child: View) = detachViewFromParent(child)
 
