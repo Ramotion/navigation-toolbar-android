@@ -219,7 +219,7 @@ class HeaderLayout : FrameLayout {
     internal fun attachView(child: View) = attachViewToParent(child, -1, child.layoutParams)
 
     internal fun setAdapter(adapter: Adapter<out ViewHolder>) {
-        this.adapter = adapter as Adapter<ViewHolder> // TODO: fix?
+        this.adapter = adapter as Adapter<ViewHolder>
     }
 
 }
