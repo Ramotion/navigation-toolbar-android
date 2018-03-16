@@ -322,105 +322,28 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     // TODO: fun scroll(distance)
 
     fun scrollToPosition(pos: Int) {
-        val header = headerLayout ?: return
-        if (header.childCount == 0) {
-            return
-        }
-
-        val itemCount = header.adapter?.getItemCount() ?: -1
-        if (pos < 0 || pos > itemCount) {
-            return
-        }
-
-        if (header.isHorizontalScrollEnabled) {
-            val anchorPos = getHorizontalAnchorPos(header)
-            if (anchorPos == pos) {
-                return
+        scrollToPosition(pos, { header, _, offset, horizontal ->
+            when(horizontal) {
+                true -> onHeaderHorizontalScroll(header, offset.toFloat())
+                else -> onHeaderVerticalScroll(header, offset.toFloat())
             }
-
-            val offset = (pos - anchorPos) * getDecoratedWidth(header.getChildAt(0))
-            onHeaderHorizontalScroll(header, offset.toFloat())
-        } else if (header.isVerticalScrollEnabled) {
-            val anchorPos = getVerticalAnchorPos(header)
-            if (anchorPos == pos) {
-                return
-            }
-
-            val offset = (pos - anchorPos) * getDecoratedHeight(header.getChildAt(0))
-            onHeaderVerticalScroll(header, offset.toFloat())
-        }
-
-        itemChangeListeners.forEach { it.onItemChanged(pos) }
+        })
     }
 
     fun smoothScrollToPosition(pos: Int) {
-        if (pos == HeaderLayout.INVALID_POSITION) {
-            return
-        }
-
-        val hx = hPoint?.x ?: return
-        val vy = vPoint?.y ?: return
-
-        if (offsetAnimator?.isRunning == true) {
-            return
-        }
-
-        val header = headerLayout ?: return
-        if (header.childCount == 0) {
-            return
-        }
-
-        val itemCount = header.adapter?.getItemCount() ?: -1
-        if (pos < 0 || pos > itemCount) {
-            return
-        }
-
-        itemChangeListeners.forEach { it.onItemChanged(pos) }
-
-        if (header.isHorizontalScrollEnabled) {
-            val anchorPos = getHorizontalAnchorPos(header)
-            if (anchorPos == HeaderLayout.INVALID_POSITION) {
-                return
+        scrollToPosition(pos, {_, anchorView, offset, horizontal ->
+            if (horizontal) {
+                val startX = getStartX(anchorView)
+                val delta = abs(offset) / horizontalTabWidth
+                val duration = min((delta + 1) * 100, MAX_SCROLL_DURATION.toInt())
+                viewFlinger.startScroll(startX, 0, -offset, 0, duration)
+            } else {
+                val startY = getStartY(anchorView)
+                val delta = abs(offset) / verticalTabHeight
+                val duration = min((delta + 1) * 100, MAX_SCROLL_DURATION.toInt())
+                viewFlinger.startScroll(0, startY, 0, -offset, duration)
             }
-
-            val anchorView = getHorizontalAnchorView(header) ?: return
-            val childWidth = getDecoratedWidth(anchorView)
-            val offset = (pos - anchorPos) * childWidth + (getDecoratedLeft(anchorView) - hx)
-            if (offset == 0) {
-                return
-            }
-
-            val startX = getStartX(anchorView)
-            val delta = abs(offset) / childWidth.toFloat()
-            val duration = min(((delta + 1) * 100).toInt(), MAX_SCROLL_DURATION.toInt())
-            viewFlinger.startScroll(startX, 0, -offset, 0, duration)
-        } else if (header.isVerticalScrollEnabled) {
-            val anchorPos = getVerticalAnchorPos(header)
-            if (anchorPos == HeaderLayout.INVALID_POSITION) {
-                return
-            }
-
-            val anchorView = getVerticalAnchorView(header) ?: return
-            val childHeight = getDecoratedHeight(anchorView)
-            val offset = (pos - anchorPos) * childHeight + (getDecoratedTop(anchorView) - vy)
-            if (offset == 0) {
-                return
-            }
-
-            if (pos == anchorPos) {
-                val lastChild = header.getChildAt(header.childCount - 1)
-                val lastChildPos = HeaderLayout.getChildPosition(lastChild)
-                val lastChildIsLastItem = lastChildPos == itemCount - 1
-                if (lastChildIsLastItem && lastChild.bottom <= header.height) {
-                    return
-                }
-            }
-
-            val startY = getStartY(anchorView)
-            val delta = abs(offset) / childHeight.toFloat()
-            val duration = min(((delta + 1) * 100).toInt(), MAX_SCROLL_DURATION.toInt())
-            viewFlinger.startScroll(0, startY, 0, -offset, duration)
-        }
+        })
     }
 
     fun getHorizontalPoint(): Point {
@@ -570,6 +493,63 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     internal fun removeItemDecoration(decoration: ItemDecoration) {
         itemDecorations -= decoration
         markItemDecorInsetsDirty()
+    }
+
+    private fun scrollToPosition(pos: Int,
+                                 task: (header: HeaderLayout,
+                                        anchorView: View,
+                                        offset: Int,
+                                        horizontal: Boolean) -> Unit)
+    {
+        if (offsetAnimator?.isRunning == true) {
+            return
+        }
+
+        val hx = hPoint?.x ?: return
+        val vy = vPoint?.y ?: return
+
+        val header = headerLayout ?: return
+        if (header.childCount == 0) {
+            return
+        }
+
+        val itemCount = header.adapter?.getItemCount() ?: -1
+        if (pos < 0 || pos > itemCount) {
+            return
+        }
+
+        val anchorView = getAnchorView(header) ?: return
+        val anchorPos = HeaderLayout.getChildPosition(anchorView)
+        if (anchorPos == HeaderLayout.INVALID_POSITION) {
+            return
+        }
+
+        val offset = if (header.isHorizontalScrollEnabled) {
+            val childWidth = getDecoratedWidth(anchorView)
+            (pos - anchorPos) * childWidth + (getDecoratedLeft(anchorView) - hx)
+        } else if (header.isVerticalScrollEnabled) {
+            val childHeight = getDecoratedHeight(anchorView)
+            (pos - anchorPos) * childHeight + (getDecoratedTop(anchorView) - vy)
+        } else {
+            0
+        }
+
+        if (offset == 0) {
+            return
+        }
+
+        if (pos == anchorPos && header.isVerticalScrollEnabled) {
+            val lastChild = header.getChildAt(header.childCount - 1)
+            val lastChildPos = HeaderLayout.getChildPosition(lastChild)
+            val lastChildIsLastItem = lastChildPos == itemCount - 1
+            if (lastChildIsLastItem && lastChild.bottom <= header.height) {
+                return
+            }
+        }
+
+        itemChangeListeners.forEach { it.onItemChanged(pos) }
+
+        task(header, anchorView, offset, header.isHorizontalScrollEnabled)
     }
 
     private fun markItemDecorInsetsDirty() {
@@ -916,10 +896,12 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
             screenHalf.toInt() -> {
                 hScrollEnable = true
                 isCanDrag = false
+                header.postOnAnimation { smoothScrollToPosition(getAnchorPos(header)) }
             }
             workTopBorder -> {
                 hScrollEnable = true
                 isCanDrag = true
+                header.postOnAnimation { smoothScrollToPosition(getAnchorPos(header)) }
             }
             in workTopBorder..(topSnapDistance - 1) -> {
                 appBar.setExpanded(false, true)
