@@ -3,17 +3,20 @@ package com.ramotion.navigationtoolbar
 import android.content.Context
 import android.support.annotation.AttrRes
 import android.support.design.widget.AppBarLayout
+import android.support.design.widget.CollapsingToolbarLayout
 import android.support.design.widget.CoordinatorLayout
 import android.support.v7.widget.Toolbar
 import android.util.AttributeSet
 import android.view.LayoutInflater
-import android.view.ViewStub
-import android.widget.ImageView
 import com.ramotion.navigationtoolbar.HeaderLayoutManager.*
 import kotlin.math.min
 
 
 class NavigationToolBarLayout : CoordinatorLayout {
+
+    private companion object {
+        const val maxBackgroundRatio = 0.8f
+    }
 
     abstract class ItemTransformer : HeaderChangeListener, HeaderUpdateListener {
         abstract fun attach(ntl: NavigationToolBarLayout)
@@ -54,18 +57,9 @@ class NavigationToolBarLayout : CoordinatorLayout {
         attrs?.also {
             val a = context.theme.obtainStyledAttributes(attrs, R.styleable.NavigationToolBarr, defStyleAttr, 0)
             try {
-                val imgResID = a.getResourceId(R.styleable.NavigationToolBarr_headerBackgroundSrc, -1)
-                if (imgResID != -1) {
-                    val imageView = findViewById<ViewStub>(R.id.com_ramotion_background_stub).inflate() as ImageView
-                    imageView.setImageResource(imgResID)
-                    addHeaderChangeListener(object : HeaderChangeListener {
-                        val maxRatio = 0.8f
-                        override fun onHeaderChanged(lm: HeaderLayoutManager, header: HeaderLayout, headerBottom: Int) {
-                            val ratio = 1f - headerBottom / (headerLayout.height + 1f)
-                            val alpha = (maxRatio - min(maxRatio, ratio)) / maxRatio
-                            imageView.alpha = alpha
-                        }
-                    })
+                if (a.hasValue(R.styleable.NavigationToolBarr_headerBackgroundLayout)) {
+                    val backgroundId = a.getResourceId(R.styleable.NavigationToolBarr_headerBackgroundLayout, -1)
+                    initBackgroundLayout(context, backgroundId)
                 }
             } finally {
                 a.recycle()
@@ -138,4 +132,15 @@ class NavigationToolBarLayout : CoordinatorLayout {
         }
     }
 
+    private fun initBackgroundLayout(context: Context, layoutId: Int) {
+        val ctl = findViewById<CollapsingToolbarLayout>(R.id.com_ramotion_toolbar_layout)
+        val background = LayoutInflater.from(context).inflate(layoutId, ctl, true)
+        addHeaderChangeListener(object : HeaderChangeListener {
+            override fun onHeaderChanged(lm: HeaderLayoutManager, header: HeaderLayout, headerBottom: Int) {
+                val ratio = 1f - headerBottom / (headerLayout.height + 1f)
+                val alpha = (maxBackgroundRatio - min(maxBackgroundRatio, ratio)) / maxBackgroundRatio
+                background.alpha = alpha
+            }
+        })
+    }
 }

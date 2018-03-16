@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <declare-styleable name="NavigationToolBarr">
-        <attr name="headerBackgroundSrc" format="reference"/>
+        <attr name="headerBackgroundLayout" format="reference"/>
         <attr name="headerItemsCount" format="integer"/>
         <attr name="headerCollapsingBySelectDuration" format="integer"/>
         <attr name="headerTopBorderAtSystemBar" format="boolean"/>
