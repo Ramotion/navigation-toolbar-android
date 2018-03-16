@@ -9,13 +9,16 @@ import android.support.v7.widget.Toolbar
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import com.ramotion.navigationtoolbar.HeaderLayoutManager.*
+import kotlin.math.max
 import kotlin.math.min
 
 
 class NavigationToolBarLayout : CoordinatorLayout {
 
     private companion object {
-        const val maxBackgroundRatio = 0.8f
+        const val HEADER_HIDE_START = 0.5f
+        const val HEADER_HIDE_END = 0.8f
+        const val HEADER_HIDE_DIFF = HEADER_HIDE_END - HEADER_HIDE_START
     }
 
     abstract class ItemTransformer : HeaderChangeListener, HeaderUpdateListener {
@@ -138,8 +141,8 @@ class NavigationToolBarLayout : CoordinatorLayout {
         addHeaderChangeListener(object : HeaderChangeListener {
             override fun onHeaderChanged(lm: HeaderLayoutManager, header: HeaderLayout, headerBottom: Int) {
                 val ratio = 1f - headerBottom / (headerLayout.height + 1f)
-                val alpha = (maxBackgroundRatio - min(maxBackgroundRatio, ratio)) / maxBackgroundRatio
-                background.alpha = alpha
+                val headerAlpha = (HEADER_HIDE_END - min(HEADER_HIDE_END, max(HEADER_HIDE_START, ratio))) / HEADER_HIDE_DIFF
+                background.alpha = headerAlpha
             }
         })
     }
