@@ -6,8 +6,14 @@
     android:layout_height="match_parent"
     android:elevation="2dp">
 
+    <View
+        android:id="@+id/gradient"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
     <ImageView
         android:id="@+id/background"
+        android:alpha="0.1"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerCrop"/>

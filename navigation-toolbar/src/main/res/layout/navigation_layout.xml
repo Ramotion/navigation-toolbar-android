@@ -20,18 +20,7 @@
             android:fitsSystemWindows="true"
             android:minHeight="?attr/actionBarSize"
             app:titleEnabled="false"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed">
-
-            <ViewStub
-                android:id="@+id/com_ramotion_background_stub"
-                android:layout="@layout/header_background"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:fitsSystemWindows="true"
-                app:layout_collapseMode="parallax"
-                app:layout_scrollFlags="scroll|exitUntilCollapsed"/>
-
-        </android.support.design.widget.CollapsingToolbarLayout>
+            app:layout_scrollFlags="scroll|exitUntilCollapsed"/>
 
     </android.support.design.widget.AppBarLayout>
 

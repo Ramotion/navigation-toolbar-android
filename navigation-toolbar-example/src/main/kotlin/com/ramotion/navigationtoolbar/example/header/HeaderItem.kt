@@ -9,12 +9,14 @@ import com.ramotion.navigationtoolbar.example.R
 
 class HeaderItem(view: View) : HeaderLayout.ViewHolder(view) {
 
+    private val gradient = view.findViewById<View>(R.id.gradient)
     private val background = view.findViewById<ImageView>(R.id.background)
 
     internal val title = view.findViewById<TextView>(R.id.title)
 
-    fun setContent(imgId: Int) {
-        background.setImageResource(imgId)
+    fun setContent(gradientId: Int, imageId: Int) {
+        gradient.setBackgroundResource(gradientId)
+        background.setImageResource(imageId)
         title.text = "Title $position"
     }
 

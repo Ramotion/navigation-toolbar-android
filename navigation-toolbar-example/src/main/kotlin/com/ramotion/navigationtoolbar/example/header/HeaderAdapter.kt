@@ -5,8 +5,10 @@ import android.view.ViewGroup
 import com.ramotion.navigationtoolbar.HeaderLayout
 import com.ramotion.navigationtoolbar.example.R
 
-class HeaderAdapter(private val content: Array<Int>,
-                    private val count: Int) : HeaderLayout.Adapter<HeaderItem>() {
+class HeaderAdapter(
+        private val count: Int,
+        private val gradients: Array<Int>,
+        private val images: Array<Int>) : HeaderLayout.Adapter<HeaderItem>() {
 
     override fun getItemCount() = count
 
@@ -16,7 +18,9 @@ class HeaderAdapter(private val content: Array<Int>,
     }
 
     override fun onBindViewHolder(holder: HeaderItem, position: Int) {
-        holder.setContent(content[position % content.size])
+        val gradient = gradients[position % gradients.size]
+        val image = images[position % images.size]
+        holder.setContent(gradient, image)
     }
 
     override fun onViewRecycled(holder: HeaderItem) {

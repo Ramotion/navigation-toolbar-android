@@ -21,7 +21,20 @@ import kotlin.math.max
 class MainActivity : AppCompatActivity() {
 
     private val itemCount = 20
-    private val pictures = intArrayOf(R.drawable.p1, R.drawable.p2, R.drawable.p3, R.drawable.p4, R.drawable.p5).toTypedArray()
+
+    private val items_images = intArrayOf(
+            R.drawable.card_1_background,
+            R.drawable.card_2_background,
+            R.drawable.card_3_background,
+            R.drawable.card_4_background)
+            .toTypedArray()
+
+    private val items_gradients = intArrayOf(
+            R.drawable.card_1_gradient,
+            R.drawable.card_2_gradient,
+            R.drawable.card_3_gradient,
+            R.drawable.card_4_gradient)
+            .toTypedArray()
 
     private lateinit var viewPager: ViewPager
     private lateinit var header: NavigationToolBarLayout
@@ -64,7 +77,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun initViewPager() {
         viewPager = findViewById(R.id.pager)
-        viewPager.adapter = ViewPagerAdapter(pictures, itemCount)
+        viewPager.adapter = ViewPagerAdapter(items_images, itemCount)
         viewPager.addOnPageChangeListener(object : ViewPager.SimpleOnPageChangeListener() {
             override fun onPageSelected(position: Int) {
                 header.smoothScrollToPosition(position)
@@ -75,7 +88,7 @@ class MainActivity : AppCompatActivity() {
     private fun initHeader() {
         header = findViewById(R.id.navigation_toolbar_layout)
         header.setItemTransformer(HeaderItemTransformer(-50, 0.35f))
-        header.setAdapter(HeaderAdapter(pictures, itemCount))
+        header.setAdapter(HeaderAdapter(itemCount, items_gradients, items_images))
 
         header.addItemChangeListener(object : HeaderLayoutManager.ItemChangeListener {
             override fun onItemChanged(position: Int) {
