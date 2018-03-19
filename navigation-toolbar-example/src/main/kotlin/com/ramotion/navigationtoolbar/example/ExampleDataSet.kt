@@ -28,7 +28,7 @@ class ExampleDataSet {
     private val headerGradients = intArrayOf(R.drawable.card_1_gradient, R.drawable.card_2_gradient, R.drawable.card_3_gradient, R.drawable.card_4_gradient).toTypedArray()
     private val headerTitles = arrayOf("TECHNOLOGY", "SCIENCE", "MOVIES", "GAMING")
 
-    private val userNames = arrayOf("aaron_bradley", "barry_allen", "bella_holmes", "caroline_shaw", "connor_graham", "deann_hunt", "ella_cole", "jayden_shaw", "jerry_carrol", "lena_lucas", "leonrd_kim", "marc_baker", "marjorie_ellis", "mattew_jordan", "ross_rodriguez", "tina_caldwell", "wallace_sutton")
+    private val userNames = arrayOf("Aaron Bradley", "Barry Allen", "Bella Holmes", "Caroline Shaw", "Connor Graham", "Deann Hunt", "Ella Cole", "Jayden Shaw", "Jerry Carrol", "Lena Lucas", "Leonrd Kim", "Marc Baker", "Marjorie Ellis", "Mattew Jordan", "Ross Rodriguez", "Tina Caldwell", "Wallace Sutton")
     private val avatars = intArrayOf(R.drawable.aaron_bradley, R.drawable.barry_allen, R.drawable.bella_holmes, R.drawable.caroline_shaw, R.drawable.connor_graham, R.drawable.deann_hunt, R.drawable.ella_cole, R.drawable.jayden_shaw, R.drawable.jerry_carrol, R.drawable.lena_lucas, R.drawable.leonrd_kim, R.drawable.marc_baker, R.drawable.marjorie_ellis, R.drawable.mattew_jordan, R.drawable.ross_rodriguez, R.drawable.tina_caldwell, R.drawable.wallace_sutton)
     private val statuses = arrayOf(
             "When the sensor experiments for deep space, all mermaids accelerate mysterious, vital moons.",
