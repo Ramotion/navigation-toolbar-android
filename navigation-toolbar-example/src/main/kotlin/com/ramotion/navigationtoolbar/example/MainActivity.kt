@@ -74,7 +74,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun initHeader() {
         header = findViewById(R.id.navigation_toolbar_layout)
-        header.setItemTransformer(HeaderItemTransformer(-50, 0.35f))
+        header.setItemTransformer(HeaderItemTransformer(-50, 0.45f))
         header.setAdapter(HeaderAdapter(itemCount, dataSet.headerDataSet))
 
         header.addItemChangeListener(object : HeaderLayoutManager.ItemChangeListener {
