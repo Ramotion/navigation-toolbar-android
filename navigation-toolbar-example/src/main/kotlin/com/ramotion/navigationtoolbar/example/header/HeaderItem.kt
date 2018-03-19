@@ -15,10 +15,10 @@ class HeaderItem(view: View) : HeaderLayout.ViewHolder(view) {
 
     internal val title = view.findViewById<TextView>(R.id.title)
 
-    fun setContent(data: HeaderDataSet.ItemData) {
-        this.gradient.setBackgroundResource(data.gradient)
-        this.background.setImageResource(data.background)
-        this.title.text = data.title
+    fun setContent(content: HeaderDataSet.ItemData) {
+        this.gradient.setBackgroundResource(content.gradient)
+        this.background.setImageResource(content.background)
+        this.title.setText(content.title)
     }
 
     fun clearContent() {

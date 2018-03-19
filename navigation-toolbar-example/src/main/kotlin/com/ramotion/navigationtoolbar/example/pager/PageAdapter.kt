@@ -1,15 +1,14 @@
 package com.ramotion.navigationtoolbar.example.pager
 
-import android.support.annotation.IdRes
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.ramotion.navigationtoolbar.example.R
+import com.ramotion.navigationtoolbar.example.PageDataSet
 
 
-class PageAdapter(
-        private val count: Int,
-        @IdRes private val imageResId: Int) : RecyclerView.Adapter<PageItem>() {
+class PageAdapter(private val count: Int,
+                  private val dataSet: PageDataSet) : RecyclerView.Adapter<PageItem>() {
 
     private enum class ItemType(val value: Int) {
         USER(1),
@@ -32,8 +31,8 @@ class PageAdapter(
 
     override fun onBindViewHolder(holder: PageItem, position: Int) {
         when (holder) {
-            is ItemUser -> { holder.setContent() }
-            is ItemImage -> { holder.setImage(imageResId)}
+            is ItemUser -> { holder.setContent(dataSet.getItemData(position)) }
+            is ItemImage -> { holder.setImage(dataSet.getSecondItemImage(position))}
         }
     }
 

@@ -64,7 +64,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun initViewPager() {
         viewPager = findViewById(R.id.pager)
-        viewPager.adapter = ViewPagerAdapter(itemCount, dataSet)
+        viewPager.adapter = ViewPagerAdapter(itemCount, dataSet.viewPagerDataSet)
         viewPager.addOnPageChangeListener(object : ViewPager.SimpleOnPageChangeListener() {
             override fun onPageSelected(position: Int) {
                 header.smoothScrollToPosition(position)
