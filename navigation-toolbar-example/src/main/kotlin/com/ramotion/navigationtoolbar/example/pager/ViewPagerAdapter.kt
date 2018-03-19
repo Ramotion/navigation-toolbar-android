@@ -5,18 +5,19 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.ramotion.navigationtoolbar.example.DataSet
 import com.ramotion.navigationtoolbar.example.R
 import java.util.*
 
 
-class ViewPagerAdapter(private val content: Array<Int>,
-                       private val size: Int) : PagerAdapter() {
+class ViewPagerAdapter(private val count: Int,
+                       private val dataSet: DataSet) : PagerAdapter() {
 
     private companion object {
         val random = Random()
     }
 
-    override fun getCount(): Int = size
+    override fun getCount(): Int = count
 
     override fun isViewFromObject(view: View, key: Any): Boolean = view == key
 
@@ -34,7 +35,7 @@ class ViewPagerAdapter(private val content: Array<Int>,
     override fun getPageTitle(position: Int): CharSequence = position.toString()
 
     private fun initRecyclerView(recyclerView: RecyclerView, position: Int) {
-        val adapter = PageAdapter(random.nextInt(10) + 5, content[position % content.size])
+        val adapter = PageAdapter(random.nextInt(10) + 5, dataSet.getHeaderItemBackground(position))
         recyclerView.adapter = adapter
     }
 

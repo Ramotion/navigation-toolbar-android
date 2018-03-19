@@ -5,6 +5,7 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import com.ramotion.navigationtoolbar.HeaderLayout
+import com.ramotion.navigationtoolbar.example.HeaderDataSet
 import com.ramotion.navigationtoolbar.example.R
 
 class HeaderItem(view: View) : HeaderLayout.ViewHolder(view) {
@@ -14,10 +15,10 @@ class HeaderItem(view: View) : HeaderLayout.ViewHolder(view) {
 
     internal val title = view.findViewById<TextView>(R.id.title)
 
-    fun setContent(gradientId: Int, imageId: Int) {
-        gradient.setBackgroundResource(gradientId)
-        background.setImageResource(imageId)
-        title.text = "Title $position"
+    fun setContent(data: HeaderDataSet.ItemData) {
+        this.gradient.setBackgroundResource(data.gradient)
+        this.background.setImageResource(data.background)
+        this.title.text = data.title
     }
 
     fun clearContent() {

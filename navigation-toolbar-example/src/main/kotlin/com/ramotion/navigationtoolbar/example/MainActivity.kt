@@ -21,20 +21,7 @@ import kotlin.math.max
 class MainActivity : AppCompatActivity() {
 
     private val itemCount = 20
-
-    private val items_images = intArrayOf(
-            R.drawable.card_1_background,
-            R.drawable.card_2_background,
-            R.drawable.card_3_background,
-            R.drawable.card_4_background)
-            .toTypedArray()
-
-    private val items_gradients = intArrayOf(
-            R.drawable.card_1_gradient,
-            R.drawable.card_2_gradient,
-            R.drawable.card_3_gradient,
-            R.drawable.card_4_gradient)
-            .toTypedArray()
+    private val dataSet = ExampleDataSet()
 
     private lateinit var viewPager: ViewPager
     private lateinit var header: NavigationToolBarLayout
@@ -77,7 +64,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun initViewPager() {
         viewPager = findViewById(R.id.pager)
-        viewPager.adapter = ViewPagerAdapter(items_images, itemCount)
+        viewPager.adapter = ViewPagerAdapter(itemCount, dataSet)
         viewPager.addOnPageChangeListener(object : ViewPager.SimpleOnPageChangeListener() {
             override fun onPageSelected(position: Int) {
                 header.smoothScrollToPosition(position)
@@ -88,7 +75,7 @@ class MainActivity : AppCompatActivity() {
     private fun initHeader() {
         header = findViewById(R.id.navigation_toolbar_layout)
         header.setItemTransformer(HeaderItemTransformer(-50, 0.35f))
-        header.setAdapter(HeaderAdapter(itemCount, items_gradients, items_images))
+        header.setAdapter(HeaderAdapter(itemCount, dataSet.headerDataSet))
 
         header.addItemChangeListener(object : HeaderLayoutManager.ItemChangeListener {
             override fun onItemChanged(position: Int) {
