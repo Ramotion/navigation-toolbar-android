@@ -32,7 +32,7 @@ class PageAdapter(private val count: Int,
     override fun onBindViewHolder(holder: PageItem, position: Int) {
         when (holder) {
             is ItemUser -> { holder.setContent(dataSet.getItemData(position)) }
-            is ItemImage -> { holder.setImage(dataSet.getSecondItemImage(position))}
+            is ItemImage -> { holder.setImage(dataSet.secondItemImage) }
         }
     }
 

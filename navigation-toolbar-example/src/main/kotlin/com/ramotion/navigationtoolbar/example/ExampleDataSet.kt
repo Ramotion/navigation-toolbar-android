@@ -1,7 +1,5 @@
 package com.ramotion.navigationtoolbar.example
 
-import android.support.annotation.IdRes
-
 interface HeaderDataSet {
     data class ItemData(val gradient: Int,
                         val background: Int,
@@ -16,8 +14,7 @@ interface PageDataSet {
                        val userName: String,
                        val status: String)
 
-    @IdRes
-    fun getSecondItemImage(page: Int): Int
+    val secondItemImage: Int
 
     fun getItemData(pos: Int): ItemData
 }
@@ -59,7 +56,7 @@ class ExampleDataSet {
         val pageItemCount = 5
 
         override fun getPageData(page: Int) = object : PageDataSet {
-            override fun getSecondItemImage(page: Int) = headerDataSet.getItemData(page).background
+            override val secondItemImage = headerDataSet.getItemData(page).background
 
             override fun getItemData(pos: Int): PageDataSet.ItemData {
                 val localPos = page * pageItemCount + pos
