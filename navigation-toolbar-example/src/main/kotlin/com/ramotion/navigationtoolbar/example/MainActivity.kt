@@ -73,8 +73,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initHeader() {
+        val resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")
+        val statusBarHeight = if (resourceId > 0) {
+            resources.getDimensionPixelSize(resourceId)
+        } else 0
+
         header = findViewById(R.id.navigation_toolbar_layout)
-        header.setItemTransformer(HeaderItemTransformer(-50, 0.45f))
+        header.setItemTransformer(HeaderItemTransformer(statusBarHeight, -50, 0.45f))
         header.setAdapter(HeaderAdapter(itemCount, dataSet.headerDataSet))
 
         header.addItemChangeListener(object : HeaderLayoutManager.ItemChangeListener {

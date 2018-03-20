@@ -1,5 +1,6 @@
 package com.ramotion.navigationtoolbar.example.header
 
+import android.support.constraint.ConstraintLayout
 import android.view.View
 import com.ramotion.navigationtoolbar.DefaultItemTransformer
 import com.ramotion.navigationtoolbar.HeaderLayout
@@ -8,6 +9,7 @@ import kotlin.math.abs
 import kotlin.math.min
 
 class HeaderItemTransformer(
+        private val horizontalTopOffset: Int,
         private val verticalLeftOffset: Int,
         private val horizontalCenterOffsetRatio: Float) : DefaultItemTransformer() {
 
@@ -44,6 +46,8 @@ class HeaderItemTransformer(
         val initialZ = this.elevation ?: run { child0.elevation.also { this.elevation = it }}
 
         if (currentRatioTopHalf in 0f..1f && currentRatioBottomHalf == 0f) {
+            val invertedRatio = 1f - currentRatioTopHalf
+
             var curZ = childCount / 2f + initialZ
             var prevZDiff = Int.MAX_VALUE
             for (i in 0 until childCount) {
@@ -70,6 +74,11 @@ class HeaderItemTransformer(
                     } else {
                         it.x = titleNewLeft
                     }
+
+                    val lp = it.layoutParams as ConstraintLayout.LayoutParams
+                    lp.topMargin = (horizontalTopOffset * invertedRatio).toInt()
+                    it.requestLayout()
+
                     transformTitle(it, ratio)
                 }
             }
