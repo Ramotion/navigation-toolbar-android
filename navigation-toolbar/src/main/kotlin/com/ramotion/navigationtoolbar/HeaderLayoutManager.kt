@@ -648,8 +648,12 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         val scrollUp = distance >= 0
         val offset = if (scrollUp) {
             val lastBottom = getDecoratedBottom(header.getChildAt(childCount - 1))
-            val newBottom = lastBottom - distance
-            if (newBottom > header.height) distance.toInt() else lastBottom - header.height
+            if (lastBottom < header.height) {
+                0
+            } else {
+                val newBottom = lastBottom - distance
+                if (newBottom > header.height) distance.toInt() else lastBottom - header.height
+            }
         } else {
             val firstTop = getDecoratedTop(header.getChildAt(0))
             if (firstTop > verticalScrollTopBorder) {
@@ -690,10 +694,11 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
             return false
         }
 
+        val flingUp = velocity < 0
         val itemCount = header.adapter?.getItemCount() ?: return false
         val startY = getStartY(header.getChildAt(0))
         val min = -itemCount * verticalTabHeight + header.height
-        val max = 0
+        val max = if (flingUp) header.height else 0
 
         viewFlinger.fling(0, startY, 0, velocity.toInt(), 0, 0, min, max)
 
