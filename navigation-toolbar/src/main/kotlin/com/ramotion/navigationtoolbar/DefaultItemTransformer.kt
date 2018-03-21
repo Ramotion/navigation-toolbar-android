@@ -139,12 +139,23 @@ open class DefaultItemTransformer
                 hPoints.add(Point(x + left + i * lm.horizontalTabWidth, y))
             }
         } else {
-            val top = -index * lm.verticalTabHeight
-            val (x, y) = lm.getVerticalPoint()
+            val totalHeight = (header.adapter?.getItemCount() ?: 0) * lm.verticalTabHeight
+            if (totalHeight > lm.workHeight) {
+                val top = -index * lm.verticalTabHeight
+                val (x, y) = lm.getVerticalPoint()
 
-            for (i in 0 until header.childCount) {
-                hPoints.add(header.getChildAt(i).let { Point(lm.getDecoratedLeft(it), lm.getDecoratedTop(it)) })
-                vPoints.add(Point(x, y + top + i * lm.verticalTabHeight))
+                for (i in 0 until header.childCount) {
+                    hPoints.add(header.getChildAt(i).let { Point(lm.getDecoratedLeft(it), lm.getDecoratedTop(it)) })
+                    vPoints.add(Point(x, y + top + i * lm.verticalTabHeight))
+                }
+            } else {
+                val x = lm.getVerticalPoint().x
+                val y = (header.height - totalHeight) / 2
+
+                for (i in 0 until header.childCount) {
+                    hPoints.add(header.getChildAt(i).let { Point(lm.getDecoratedLeft(it), lm.getDecoratedTop(it)) })
+                    vPoints.add(Point(x, y + i * lm.verticalTabHeight))
+                }
             }
         }
     }

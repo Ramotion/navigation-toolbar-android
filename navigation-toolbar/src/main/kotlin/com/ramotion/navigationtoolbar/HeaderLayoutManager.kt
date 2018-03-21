@@ -87,6 +87,8 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     private val verticalGravity: VerticalGravity
     private val tempDecorRect = Rect()
     private val itemDecorations = mutableListOf<ItemDecoration>()
+    private val scrollListener = HeaderScrollListener()
+    private val adapterChangeListener = AdapterChangeListener()
 
     private val collapsingBySelectDuration: Int
     private val tabOnScreenCount: Int
@@ -106,7 +108,6 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     val verticalTabHeight: Int
 
     internal val appBarBehavior = AppBarBehavior()
-    internal val scrollListener = HeaderScrollListener()
     internal val changeListener = mutableListOf<HeaderChangeListener>()
     internal val updateListener = mutableListOf<HeaderUpdateListener>()
     internal val itemClickListeners = mutableListOf<ItemClickListener>()
@@ -117,7 +118,6 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     private var appBar: AppBarLayout? = null
     private var headerLayout: HeaderLayout? = null
 
-    private var isInitialized = false
     private var isCanDrag = true
     private var isOffsetChanged = false
     private var isCheckingScrollStop =false
@@ -130,7 +130,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     var hPoint: Point? = null
     var vPoint: Point? = null
 
-    inner class AppBarBehavior : AppBarLayout.Behavior() {
+    internal inner class AppBarBehavior : AppBarLayout.Behavior() {
         init {
             setDragCallback(object : AppBarLayout.Behavior.DragCallback() {
                 override fun canDrag(appBarLayout: AppBarLayout) = isCanDrag
@@ -138,7 +138,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         }
     }
 
-    inner class HeaderScrollListener : HeaderLayout.ScrollListener {
+    private inner class HeaderScrollListener : HeaderLayout.ScrollListener {
         override fun onItemClick(header: HeaderLayout, viewHolder: HeaderLayout.ViewHolder) =
                 this@HeaderLayoutManager.onHeaderItemClick(header, viewHolder)
 
@@ -159,6 +159,12 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
 
         override fun onHeaderVerticalFling(header: HeaderLayout, velocity: Float) =
                 this@HeaderLayoutManager.onHeaderVerticalFling(header, velocity)
+    }
+
+    private inner class AdapterChangeListener : HeaderLayout.AdapterChangeListener {
+        override fun onAdapterChanged(header: HeaderLayout) {
+            updatePoints(header)
+        }
     }
 
     private inner class ViewFlinger(context: Context) : Runnable {
@@ -295,11 +301,10 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
 
             headerLayout = header
             header.scrollListener = scrollListener
+            header.adapterChangeListener = adapterChangeListener
 
-            initPoints(header)
+            updatePoints(header)
             fill(header)
-
-            isInitialized = true
         }
 
         return true
@@ -717,17 +722,21 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
                 ?: throw RuntimeException("View holder not found")
     }
 
-    private fun initPoints(header: HeaderLayout) {
-        val hx = 0
-        val hy = screenHalf.toInt()
-        val vy = (screenHeight / tabOnScreenCount) * centerIndex + verticalScrollTopBorder
+    private fun updatePoints(header: HeaderLayout) {
         val vx = when (verticalGravity) {
             HeaderLayoutManager.VerticalGravity.LEFT -> 0
             HeaderLayoutManager.VerticalGravity.CENTER -> header.width - verticalTabWidth / 2
             HeaderLayoutManager.VerticalGravity.RIGHT -> header.width - verticalTabWidth
         }
 
-        hPoint = Point(hx, hy)
+        val totalHeight = (header.adapter?.getItemCount() ?: 0) * verticalTabHeight
+        val vy = if (totalHeight > workHeight) {
+            (screenHeight / tabOnScreenCount) * centerIndex + verticalScrollTopBorder
+        } else {
+            (header.height - totalHeight) / 2
+        }
+
+        hPoint = Point(0, screenHalf.toInt())
         vPoint = Point(vx, vy)
     }
 

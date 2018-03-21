@@ -32,6 +32,10 @@ class HeaderLayout : FrameLayout {
         fun onHeaderVerticalFling(header: HeaderLayout, velocity: Float): Boolean
     }
 
+    internal interface AdapterChangeListener {
+        fun onAdapterChanged(header: HeaderLayout)
+    }
+
     private val gestureDetector: GestureDetectorCompat
 
     internal val recycler = Recycler()
@@ -40,6 +44,7 @@ class HeaderLayout : FrameLayout {
     internal var isVerticalScrollEnabled = false
 
     internal var scrollListener: ScrollListener? = null
+    internal var adapterChangeListener: AdapterChangeListener? = null
 
     var adapter: Adapter<ViewHolder>? = null; private set
 
@@ -93,14 +98,11 @@ class HeaderLayout : FrameLayout {
     }
 
     open class ViewHolder(val view: View) {
-
         var position: Int = INVALID_POSITION
             internal set
-
     }
 
     open class LayoutParams : FrameLayout.LayoutParams {
-
         internal val decorRect = Rect()
 
         internal var decorRectValid = false
@@ -118,7 +120,6 @@ class HeaderLayout : FrameLayout {
     }
 
     abstract class Adapter<VH : ViewHolder> {
-
         abstract fun getItemCount(): Int
 
         abstract fun onCreateViewHolder(parent: ViewGroup): VH
@@ -150,11 +151,9 @@ class HeaderLayout : FrameLayout {
         }
 
         fun recycleView(holder: VH) = onViewRecycled(holder)
-
     }
 
     internal inner class Recycler {
-
         private val viewCache = mutableListOf<View>()
 
         fun getViewForPosition(position: Int): View {
@@ -186,11 +185,26 @@ class HeaderLayout : FrameLayout {
             }
         }
 
+        internal fun recycleAll() {
+            while (childCount > 0) {
+                recycler.recycleView(getChildAt(0), false)
+            }
+            clearCache()
+        }
+
+        internal fun onAdapterChanged() {
+            recycleAll()
+        }
+
         private fun bindViewToPosition(holder: ViewHolder, position: Int) {
             val adapter = adapter ?: throw RuntimeException("No adapter set")
             adapter.bindViewHolder(holder, position)
         }
 
+        private fun clearCache() {
+            viewCache.forEach { recycleView(it, false) }
+            viewCache.clear()
+        }
     }
 
     constructor(context: Context, attrs: AttributeSet) : this(context, attrs, 0)
@@ -208,9 +222,7 @@ class HeaderLayout : FrameLayout {
     }
 
     override fun onDetachedFromWindow() {
-        while (childCount > 0) {
-            recycler.recycleView(getChildAt(0), false)
-        }
+        recycler.recycleAll()
         super.onDetachedFromWindow()
     }
 
@@ -218,8 +230,9 @@ class HeaderLayout : FrameLayout {
 
     internal fun attachView(child: View) = attachViewToParent(child, -1, child.layoutParams)
 
-    internal fun setAdapter(adapter: Adapter<out ViewHolder>) {
-        this.adapter = adapter as Adapter<ViewHolder>
+    internal fun setAdapter(newAdapter: Adapter<out ViewHolder>) {
+        adapter = newAdapter as Adapter<ViewHolder>
+        recycler.onAdapterChanged()
+        adapterChangeListener?.onAdapterChanged(this@HeaderLayout)
     }
-
 }
