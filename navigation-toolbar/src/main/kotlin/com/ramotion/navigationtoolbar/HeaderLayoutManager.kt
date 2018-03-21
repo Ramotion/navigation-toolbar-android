@@ -529,6 +529,8 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
             return
         }
 
+        itemChangeListeners.forEach { it.onItemChanged(pos) }
+
         val offset = if (header.isHorizontalScrollEnabled) {
             val childWidth = getDecoratedWidth(anchorView)
             (pos - anchorPos) * childWidth + (getDecoratedLeft(anchorView) - hx)
@@ -551,8 +553,6 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
                 return
             }
         }
-
-        itemChangeListeners.forEach { it.onItemChanged(pos) }
 
         task(header, anchorView, offset, header.isHorizontalScrollEnabled)
     }
