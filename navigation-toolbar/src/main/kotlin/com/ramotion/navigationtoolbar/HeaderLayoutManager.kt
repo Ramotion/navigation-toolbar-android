@@ -7,6 +7,8 @@ import android.content.Context
 import android.graphics.Rect
 import android.os.Build
 import android.os.Looper
+import android.os.Parcel
+import android.os.Parcelable
 import android.support.design.widget.AppBarLayout
 import android.support.design.widget.CoordinatorLayout
 import android.support.v4.view.ViewCompat
@@ -45,6 +47,33 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     }
 
     data class Point(val x: Int, val y: Int)
+
+    class State : View.BaseSavedState {
+        companion object {
+            @JvmField
+            @Suppress("unused")
+            val CREATOR = object : Parcelable.Creator<State> {
+                override fun createFromParcel(parcel: Parcel): State = State(parcel)
+                override fun newArray(size: Int): Array<State?> = arrayOfNulls(size)
+            }
+        }
+
+        val anchorPos: Int
+
+        constructor(superState: Parcelable, anchorPos: Int) : super(superState) {
+            this.anchorPos = anchorPos
+        }
+
+        private constructor(parcel: Parcel) : super(parcel) {
+            this.anchorPos = parcel.readInt()
+        }
+
+        override fun writeToParcel(parcel: Parcel, i: Int) {
+            parcel.writeInt(anchorPos)
+        }
+
+        override fun describeContents(): Int = 0
+    }
 
     internal companion object {
         const val TAB_ON_SCREEN_COUNT = 5
@@ -126,6 +155,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     private var scrollState = ScrollState.IDLE
     private var curOrientation: Orientation? = null
     private var prevOffset: Int = Int.MAX_VALUE
+    private var restoredAnchorPosition: Int? = null
 
     var hPoint: Point? = null
     var vPoint: Point? = null
@@ -322,6 +352,19 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
 
     override fun onOffsetChanged(appBarLayout: AppBarLayout?, verticalOffset: Int) {
         isOffsetChanged = true
+    }
+
+    override fun onSaveInstanceState(parent: CoordinatorLayout, header: HeaderLayout): Parcelable {
+        val anchorPos = getAnchorPos(header)
+        val superParcel = super.onSaveInstanceState(parent, header)
+        return State(superParcel, anchorPos)
+    }
+
+    override fun onRestoreInstanceState(parent: CoordinatorLayout, child: HeaderLayout, state: Parcelable?) {
+        super.onRestoreInstanceState(parent, child, state)
+        if (state is State) {
+            restoredAnchorPosition = state.anchorPos
+        }
     }
 
     // TODO: fun scroll(distance)
