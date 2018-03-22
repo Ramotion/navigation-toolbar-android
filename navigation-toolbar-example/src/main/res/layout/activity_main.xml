@@ -7,16 +7,9 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
     app:headerBackgroundLayout="@layout/header_background"
-    app:headerTopBorderAtSystemBar="true"
-    app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-    app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+    app:headerTopBorderAtSystemBar="true">
 
-    <android.support.v4.view.ViewPager
-        android:id="@+id/pager"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@android:color/white"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
+    <include layout="@layout/content_layout"/>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
