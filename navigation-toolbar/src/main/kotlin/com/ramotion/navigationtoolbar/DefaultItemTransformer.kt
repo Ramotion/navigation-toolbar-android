@@ -10,8 +10,6 @@ open class DefaultItemTransformer
     private val hPoints: MutableList<Point> = mutableListOf()
     private val vPoints: MutableList<Point> = mutableListOf()
 
-    private var navigationToolBarLayout: NavigationToolBarLayout? = null
-
     private var ratioWork = 0f
     private var ratioTopHalf = 0f
     private var ratioBottomHalf = 0f
@@ -24,21 +22,18 @@ open class DefaultItemTransformer
     protected var currentRatioTopHalf = -1f; private set
     protected var currentRatioBottomHalf = -1f; private set
 
-    override fun attach(ntl: NavigationToolBarLayout) {
+    override fun onAttach(ntl: NavigationToolBarLayout) {
         ntl.layoutManager.also { lm ->
             ratioWork = lm.workHeight / lm.screenHeight.toFloat()
             ratioTopHalf = lm.workTopBorder / lm.screenHeight.toFloat()
             ratioBottomHalf = lm.screenHalf / lm.screenHeight.toFloat()
         }
 
-        navigationToolBarLayout = ntl.also {
-            it.addItemClickListener(this)
-        }
+        ntl.addItemClickListener(this)
     }
 
-    override fun detach() {
+    override fun onDetach() {
         navigationToolBarLayout?.removeItemClickListener(this)
-        navigationToolBarLayout = null
     }
 
     override fun transform(lm: HeaderLayoutManager, header: HeaderLayout, headerBottom: Int) {
@@ -110,7 +105,6 @@ open class DefaultItemTransformer
     }
 
     override fun onItemClicked(viewHolder: HeaderLayout.ViewHolder) {
-        // TODO: fix 3 events on single click
         navigationToolBarLayout
                 ?.takeIf { currentRatioBottomHalf == 1f }
                 ?.also { it ->

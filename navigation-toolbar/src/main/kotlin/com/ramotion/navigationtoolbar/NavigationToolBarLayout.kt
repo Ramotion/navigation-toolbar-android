@@ -18,11 +18,30 @@ class NavigationToolBarLayout : CoordinatorLayout {
     }
 
     abstract class ItemTransformer : HeaderChangeListener, HeaderUpdateListener {
-        abstract fun attach(ntl: NavigationToolBarLayout)
-
-        abstract fun detach()
+        protected var navigationToolBarLayout: NavigationToolBarLayout? = null
+            private set
 
         abstract fun transform(lm: HeaderLayoutManager, header: HeaderLayout, headerBottom: Int)
+
+        abstract fun onAttach(ntl: NavigationToolBarLayout)
+
+        abstract fun onDetach()
+
+        fun attach(ntl: NavigationToolBarLayout) {
+            navigationToolBarLayout = ntl
+            ntl.addHeaderChangeListener(this)
+            ntl.addHeaderUpdateListener(this)
+            onAttach(ntl)
+        }
+
+        fun detach() {
+            onDetach()
+            navigationToolBarLayout?.also {
+                it.removeHeaderChangeListener(this)
+                it.removeHeaderUpdateListener(this)
+            }
+            navigationToolBarLayout = null
+        }
 
         final override fun onHeaderChanged(lm: HeaderLayoutManager, header: HeaderLayout, headerBottom: Int) =
                 transform(lm, header, headerBottom)
@@ -97,7 +116,7 @@ class NavigationToolBarLayout : CoordinatorLayout {
     }
 
     fun removeItemClickListener(listener: HeaderLayoutManager.ItemClickListener) {
-        layoutManager.itemClickListeners += listener
+        layoutManager.itemClickListeners -= listener
     }
 
     fun addHeaderChangeListener(listener: HeaderChangeListener) {
@@ -106,6 +125,14 @@ class NavigationToolBarLayout : CoordinatorLayout {
 
     fun removeHeaderChangeListener(listener: HeaderChangeListener) {
         layoutManager.changeListener -= listener
+    }
+
+    fun addHeaderUpdateListener(listener: HeaderUpdateListener) {
+        layoutManager.updateListener += listener
+    }
+
+    fun removeHeaderUpdateListener(listener: HeaderUpdateListener) {
+        layoutManager.updateListener -= listener
     }
 
     fun addItemDecoration(decoration: ItemDecoration) {
@@ -117,16 +144,10 @@ class NavigationToolBarLayout : CoordinatorLayout {
     }
 
     fun setItemTransformer(newTransformer: ItemTransformer?) {
-        itemTransformer?.also {
-            layoutManager.changeListener -= it
-            layoutManager.updateListener -= it
-            it.detach()
-        }
+        itemTransformer?.also { it.detach() }
 
         (newTransformer ?: DefaultItemTransformer()).also {
             it.attach(this)
-            layoutManager.changeListener += it
-            layoutManager.updateListener += it
             itemTransformer = it
         }
     }
