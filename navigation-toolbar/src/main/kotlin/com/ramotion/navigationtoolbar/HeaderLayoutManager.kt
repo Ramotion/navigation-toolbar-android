@@ -457,11 +457,11 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
 
     fun fill(header: HeaderLayout) {
         val orientation = getOrientation(::getPositionRatio)
-        val pos = when (orientation) {
-            Orientation.HORIZONTAL -> getHorizontalAnchorPos(header)
-            Orientation.VERTICAL -> getVerticalAnchorPos(header)
-            Orientation.TRANSITIONAL -> return
+        if (orientation == Orientation.TRANSITIONAL) {
+            return
         }
+
+        val anchorPos = getAnchorPos(header)
 
         viewCache.clear()
 
@@ -475,11 +475,11 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         }
 
         if (orientation == Orientation.HORIZONTAL) {
-            fillLeft(header, pos)
-            fillRight(header, pos)
+            fillLeft(header, anchorPos)
+            fillRight(header, anchorPos)
         } else{
-            fillTop(header, pos)
-            fillBottom(header, pos)
+            fillTop(header, anchorPos)
+            fillBottom(header, anchorPos)
         }
 
         for (i in 0 until viewCache.size()) {
@@ -500,7 +500,9 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     }
 
     fun getAnchorPos(header: HeaderLayout): Int {
-        return getAnchorView(header)
+        return restoredAnchorPosition
+                ?.also { restoredAnchorPosition = null }
+                ?: getAnchorView(header)
                 ?.let { HeaderLayout.getChildPosition(it) }
                 ?: HeaderLayout.INVALID_POSITION
     }
@@ -609,18 +611,6 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
             }
             header.recycler.markItemDecorInsetsDirty()
         }
-    }
-
-    private fun getHorizontalAnchorPos(header: HeaderLayout): Int {
-        return getHorizontalAnchorView(header)
-                ?.let { HeaderLayout.getChildPosition(it) }
-                ?: HeaderLayout.INVALID_POSITION
-    }
-
-    private fun getVerticalAnchorPos(header: HeaderLayout): Int {
-        return getVerticalAnchorView(header)
-                ?.let { HeaderLayout.getChildPosition(it) }
-                ?: HeaderLayout.INVALID_POSITION
     }
 
     private fun onHeaderItemClick(header: HeaderLayout, viewHolder: HeaderLayout.ViewHolder): Boolean {
@@ -860,7 +850,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         }
 
         var pos = Math.max(0, anchorPos - centerIndex - tabOffsetCount)
-        val topDiff = vy - (viewCache.get(anchorPos)?.let { getDecoratedTop(it) } ?: 0)
+        val topDiff = viewCache.get(anchorPos)?.let { vy - getDecoratedTop(it) } ?: 0
         var top = (vy - (anchorPos - pos) * verticalTabHeight) - topDiff
 
         while (pos < anchorPos) {
