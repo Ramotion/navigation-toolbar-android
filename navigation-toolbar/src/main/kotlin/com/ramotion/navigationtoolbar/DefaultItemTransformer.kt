@@ -64,7 +64,7 @@ open class DefaultItemTransformer
                 && prevRatioTopHalf < currentRatioTopHalf && prevRatioTopHalf != -1f
         if (expandedToTopOfBottomHalf) {
             transformTopHalf(lm, header, headerBottom)
-            updatePoints(lm, header, false)
+            clearPoints()
             transformBottomHalf(lm, header)
             transformed = true
         } else {
@@ -83,7 +83,7 @@ open class DefaultItemTransformer
                 transformBottomHalf(lm, header)
                 transformTopHalf(lm, header, headerBottom)
                 lm.fill(header)
-                updatePoints(lm, header, false)
+                clearPoints()
                 transformed = true
         } else {
             val collapsedToTopOfTopHalf = currentRatioTopHalf == 0f
@@ -98,6 +98,10 @@ open class DefaultItemTransformer
         if (!transformed) {
             val isAtBottomHalf = currentRatioBottomHalf > 0f && currentRatioBottomHalf < 1f
             if (isAtBottomHalf) {
+                val arePointsEmpty = hPoints.isEmpty() || vPoints.isEmpty()
+                if (arePointsEmpty) {
+                    updatePoints(lm, header, false)
+                }
                 transformBottomHalf(lm, header)
             } else {
                 transformTopHalf(lm, header, headerBottom)
@@ -106,10 +110,13 @@ open class DefaultItemTransformer
     }
 
     override fun onItemClicked(viewHolder: HeaderLayout.ViewHolder) {
-        navigationToolBarLayout?.also { it ->
-            clickedItemIndex = it.headerLayout.indexOfChild(viewHolder.view)
-            updatePoints(it.layoutManager, it.headerLayout, true)
-        }
+        // TODO: fix 3 events on single click
+        navigationToolBarLayout
+                ?.takeIf { currentRatioBottomHalf == 1f }
+                ?.also { it ->
+                    clickedItemIndex = it.headerLayout.indexOfChild(viewHolder.view)
+                    updatePoints(it.layoutManager, it.headerLayout, true)
+                }
     }
 
     private fun updateRatios(lm: HeaderLayoutManager, headerBottom: Int) {
