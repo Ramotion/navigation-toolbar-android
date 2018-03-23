@@ -96,9 +96,9 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     abstract class HeaderChangeStateListener : HeaderChangeListener {
         final override fun onHeaderChanged(lm: HeaderLayoutManager, header: HeaderLayout, headerBottom: Int) {
             when (headerBottom) {
-                lm.workTopBorder -> onCollapsed()
-                lm.screenHalf -> onMiddle()
-                lm.screenHeight -> onExpanded()
+                lm.workTop -> onCollapsed()
+                lm.workMiddle -> onMiddle()
+                lm.workBottom -> onExpanded()
             }
         }
 
@@ -124,7 +124,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     }
 
     private val tabOffsetCount = TAB_OFF_SCREEN_COUNT
-    private val verticalScrollTopBorder: Int
+    private val screenWidth = context.resources.displayMetrics.widthPixels
     private val viewCache = SparseArray<View?>()
     private val viewFlinger = ViewFlinger(context)
     private val verticalGravity: VerticalGravity
@@ -133,19 +133,19 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     private val scrollListener = HeaderScrollListener()
     private val adapterChangeListener = AdapterChangeListener()
 
+    private val verticalScrollTopBorder: Int
     private val collapsingBySelectDuration: Int
     private val tabOnScreenCount: Int
     private val centerIndex: Int
     private val topSnapDistance: Int
     private val bottomSnapDistance: Int
 
-    val screenWidth = context.resources.displayMetrics.widthPixels
-    val screenHeight = context.resources.displayMetrics.heightPixels
-    val screenHalf = screenHeight / 2
+    val workBottom = context.resources.displayMetrics.heightPixels
+    val workMiddle = workBottom / 2
     val horizontalTabWidth = screenWidth
-    val horizontalTabHeight = screenHalf
+    val horizontalTabHeight = workMiddle
 
-    val workTopBorder: Int
+    val workTop: Int
     val workHeight: Int
     val verticalTabWidth: Int
     val verticalTabHeight: Int
@@ -153,7 +153,6 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     internal val appBarBehavior = AppBarBehavior()
     internal val changeListener = mutableListOf<HeaderChangeListener>()
     internal val updateListener = mutableListOf<HeaderUpdateListener>()
-    internal val changeStateListener = mutableListOf<HeaderChangeStateListener>()
     internal val itemClickListeners = mutableListOf<ItemClickListener>()
     internal val itemChangeListeners = mutableListOf<ItemChangeListener>()
     internal val scrollStateListeners = mutableListOf<ScrollStateListener>()
@@ -307,7 +306,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
 
         tabOnScreenCount = itemCount
         centerIndex = tabOnScreenCount / 2
-        verticalTabHeight = (screenHeight * (1f / tabOnScreenCount)).toInt()
+        verticalTabHeight = (workBottom * (1f / tabOnScreenCount)).toInt()
         verticalTabWidth = verticalItemWidth.toInt()
         verticalGravity = gravity
         collapsingBySelectDuration = collapsingDuration
@@ -325,11 +324,11 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
             styledAttributes.recycle()
         }
 
-        workTopBorder = actionBarSize + statusBarHeight
-        workHeight = screenHeight - workTopBorder
+        workTop = actionBarSize + statusBarHeight
+        workHeight = workBottom - workTop
 
-        topSnapDistance = (workTopBorder + (screenHalf - workTopBorder) / 2)
-        bottomSnapDistance = (screenHalf + screenHalf / 2)
+        topSnapDistance = (workTop + (workMiddle - workTop) / 2)
+        bottomSnapDistance = (workMiddle + workMiddle / 2)
 
         verticalScrollTopBorder = if (vScrollTopBorder) statusBarHeight else 0
     }
@@ -636,7 +635,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
                 true
             }
             header.isVerticalScrollEnabled -> {
-                smoothOffset(screenHalf)
+                smoothOffset(workMiddle)
                 itemClickListeners.forEach { it.onItemClicked(viewHolder) }
                 true
             }
@@ -779,16 +778,16 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
 
         val totalHeight = (header.adapter?.getItemCount() ?: 0) * verticalTabHeight
         val vy = if (totalHeight > workHeight) {
-            (screenHeight / tabOnScreenCount) * centerIndex + verticalScrollTopBorder
+            (workBottom / tabOnScreenCount) * centerIndex + verticalScrollTopBorder
         } else {
             (header.height - totalHeight) / 2
         }
 
-        hPoint = Point(0, screenHalf)
+        hPoint = Point(0, workMiddle)
         vPoint = Point(vx, vy)
     }
 
-    private fun getPositionRatio() = appBar?.let { Math.max(0f, it.bottom / screenHeight.toFloat()) } ?: 0f
+    private fun getPositionRatio() = appBar?.let { Math.max(0f, it.bottom / workBottom.toFloat()) } ?: 0f
 
     private tailrec fun getOrientation(getRatio: () -> Float, force: Boolean = false): Orientation {
         return if (force) {
@@ -949,27 +948,27 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         var hScrollEnable = false
         var vScrollEnable = false
 
-        val invertedOffset = screenHeight + offset
+        val invertedOffset = workBottom + offset
         when (invertedOffset) {
-            screenHeight -> {
+            workBottom -> {
                 vScrollEnable = true
                 isCanDrag = false
             }
-            screenHalf -> {
+            workMiddle -> {
                 hScrollEnable = true
                 isCanDrag = false
                 header.postOnAnimation { smoothScrollToPosition(getAnchorPos(header)) }
             }
-            workTopBorder -> {
+            workTop -> {
                 hScrollEnable = true
                 isCanDrag = true
                 header.postOnAnimation { smoothScrollToPosition(getAnchorPos(header)) }
             }
-            in workTopBorder..(topSnapDistance - 1) -> {
+            in workTop..(topSnapDistance - 1) -> {
                 appBar.setExpanded(false, true)
             }
             in topSnapDistance..(bottomSnapDistance - 1) -> {
-                smoothOffset(screenHalf, SNAP_ANIMATION_DURATION)
+                smoothOffset(workMiddle, SNAP_ANIMATION_DURATION)
             }
             else -> {
                 appBar.setExpanded(true, true)
