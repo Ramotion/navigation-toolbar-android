@@ -1,10 +1,12 @@
 package com.ramotion.navigationtoolbar.example
 
+import android.animation.ObjectAnimator
 import android.graphics.Rect
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v4.view.ViewPager
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.graphics.drawable.DrawerArrowDrawable
 import android.view.Menu
 import android.view.MenuItem
 import com.ramotion.navigationtoolbar.HeaderLayout
@@ -18,9 +20,10 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlin.math.ceil
 import kotlin.math.max
 
+
 class MainActivity : AppCompatActivity() {
 
-    private val itemCount = 20
+    private val itemCount = 4
     private val dataSet = ExampleDataSet()
 
     private lateinit var viewPager: ViewPager
@@ -30,17 +33,12 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        setSupportActionBar(navigation_toolbar_layout.toolBar)
-        supportActionBar?.apply {
-            setDisplayShowTitleEnabled(false)
-            setDisplayHomeAsUpEnabled(true)
-        }
-
         fab.setOnClickListener { view ->
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show()
         }
 
+        initActionBar()
         initViewPager()
         initHeader()
     }
@@ -59,6 +57,15 @@ class MainActivity : AppCompatActivity() {
         return when (item.itemId) {
             R.id.action_settings -> true
             else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun initActionBar() {
+        val toolbar = navigation_toolbar_layout.toolBar
+        setSupportActionBar(toolbar)
+        supportActionBar?.apply {
+            setDisplayShowTitleEnabled(false)
+            setDisplayHomeAsUpEnabled(true)
         }
     }
 
@@ -91,6 +98,19 @@ class MainActivity : AppCompatActivity() {
         header.addItemClickListener(object : HeaderLayoutManager.ItemClickListener {
             override fun onItemClicked(viewHolder: HeaderLayout.ViewHolder) {
                 viewPager.currentItem = viewHolder.position
+            }
+        })
+
+        val drawerArrow = DrawerArrowDrawable(this)
+        drawerArrow.color = resources.getColor(android.R.color.white)
+        header.toolBar.navigationIcon = drawerArrow
+        header.addHeaderChangeListener(object : HeaderLayoutManager.HeaderChangeListener {
+            override fun onHeaderChanged(lm: HeaderLayoutManager, header: HeaderLayout, headerBottom: Int) {
+                when (headerBottom) {
+                    lm.workTopBorder -> ObjectAnimator.ofFloat(drawerArrow, "progress", 1f).start()
+                    header.height -> ObjectAnimator.ofFloat(drawerArrow, "progress", 0f).start()
+                    else -> {}
+                }
             }
         })
 
