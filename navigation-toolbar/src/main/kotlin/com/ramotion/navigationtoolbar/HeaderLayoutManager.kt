@@ -93,6 +93,20 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         fun onHeaderUpdated(lm: HeaderLayoutManager, header: HeaderLayout, headerBottom: Int)
     }
 
+    abstract class HeaderChangeStateListener : HeaderChangeListener {
+        final override fun onHeaderChanged(lm: HeaderLayoutManager, header: HeaderLayout, headerBottom: Int) {
+            when (headerBottom) {
+                lm.workTopBorder -> onCollapsed()
+                lm.screenHalf -> onMiddle()
+                lm.screenHeight -> onExpanded()
+            }
+        }
+
+        open fun onCollapsed() {}
+        open fun onMiddle() {}
+        open fun onExpanded() {}
+    }
+
     interface ItemClickListener {
         fun onItemClicked(viewHolder: HeaderLayout.ViewHolder)
     }
@@ -127,9 +141,9 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
 
     val screenWidth = context.resources.displayMetrics.widthPixels
     val screenHeight = context.resources.displayMetrics.heightPixels
-    val screenHalf = screenHeight / 2f
+    val screenHalf = screenHeight / 2
     val horizontalTabWidth = screenWidth
-    val horizontalTabHeight = screenHalf.toInt()
+    val horizontalTabHeight = screenHalf
 
     val workTopBorder: Int
     val workHeight: Int
@@ -139,6 +153,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     internal val appBarBehavior = AppBarBehavior()
     internal val changeListener = mutableListOf<HeaderChangeListener>()
     internal val updateListener = mutableListOf<HeaderUpdateListener>()
+    internal val changeStateListener = mutableListOf<HeaderChangeStateListener>()
     internal val itemClickListeners = mutableListOf<ItemClickListener>()
     internal val itemChangeListeners = mutableListOf<ItemChangeListener>()
     internal val scrollStateListeners = mutableListOf<ScrollStateListener>()
@@ -313,8 +328,8 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         workTopBorder = actionBarSize + statusBarHeight
         workHeight = screenHeight - workTopBorder
 
-        topSnapDistance = (workTopBorder + (screenHalf - workTopBorder) / 2).toInt()
-        bottomSnapDistance = (screenHalf + screenHalf / 2).toInt()
+        topSnapDistance = (workTopBorder + (screenHalf - workTopBorder) / 2)
+        bottomSnapDistance = (screenHalf + screenHalf / 2)
 
         verticalScrollTopBorder = if (vScrollTopBorder) statusBarHeight else 0
     }
@@ -621,7 +636,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
                 true
             }
             header.isVerticalScrollEnabled -> {
-                smoothOffset(screenHalf.toInt())
+                smoothOffset(screenHalf)
                 itemClickListeners.forEach { it.onItemClicked(viewHolder) }
                 true
             }
@@ -769,7 +784,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
             (header.height - totalHeight) / 2
         }
 
-        hPoint = Point(0, screenHalf.toInt())
+        hPoint = Point(0, screenHalf)
         vPoint = Point(vx, vy)
     }
 
@@ -940,7 +955,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
                 vScrollEnable = true
                 isCanDrag = false
             }
-            screenHalf.toInt() -> {
+            screenHalf -> {
                 hScrollEnable = true
                 isCanDrag = false
                 header.postOnAnimation { smoothScrollToPosition(getAnchorPos(header)) }
@@ -954,7 +969,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
                 appBar.setExpanded(false, true)
             }
             in topSnapDistance..(bottomSnapDistance - 1) -> {
-                smoothOffset(screenHalf.toInt(), SNAP_ANIMATION_DURATION)
+                smoothOffset(screenHalf, SNAP_ANIMATION_DURATION)
             }
             else -> {
                 appBar.setExpanded(true, true)

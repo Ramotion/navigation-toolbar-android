@@ -104,13 +104,13 @@ class MainActivity : AppCompatActivity() {
         val drawerArrow = DrawerArrowDrawable(this)
         drawerArrow.color = resources.getColor(android.R.color.white)
         header.toolBar.navigationIcon = drawerArrow
-        header.addHeaderChangeListener(object : HeaderLayoutManager.HeaderChangeListener {
-            override fun onHeaderChanged(lm: HeaderLayoutManager, header: HeaderLayout, headerBottom: Int) {
-                when (headerBottom) {
-                    lm.workTopBorder -> ObjectAnimator.ofFloat(drawerArrow, "progress", 1f).start()
-                    header.height -> ObjectAnimator.ofFloat(drawerArrow, "progress", 0f).start()
-                    else -> {}
-                }
+        header.addHeaderChangeStateListener(object : HeaderLayoutManager.HeaderChangeStateListener() {
+            override fun onCollapsed() {
+                ObjectAnimator.ofFloat(drawerArrow, "progress", 1f).start()
+            }
+
+            override fun onExpanded() {
+                ObjectAnimator.ofFloat(drawerArrow, "progress", 0f).start()
             }
         })
 

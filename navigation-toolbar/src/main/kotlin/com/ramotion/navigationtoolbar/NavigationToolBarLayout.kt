@@ -143,6 +143,14 @@ class NavigationToolBarLayout : CoordinatorLayout {
         layoutManager.removeItemDecoration(decoration)
     }
 
+    fun addHeaderChangeStateListener(listener: HeaderChangeStateListener) {
+        layoutManager.changeListener += listener
+    }
+
+    fun removeHeaderChangeStateListener(listener: HeaderChangeStateListener) {
+        layoutManager.changeListener -= listener
+    }
+
     fun setItemTransformer(newTransformer: ItemTransformer?) {
         itemTransformer?.also { it.detach() }
 
