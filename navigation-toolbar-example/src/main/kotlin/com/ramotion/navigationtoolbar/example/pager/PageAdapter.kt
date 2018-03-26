@@ -40,6 +40,11 @@ class PageAdapter(private val count: Int,
         return (if (position == 1) ItemType.IMAGE else ItemType.USER).value
     }
 
+    override fun onViewRecycled(holder: PageItem) {
+        super.onViewRecycled(holder)
+        holder.clearContent()
+    }
+
     private fun createItemUser(parent: ViewGroup): ItemUser {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.list_item_user, parent, false)
         return ItemUser(view)
