@@ -16,8 +16,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/fab_margin"
-        app:layout_anchor="@id/com_ramotion_app_bar"
-        app:layout_anchorGravity="bottom|end"
+        android:layout_gravity="end|bottom"
+        app:layout_behavior="com.ramotion.navigationtoolbar.example.FABBehavior"
         app:srcCompat="@android:drawable/ic_dialog_email" />
 
 </com.ramotion.navigationtoolbar.NavigationToolBarLayout>
