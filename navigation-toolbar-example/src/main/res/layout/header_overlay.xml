@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/header_overlay"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#715174dc"
+    android:fitsSystemWindows="true">
+
+    <TextView
+        android:id="@+id/textView0"
+        style="@style/HeaderItemTextStyle"/>
+
+    <TextView
+        android:id="@+id/textView1"
+        style="@style/HeaderItemTextStyle"/>
+
+    <TextView
+        android:id="@+id/textView2"
+        style="@style/HeaderItemTextStyle"/>
+
+    <TextView
+        android:id="@+id/textView3"
+        style="@style/HeaderItemTextStyle"/>
+
+    <TextView
+        android:id="@+id/textView4"
+        style="@style/HeaderItemTextStyle"/>
+
+    <TextView
+        android:id="@+id/textView5"
+        style="@style/HeaderItemTextStyle"/>
+
+    <TextView
+        android:id="@+id/textView6"
+        style="@style/HeaderItemTextStyle"/>
+
+</FrameLayout>

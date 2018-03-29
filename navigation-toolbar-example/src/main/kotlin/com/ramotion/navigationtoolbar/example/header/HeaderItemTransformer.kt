@@ -2,6 +2,8 @@ package com.ramotion.navigationtoolbar.example.header
 
 import android.support.constraint.ConstraintLayout
 import android.view.View
+import android.widget.FrameLayout
+import android.widget.TextView
 import com.ramotion.navigationtoolbar.DefaultItemTransformer
 import com.ramotion.navigationtoolbar.HeaderLayout
 import com.ramotion.navigationtoolbar.HeaderLayoutManager
@@ -10,6 +12,7 @@ import kotlin.math.abs
 import kotlin.math.min
 
 class HeaderItemTransformer(
+        private val overlay: FrameLayout,
         private val horizontalTopOffset: Int,
         private val verticalLeftOffset: Int,
         private val horizontalCenterOffsetRatio: Float) : DefaultItemTransformer() {
@@ -30,8 +33,9 @@ class HeaderItemTransformer(
         }
 
         val isAtTopHalf = currentRatioTopHalf in 0f..1f && currentRatioBottomHalf == 0f
-        val doTransform = (if (isAtTopHalf) ::transformTopHalf else ::transformBottomHalf)
-        doTransform(lm, header, headerBottom)
+        val transformItems = (if (isAtTopHalf) ::transformTopHalf else ::transformBottomHalf)
+        transformItems(lm, header, headerBottom)
+        transformOverlay(lm, header, headerBottom)
     }
 
     private fun checkForChanges(header: HeaderLayout, headerBottom: Int): Boolean {
@@ -129,6 +133,21 @@ class HeaderItemTransformer(
             val lp = title.layoutParams as ConstraintLayout.LayoutParams
             lp.topMargin = it.toInt()
             title.requestLayout()
+        }
+    }
+
+    private fun transformOverlay(lm: HeaderLayoutManager, header: HeaderLayout, headerBottom: Int) {
+        overlay.y = (headerBottom - overlay.height).toFloat()
+
+        val count = min(overlay.childCount, header.childCount)
+        for (i in 0 until count) {
+            val card = header.getChildAt(i)
+            val holder = HeaderLayout.getChildViewHolder(card) as HeaderItem
+            val tv = overlay.getChildAt(i) as TextView
+
+            tv.x = card.x
+            tv.y = card.y
+            holder.titleText?.also { tv.setText(it) }
         }
     }
 }

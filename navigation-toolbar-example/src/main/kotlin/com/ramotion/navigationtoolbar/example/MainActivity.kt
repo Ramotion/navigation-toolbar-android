@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.graphics.drawable.DrawerArrowDrawable
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.FrameLayout
 import com.ramotion.navigationtoolbar.HeaderLayout
 import com.ramotion.navigationtoolbar.HeaderLayoutManager
 import com.ramotion.navigationtoolbar.NavigationToolBarLayout
@@ -23,7 +24,7 @@ import kotlin.math.max
 
 class MainActivity : AppCompatActivity() {
 
-    private val itemCount = 4
+    private val itemCount = 40
     private val dataSet = ExampleDataSet()
 
     private lateinit var viewPager: ViewPager
@@ -86,7 +87,13 @@ class MainActivity : AppCompatActivity() {
         } else 0
 
         header = findViewById(R.id.navigation_toolbar_layout)
-        header.setItemTransformer(HeaderItemTransformer(statusBarHeight, -50, 0.45f))
+
+        header.setItemTransformer(HeaderItemTransformer(
+                findViewById<FrameLayout>(R.id.header_overlay),
+                statusBarHeight,
+                -50,
+                0.45f))
+
         header.setAdapter(HeaderAdapter(itemCount, dataSet.headerDataSet))
 
         header.addItemChangeListener(object : HeaderLayoutManager.ItemChangeListener {
@@ -101,6 +108,7 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
+        // TODO: move to setupDrawerArrow
         val drawerArrow = DrawerArrowDrawable(this)
         drawerArrow.color = resources.getColor(android.R.color.white)
         header.toolBar.navigationIcon = drawerArrow
@@ -114,6 +122,7 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
+        // TODO: move to setupDecorator
         val decorator = object :
                 HeaderLayoutManager.ItemDecoration,
                 HeaderLayoutManager.HeaderChangeListener {

@@ -15,9 +15,7 @@ class FABBehavior(context: Context, attrs: AttributeSet) : CoordinatorLayout.Beh
     }
 
     override fun onDependentViewChanged(parent: CoordinatorLayout, child: FloatingActionButton, dependency: View): Boolean {
-        if (dependency is AppBarLayout) {
-            updateFABVisibilty(dependency, child)
-        }
+        updateFABVisibilty(dependency, child)
         return false
     }
 
@@ -36,7 +34,5 @@ class FABBehavior(context: Context, attrs: AttributeSet) : CoordinatorLayout.Beh
     private fun updateFABVisibilty(dependency: View, child: FloatingActionButton) {
         val show = dependency.bottom <= hideBorder
         if (show) child.show() else child.hide()
-
     }
-
 }

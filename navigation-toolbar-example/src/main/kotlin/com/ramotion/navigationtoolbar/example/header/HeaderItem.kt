@@ -15,12 +15,18 @@ class HeaderItem(view: View) : HeaderLayout.ViewHolder(view) {
 
     internal val title = view.findViewById<TextView>(R.id.title)
 
+    internal var titleText: String? = null
+
     fun setContent(content: HeaderDataSet.ItemData) {
         gradient.setBackgroundResource(content.gradient)
-        title.setText(content.title)
         Glide.with(background).load(content.background).into(background)
+
+        titleText = content.title
+        title.setText(content.title)
     }
 
-    fun clearContent() {}
+    fun clearContent() {
+        titleText = null
+    }
 
 }

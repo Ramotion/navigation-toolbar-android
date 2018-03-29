@@ -9,6 +9,8 @@
     app:headerBackgroundLayout="@layout/header_background"
     app:headerTopBorderAtSystemBar="true">
 
+    <include layout="@layout/header_overlay"/>
+
     <include layout="@layout/content_layout"/>
 
     <android.support.design.widget.FloatingActionButton
