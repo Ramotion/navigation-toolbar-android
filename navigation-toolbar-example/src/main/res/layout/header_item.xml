@@ -5,16 +5,23 @@
     android:layout_height="match_parent"
     android:elevation="2dp">
 
-    <View
-        android:id="@+id/gradient"
+    <FrameLayout
+        android:id="@+id/backgroud_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent">
 
-    <ImageView
-        android:id="@+id/background"
-        android:alpha="0.1"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scaleType="centerCrop"/>
+        <View
+            android:id="@+id/gradient"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+        <ImageView
+            android:id="@+id/image"
+            android:alpha="0.1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"/>
+
+    </FrameLayout>
 
 </android.support.constraint.ConstraintLayout>

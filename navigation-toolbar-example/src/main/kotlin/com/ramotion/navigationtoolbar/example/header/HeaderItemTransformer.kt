@@ -1,8 +1,6 @@
 package com.ramotion.navigationtoolbar.example.header
 
-import android.support.constraint.ConstraintLayout
-import android.view.View
-import android.widget.FrameLayout
+import android.view.ViewOutlineProvider
 import com.ramotion.navigationtoolbar.DefaultItemTransformer
 import com.ramotion.navigationtoolbar.HeaderLayout
 import com.ramotion.navigationtoolbar.HeaderLayoutManager
@@ -67,27 +65,46 @@ class HeaderItemTransformer(
         for (i in 0 until header.childCount) {
             val card = header.getChildAt(i)
             val holder = HeaderLayout.getChildViewHolder(card) as HeaderItem
-            holder.overlayTitle?.also { title ->
-                val cardWidth = card.width
-                val cardWidthDiff = lm.horizontalTabWidth - cardWidth
-                val widthRatio = cardWidthDiff / maxWidthDiff.toFloat()
 
-                val cardCenter = card.x + cardWidth / 2
+            val cardWidth = card.width
+            val cardWidthDiff = lm.horizontalTabWidth - cardWidth
+            val cardCenter = card.x + cardWidth / 2
+
+            val ratioWidth = cardWidthDiff / maxWidthDiff.toFloat()
+            val ratioOffset = (card.x / card.width) * invertedBottomRatio
+            val ratioAlphaScale = 0.8f + 0.2f * (1f - min(headerCenter, abs(headerCenter - cardCenter)) / headerCenter * invertedBottomRatio)
+
+            holder.overlayTitle?.also { title ->
                 val titleLeft = card.x + verticalLeftOffset
                 val titleCenter = cardCenter - title.width / 2
-                val titleCurrentLeft = titleLeft + (titleCenter - titleLeft) * (1f - widthRatio)
+                val titleCurrentLeft = titleLeft + (titleCenter - titleLeft) * (1f - ratioWidth)
                 val titleTop = card.y + card.height / 2 - title.height / 2 + horizontalTopOffset / 2 * (1f - currentRatioTopHalf)
-
-                val ratioOffsetDateTime = (card.x / card.width) * invertedBottomRatio
-                val ratioAlphaScale = 0.8f + 0.2f * (1f - min(headerCenter, abs(headerCenter - cardCenter)) / headerCenter * invertedBottomRatio)
-
-                val titleOffset = (-ratioOffsetDateTime * cardWidth / 2)
+                val titleOffset = (-ratioOffset * cardWidth / 2)
 
                 title.x = titleCurrentLeft + titleOffset
                 title.y = titleTop
                 title.alpha = ratioAlphaScale
                 title.scaleX = min(1f, ratioAlphaScale)
                 title.scaleY = title.scaleX
+            }
+
+            val background = holder.backgroundLayout
+            if (currentRatioBottomHalf != 0f) {
+                background.translationX = 0f
+                background.alpha = 1f
+                card.outlineProvider = ViewOutlineProvider.BACKGROUND
+            } else {
+                card.outlineProvider = null
+                if (ratioOffset <= -1f || ratioOffset >= 1f) {
+                    background.translationX = card.width * ratioOffset
+                    background.alpha = 0f
+                } else if (ratioOffset == 0f) {
+                    background.translationX = card.width * ratioOffset
+                    background.alpha = 1f
+                } else {
+                    background.translationX = card.width * -ratioOffset
+                    background.alpha = 1f - abs(ratioOffset)
+                }
             }
         }
     }

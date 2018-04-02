@@ -11,7 +11,9 @@ import com.ramotion.navigationtoolbar.example.R
 class HeaderItem(view: View) : HeaderLayout.ViewHolder(view) {
 
     private val gradient = view.findViewById<View>(R.id.gradient)
-    private val background = view.findViewById<ImageView>(R.id.background)
+    private val background = view.findViewById<ImageView>(R.id.image)
+
+    internal val backgroundLayout = view.findViewById<View>(R.id.backgroud_layout)
 
     internal var overlayTitle: TextView? = null
 
