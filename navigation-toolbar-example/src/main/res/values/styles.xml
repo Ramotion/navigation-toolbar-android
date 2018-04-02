@@ -18,6 +18,7 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:textColor">@android:color/white</item>
         <item name="android:textSize">23sp</item>
+        <item name="android:maxLines">1</item>
         <item name="android:shadowColor">#81000000</item>
         <item name="android:shadowDx">1</item>
         <item name="android:shadowDy">6</item>

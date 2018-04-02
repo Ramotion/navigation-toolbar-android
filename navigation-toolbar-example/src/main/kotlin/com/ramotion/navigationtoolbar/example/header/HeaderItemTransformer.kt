@@ -3,10 +3,10 @@ package com.ramotion.navigationtoolbar.example.header
 import android.support.constraint.ConstraintLayout
 import android.view.View
 import android.widget.FrameLayout
-import android.widget.TextView
 import com.ramotion.navigationtoolbar.DefaultItemTransformer
 import com.ramotion.navigationtoolbar.HeaderLayout
 import com.ramotion.navigationtoolbar.HeaderLayoutManager
+import com.ramotion.navigationtoolbar.NavigationToolBarLayout
 import kotlinx.android.synthetic.main.header_item.view.*
 import kotlin.math.abs
 import kotlin.math.min
@@ -17,6 +17,8 @@ class HeaderItemTransformer(
         private val verticalLeftOffset: Int,
         private val horizontalCenterOffsetRatio: Float) : DefaultItemTransformer() {
 
+    private var maxWidthDiff: Int = 0
+
     private var prevChildCount = Int.MIN_VALUE
     private var prevHScrollOffset = Int.MIN_VALUE
     private var prevVScrollOffset = Int.MIN_VALUE
@@ -24,6 +26,12 @@ class HeaderItemTransformer(
 
     private var topTitlesAnimated = false
     private var elevation: Float? = null
+
+    override fun onAttach(ntl: NavigationToolBarLayout) {
+        super.onAttach(ntl)
+        val lm = ntl.layoutManager
+        maxWidthDiff = lm.horizontalTabWidth - lm.verticalTabWidth
+    }
 
     override fun transform(lm: HeaderLayoutManager, header: HeaderLayout, headerBottom: Int) {
         super.transform(lm, header, headerBottom)
@@ -96,7 +104,6 @@ class HeaderItemTransformer(
             val titleNewTop = horizontalTopOffset * invertedRatio
             val ratio = 1.5f - min(headerCenter.toFloat(), abs(headerCenter - itemNewCenter)) / headerCenter
             val animate = currentRatioTopHalf > 0.5f && !topTitlesAnimated
-
             transformTitle(title, ratio, titleNewLeft, titleNewTop, animate)
         }
 
@@ -137,17 +144,23 @@ class HeaderItemTransformer(
     }
 
     private fun transformOverlay(lm: HeaderLayoutManager, header: HeaderLayout, headerBottom: Int) {
-        overlay.y = (headerBottom - overlay.height).toFloat()
 
-        val count = min(overlay.childCount, header.childCount)
-        for (i in 0 until count) {
+        for (i in 0 until header.childCount) {
             val card = header.getChildAt(i)
             val holder = HeaderLayout.getChildViewHolder(card) as HeaderItem
-            val tv = overlay.getChildAt(i) as TextView
+            holder._overlayTitle?.also { title ->
+                val cardWidth = card.width
+                val cardWidthDiff = lm.horizontalTabWidth - cardWidth
+                val widthRatio = cardWidthDiff / maxWidthDiff.toFloat()
 
-            tv.x = card.x
-            tv.y = card.y
-            holder.titleText?.also { tv.setText(it) }
+                val titleLeft = card.x + verticalLeftOffset
+                val titleCenter = card.x + cardWidth / 2 - title.width / 2
+                val titleCurrentLeft = titleLeft + (titleCenter - titleLeft) * (1f - widthRatio)
+                val titleTop = card.y + card.height / 2 - title.height / 2 + horizontalTopOffset / 2 * (1f - currentRatioTopHalf)
+
+                title.x = titleCurrentLeft
+                title.y = titleTop
+            }
         }
     }
 }

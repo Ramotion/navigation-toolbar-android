@@ -17,16 +17,30 @@ class HeaderItem(view: View) : HeaderLayout.ViewHolder(view) {
 
     internal var titleText: String? = null
 
-    fun setContent(content: HeaderDataSet.ItemData) {
+    internal var _overlayTitle: TextView? = null
+
+    fun setContent(content: HeaderDataSet.ItemData, overlayTitle: TextView?) {
         gradient.setBackgroundResource(content.gradient)
         Glide.with(background).load(content.background).into(background)
 
         titleText = content.title
         title.setText(content.title)
+
+        _overlayTitle = overlayTitle
+        _overlayTitle?.also {
+            it.setTag(position)
+            it.setText(content.title)
+        }
     }
 
     fun clearContent() {
         titleText = null
+
+        _overlayTitle?.also {
+            it.setText("unused")
+            it.setTag(null)
+        }
+        _overlayTitle = null
     }
 
 }
