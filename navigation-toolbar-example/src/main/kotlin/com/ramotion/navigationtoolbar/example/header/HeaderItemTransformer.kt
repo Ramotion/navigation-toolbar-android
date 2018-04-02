@@ -144,6 +144,8 @@ class HeaderItemTransformer(
     }
 
     private fun transformOverlay(lm: HeaderLayoutManager, header: HeaderLayout, headerBottom: Int) {
+        val invertedBottomRatio = 1f - currentRatioBottomHalf
+        val headerCenter = header.width / 2f
 
         for (i in 0 until header.childCount) {
             val card = header.getChildAt(i)
@@ -153,13 +155,22 @@ class HeaderItemTransformer(
                 val cardWidthDiff = lm.horizontalTabWidth - cardWidth
                 val widthRatio = cardWidthDiff / maxWidthDiff.toFloat()
 
+                val cardCenter = card.x + cardWidth / 2
                 val titleLeft = card.x + verticalLeftOffset
-                val titleCenter = card.x + cardWidth / 2 - title.width / 2
+                val titleCenter = cardCenter - title.width / 2
                 val titleCurrentLeft = titleLeft + (titleCenter - titleLeft) * (1f - widthRatio)
                 val titleTop = card.y + card.height / 2 - title.height / 2 + horizontalTopOffset / 2 * (1f - currentRatioTopHalf)
 
-                title.x = titleCurrentLeft
+                val ratioOffsetDateTime = (card.x / card.width) * invertedBottomRatio
+                val ratioAlphaScale = 0.8f + 0.2f * (1f - min(headerCenter, abs(headerCenter - cardCenter)) / headerCenter * invertedBottomRatio)
+
+                val titleOffset = (-ratioOffsetDateTime * cardWidth / 2)
+
+                title.x = titleCurrentLeft + titleOffset
                 title.y = titleTop
+                title.alpha = ratioAlphaScale
+                title.scaleX = min(1f, ratioAlphaScale)
+                title.scaleY = title.scaleX
             }
         }
     }
