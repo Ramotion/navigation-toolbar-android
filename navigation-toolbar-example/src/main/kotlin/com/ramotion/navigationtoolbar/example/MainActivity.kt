@@ -89,11 +89,10 @@ class MainActivity : AppCompatActivity() {
         header = findViewById(R.id.navigation_toolbar_layout)
 
         val overlay = findViewById<FrameLayout>(R.id.header_overlay)
-        header.setItemTransformer(HeaderItemTransformer(
-                overlay,
-                statusBarHeight,
-                -50,
-                0.45f))
+        header.setItemTransformer(
+                HeaderItemTransformer(
+                        horizontalTopOffset = statusBarHeight,
+                        verticalLeftOffset = -50))
 
         header.setAdapter(
                 HeaderAdapter(
@@ -149,7 +148,7 @@ class MainActivity : AppCompatActivity() {
         header.addItemDecoration(decorator)
         header.addHeaderChangeListener(decorator)
 
-//        SimpleSnapHelper().attach(header)
+        SimpleSnapHelper().attach(header)
     }
 
 }
