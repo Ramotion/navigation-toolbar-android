@@ -79,7 +79,7 @@ class HeaderItemTransformer(
                 val titleCenter = cardCenter - title.width / 2
                 val titleCurrentLeft = titleLeft + (titleCenter - titleLeft) * (1f - ratioWidth)
                 val titleTop = card.y + card.height / 2 - title.height / 2 + horizontalTopOffset / 2 * (1f - currentRatioTopHalf)
-                val titleOffset = (-ratioOffset * cardWidth / 2)
+                val titleOffset = (-ratioOffset * cardWidth / 2) * currentRatioTopHalf
 
                 title.x = titleCurrentLeft + titleOffset
                 title.y = titleTop
