@@ -16,6 +16,7 @@ import android.util.AttributeSet
 import android.util.SparseArray
 import android.util.TypedValue
 import android.view.View
+import android.view.animation.LinearInterpolator
 import android.widget.OverScroller
 import kotlin.math.abs
 import kotlin.math.min
@@ -212,7 +213,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     }
 
     private inner class ViewFlinger(context: Context) : Runnable {
-        private val scroller = OverScroller(context)
+        private val scroller = OverScroller(context, LinearInterpolator())
 
         override fun run() {
             val header = headerLayout ?: return
