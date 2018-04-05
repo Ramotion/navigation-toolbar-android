@@ -726,18 +726,9 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     }
 
     private fun onHeaderHorizontalFling(header: HeaderLayout, velocity: Float): Boolean {
-        val childCount = header.childCount
-        if (childCount == 0) {
-            return false
-        }
-
-        val itemCount = header.adapter?.getItemCount() ?: return false
-        val startX = getStartX(header.getChildAt(0))
-        val min = -itemCount * horizontalTabWidth + header.width
-        val max = 0
-
+        val startX = getAnchorView(header)?.left?.takeIf { it != 0 } ?: return false
+        val (min, max) = if (startX < 0) (-horizontalTabWidth to 0) else (0 to horizontalTabWidth)
         viewFlinger.fling(startX, 0, velocity.toInt(), 0, min, max, 0, 0)
-
         return true
     }
 
