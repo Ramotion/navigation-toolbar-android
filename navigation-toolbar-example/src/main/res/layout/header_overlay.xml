@@ -7,20 +7,36 @@
     android:fitsSystemWindows="true"
     app:layout_behavior="com.ramotion.navigationtoolbar.example.header.HeaderOverlayBehavior">
 
-    <android.support.v7.widget.AppCompatTextView style="@style/HeaderItemTextStyle"/>
+    <FrameLayout
+        android:id="@+id/texts"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-    <android.support.v7.widget.AppCompatTextView style="@style/HeaderItemTextStyle"/>
+        <android.support.v7.widget.AppCompatTextView style="@style/HeaderItemTextStyle"/>
+        <android.support.v7.widget.AppCompatTextView style="@style/HeaderItemTextStyle"/>
+        <android.support.v7.widget.AppCompatTextView style="@style/HeaderItemTextStyle"/>
+        <android.support.v7.widget.AppCompatTextView style="@style/HeaderItemTextStyle"/>
+        <android.support.v7.widget.AppCompatTextView style="@style/HeaderItemTextStyle"/>
+        <android.support.v7.widget.AppCompatTextView style="@style/HeaderItemTextStyle"/>
+        <android.support.v7.widget.AppCompatTextView style="@style/HeaderItemTextStyle"/>
+        <android.support.v7.widget.AppCompatTextView style="@style/HeaderItemTextStyle"/>
 
-    <android.support.v7.widget.AppCompatTextView style="@style/HeaderItemTextStyle"/>
+    </FrameLayout>
 
-    <android.support.v7.widget.AppCompatTextView style="@style/HeaderItemTextStyle"/>
+    <FrameLayout
+        android:id="@+id/lines"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-    <android.support.v7.widget.AppCompatTextView style="@style/HeaderItemTextStyle"/>
+        <View style="@style/HeaderItemLineStyle"/>
+        <View style="@style/HeaderItemLineStyle"/>
+        <View style="@style/HeaderItemLineStyle"/>
+        <View style="@style/HeaderItemLineStyle"/>
+        <View style="@style/HeaderItemLineStyle"/>
+        <View style="@style/HeaderItemLineStyle"/>
+        <View style="@style/HeaderItemLineStyle"/>
+        <View style="@style/HeaderItemLineStyle"/>
 
-    <android.support.v7.widget.AppCompatTextView style="@style/HeaderItemTextStyle"/>
-
-    <android.support.v7.widget.AppCompatTextView style="@style/HeaderItemTextStyle"/>
-
-    <android.support.v7.widget.AppCompatTextView style="@style/HeaderItemTextStyle"/>
+    </FrameLayout>
 
 </FrameLayout>

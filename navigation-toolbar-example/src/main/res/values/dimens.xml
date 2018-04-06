@@ -3,4 +3,7 @@
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="text_margin">16dp</dimen>
     <dimen name="decor_bottom">5dp</dimen>
+    <dimen name="title_left_offset">-15dp</dimen>
+    <dimen name="line_right_offset">10dp</dimen>
+    <dimen name="line_bottom_offset">10dp</dimen>
 </resources>

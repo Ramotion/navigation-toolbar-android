@@ -10,7 +10,9 @@ import kotlin.math.min
 
 class HeaderItemTransformer(
         private val horizontalTopOffset: Int,
-        private val verticalLeftOffset: Int) : DefaultItemTransformer() {
+        private val titleLeftOffset: Int,
+        private val lineRightOffset: Int,
+        private val lineBottomOffset: Int) : DefaultItemTransformer() {
 
     private var maxWidthDiff: Int = 0
 
@@ -67,18 +69,20 @@ class HeaderItemTransformer(
             val holder = HeaderLayout.getChildViewHolder(card) as HeaderItem
 
             val cardWidth = card.width
+            val cardHeight = card.height
             val cardWidthDiff = lm.horizontalTabWidth - cardWidth
-            val cardCenter = card.x + cardWidth / 2
+            val cardCenterX = card.x + cardWidth / 2
+            val cardCenterY = card.y + cardHeight / 2
 
             val ratioWidth = cardWidthDiff / maxWidthDiff.toFloat()
-            val ratioOffset = (card.x / card.width) * invertedBottomRatio
-            val ratioAlphaScale = 0.8f + 0.2f * (1f - min(headerCenter, abs(headerCenter - cardCenter)) / headerCenter * invertedBottomRatio)
+            val ratioOffset = (card.x / cardWidth) * invertedBottomRatio
+            val ratioAlphaScale = 0.8f + 0.2f * (1f - min(headerCenter, abs(headerCenter - cardCenterX)) / headerCenter * invertedBottomRatio)
 
             holder.overlayTitle?.also { title ->
-                val titleLeft = card.x + verticalLeftOffset
-                val titleCenter = cardCenter - title.width / 2
+                val titleLeft = card.x + titleLeftOffset
+                val titleCenter = cardCenterX - title.width / 2
                 val titleCurrentLeft = titleLeft + (titleCenter - titleLeft) * (1f - ratioWidth)
-                val titleTop = card.y + card.height / 2 - title.height / 2 + horizontalTopOffset / 2 * (1f - currentRatioTopHalf)
+                val titleTop = cardCenterY - title.height / 2 + horizontalTopOffset / 2 * (1f - currentRatioTopHalf)
                 val titleOffset = (-ratioOffset * cardWidth / 2) * currentRatioTopHalf
 
                 title.x = titleCurrentLeft + titleOffset
@@ -86,6 +90,17 @@ class HeaderItemTransformer(
                 title.alpha = ratioAlphaScale
                 title.scaleX = min(1f, ratioAlphaScale)
                 title.scaleY = title.scaleX
+            }
+
+            holder.overlayLine?.also { line ->
+                val lineWidth = line.width
+                val lineHeight = line.height
+                val lineLeft = cardCenterX - lineWidth / 2
+                val lineTop = cardCenterY + (holder.overlayTitle?.let { it.height / 2 } ?: 0)
+                val hOffset = ((card.right - lineRightOffset - lineWidth) - lineLeft) * currentRatioBottomHalf
+                val vOffset = ((card.bottom - lineBottomOffset - lineHeight) - lineTop) * currentRatioBottomHalf
+                line.x = lineLeft + hOffset
+                line.y = lineTop + vOffset + horizontalTopOffset / 2 * (1f - currentRatioTopHalf)
             }
 
             val background = holder.backgroundLayout
