@@ -4,7 +4,6 @@ import android.view.ViewOutlineProvider
 import com.ramotion.navigationtoolbar.DefaultItemTransformer
 import com.ramotion.navigationtoolbar.HeaderLayout
 import com.ramotion.navigationtoolbar.HeaderLayoutManager
-import com.ramotion.navigationtoolbar.NavigationToolBarLayout
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -16,18 +15,10 @@ class HeaderItemTransformer(
         private val lineRightOffset: Int,
         private val lineBottomOffset: Int) : DefaultItemTransformer() {
 
-    private var maxWidthDiff: Int = 0
-
     private var prevChildCount = Int.MIN_VALUE
     private var prevHScrollOffset = Int.MIN_VALUE
     private var prevVScrollOffset = Int.MIN_VALUE
     private var prevHeaderBottom = Int.MIN_VALUE
-
-    override fun onAttach(ntl: NavigationToolBarLayout) {
-        super.onAttach(ntl)
-        val lm = ntl.layoutManager
-        maxWidthDiff = lm.horizontalTabWidth - lm.verticalTabWidth
-    }
 
     override fun transform(lm: HeaderLayoutManager, header: HeaderLayout, headerBottom: Int) {
         super.transform(lm, header, headerBottom)
@@ -36,7 +27,7 @@ class HeaderItemTransformer(
             return
         }
 
-        transformOverlay(lm, header, headerBottom)
+        transformOverlay(header)
     }
 
     private fun checkForChanges(header: HeaderLayout, headerBottom: Int): Boolean {
@@ -62,12 +53,11 @@ class HeaderItemTransformer(
         return true
     }
 
-    private fun transformOverlay(lm: HeaderLayoutManager, header: HeaderLayout, headerBottom: Int) {
+    private fun transformOverlay(header: HeaderLayout) {
         val invertedBottomRatio = 1f - currentRatioBottomHalf
         val headerCenter = header.width / 2f
 
-        val alphaX = abs((min(0.8f, max(0.2f, currentRatioBottomHalf)) - 0.2f) / 0.6f - 0.5f) / 0.5f
-        val alphaY = alphaX.pow(11)
+        val lineAlpha = (abs((min(0.8f, max(0.2f, currentRatioBottomHalf)) - 0.2f) / 0.6f - 0.5f) / 0.5f).pow(11)
 
         for (i in 0 until header.childCount) {
             val card = header.getChildAt(i)
@@ -75,25 +65,24 @@ class HeaderItemTransformer(
 
             val cardWidth = card.width
             val cardHeight = card.height
-            val cardWidthDiff = lm.horizontalTabWidth - cardWidth
             val cardCenterX = card.x + cardWidth / 2
             val cardCenterY = card.y + cardHeight / 2
 
-            val ratioWidth = cardWidthDiff / maxWidthDiff.toFloat()
-            val ratioOffset = (card.x / cardWidth) * invertedBottomRatio
-            val ratioAlphaScale = 0.8f + 0.2f * (1f - min(headerCenter, abs(headerCenter - cardCenterX)) / headerCenter * invertedBottomRatio)
+            val ratioHorizontalPosition = (card.x / cardWidth) * invertedBottomRatio
+            val ratioHorizontalOffset = (1f - min(headerCenter, abs(headerCenter - cardCenterX)) / headerCenter * invertedBottomRatio)
+            val alphaTitle = 0.7f + 0.3f * ratioHorizontalOffset
 
             holder.overlayTitle?.also { title ->
                 val titleLeft = card.x + titleLeftOffset
                 val titleCenter = cardCenterX - title.width / 2
-                val titleCurrentLeft = titleLeft + (titleCenter - titleLeft) * (1f - ratioWidth)
+                val titleCurrentLeft = titleLeft + (titleCenter - titleLeft) * invertedBottomRatio
                 val titleTop = cardCenterY - title.height / 2 + horizontalTopOffset / 2 * (1f - currentRatioTopHalf)
-                val titleOffset = (-ratioOffset * cardWidth / 2) * currentRatioTopHalf
+                val titleOffset = (-ratioHorizontalPosition * cardWidth / 2) * currentRatioTopHalf
 
                 title.x = titleCurrentLeft + titleOffset
                 title.y = titleTop
-                title.alpha = ratioAlphaScale
-                title.scaleX = min(1f, ratioAlphaScale)
+                title.alpha = alphaTitle
+                title.scaleX = min(1f, 0.8f + 0.2f * ratioHorizontalOffset)
                 title.scaleY = title.scaleX
             }
 
@@ -102,11 +91,12 @@ class HeaderItemTransformer(
                 val lineHeight = line.height
                 val lineLeft = cardCenterX - lineWidth / 2
                 val lineTop = cardCenterY + (holder.overlayTitle?.let { it.height / 2 } ?: 0)
-                val hOffset = ((card.right - lineRightOffset - lineWidth) - lineLeft) * currentRatioBottomHalf
+                val hBottomOffset = ((card.right - lineRightOffset - lineWidth) - lineLeft) * currentRatioBottomHalf
+                val hTopOffset = -ratioHorizontalPosition * cardWidth / 1.1f * (1f - currentRatioTopHalf)
                 val vOffset = ((card.bottom - lineBottomOffset - lineHeight) - lineTop) * currentRatioBottomHalf
-                line.x = lineLeft + hOffset
+                line.x = lineLeft + hBottomOffset + hTopOffset
                 line.y = lineTop + vOffset + horizontalTopOffset / 2 * (1f - currentRatioTopHalf)
-                line.alpha = alphaY
+                line.alpha = if (currentRatioTopHalf == 1f) lineAlpha else alphaTitle
             }
 
             val background = holder.backgroundLayout
@@ -116,15 +106,15 @@ class HeaderItemTransformer(
                 card.outlineProvider = ViewOutlineProvider.BACKGROUND
             } else {
                 card.outlineProvider = null
-                if (ratioOffset <= -1f || ratioOffset >= 1f) {
-                    background.translationX = card.width * ratioOffset
+                if (ratioHorizontalPosition <= -1f || ratioHorizontalPosition >= 1f) {
+                    background.translationX = card.width * ratioHorizontalPosition
                     background.alpha = 0f
-                } else if (ratioOffset == 0f) {
-                    background.translationX = card.width * ratioOffset
+                } else if (ratioHorizontalPosition == 0f) {
+                    background.translationX = card.width * ratioHorizontalPosition
                     background.alpha = 1f
                 } else {
-                    background.translationX = card.width * -ratioOffset
-                    background.alpha = 1f - abs(ratioOffset)
+                    background.translationX = card.width * -ratioHorizontalPosition
+                    background.alpha = 1f - abs(ratioHorizontalPosition)
                 }
             }
         }
