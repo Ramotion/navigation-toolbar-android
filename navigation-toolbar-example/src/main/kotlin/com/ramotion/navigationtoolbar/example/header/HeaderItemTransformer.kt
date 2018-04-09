@@ -6,7 +6,9 @@ import com.ramotion.navigationtoolbar.HeaderLayout
 import com.ramotion.navigationtoolbar.HeaderLayoutManager
 import com.ramotion.navigationtoolbar.NavigationToolBarLayout
 import kotlin.math.abs
+import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.pow
 
 class HeaderItemTransformer(
         private val horizontalTopOffset: Int,
@@ -64,6 +66,9 @@ class HeaderItemTransformer(
         val invertedBottomRatio = 1f - currentRatioBottomHalf
         val headerCenter = header.width / 2f
 
+        val alphaX = abs((min(0.8f, max(0.2f, currentRatioBottomHalf)) - 0.2f) / 0.6f - 0.5f) / 0.5f
+        val alphaY = alphaX.pow(11)
+
         for (i in 0 until header.childCount) {
             val card = header.getChildAt(i)
             val holder = HeaderLayout.getChildViewHolder(card) as HeaderItem
@@ -101,6 +106,7 @@ class HeaderItemTransformer(
                 val vOffset = ((card.bottom - lineBottomOffset - lineHeight) - lineTop) * currentRatioBottomHalf
                 line.x = lineLeft + hOffset
                 line.y = lineTop + vOffset + horizontalTopOffset / 2 * (1f - currentRatioTopHalf)
+                line.alpha = alphaY
             }
 
             val background = holder.backgroundLayout
