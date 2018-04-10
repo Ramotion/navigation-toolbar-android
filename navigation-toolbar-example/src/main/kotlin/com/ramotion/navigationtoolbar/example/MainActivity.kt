@@ -81,24 +81,20 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initHeader() {
-        val statusBarHeight = resources.getIdentifier("status_bar_height", "dimen", "android")
-                .takeIf { it != 0 }
-                ?.let { resources.getDimensionPixelSize(it) }
-                ?: 0
-
         val titleLeftOffset = resources.getDimensionPixelSize(R.dimen.title_left_offset)
         val lineRightOffset = resources.getDimensionPixelSize(R.dimen.line_right_offset)
         val lineBottomOffset = resources.getDimensionPixelSize(R.dimen.line_bottom_offset)
+        val lineTitleOffset = resources.getDimensionPixelSize(R.dimen.line_title_offset)
 
         header = findViewById(R.id.navigation_toolbar_layout)
 
         val overlay = findViewById<FrameLayout>(R.id.header_overlay)
         header.setItemTransformer(
                 HeaderItemTransformer(
-                        horizontalTopOffset = statusBarHeight,
                         titleLeftOffset = titleLeftOffset,
                         lineRightOffset = lineRightOffset,
-                        lineBottomOffset = lineBottomOffset))
+                        lineBottomOffset = lineBottomOffset,
+                        lineTitleOffset = lineTitleOffset))
 
         header.setAdapter(
                 HeaderAdapter(

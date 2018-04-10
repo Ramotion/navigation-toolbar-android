@@ -10,10 +10,10 @@ import kotlin.math.min
 import kotlin.math.pow
 
 class HeaderItemTransformer(
-        private val horizontalTopOffset: Int,
         private val titleLeftOffset: Int,
         private val lineRightOffset: Int,
-        private val lineBottomOffset: Int) : DefaultItemTransformer() {
+        private val lineBottomOffset: Int,
+        private val lineTitleOffset: Int) : DefaultItemTransformer() {
 
     private var prevChildCount = Int.MIN_VALUE
     private var prevHScrollOffset = Int.MIN_VALUE
@@ -76,7 +76,7 @@ class HeaderItemTransformer(
                 val titleLeft = card.x + titleLeftOffset
                 val titleCenter = cardCenterX - title.width / 2
                 val titleCurrentLeft = titleLeft + (titleCenter - titleLeft) * invertedBottomRatio
-                val titleTop = cardCenterY - title.height / 2 + horizontalTopOffset / 2 * (1f - currentRatioTopHalf)
+                val titleTop = cardCenterY - title.height / 2
                 val titleOffset = (-ratioHorizontalPosition * cardWidth / 2) * currentRatioTopHalf
 
                 title.x = titleCurrentLeft + titleOffset
@@ -90,12 +90,12 @@ class HeaderItemTransformer(
                 val lineWidth = line.width
                 val lineHeight = line.height
                 val lineLeft = cardCenterX - lineWidth / 2
-                val lineTop = cardCenterY + (holder.overlayTitle?.let { it.height / 2 } ?: 0)
+                val lineTop = cardCenterY + (holder.overlayTitle?.let { it.height / 2 + lineTitleOffset } ?: 0)
                 val hBottomOffset = ((card.right - lineRightOffset - lineWidth) - lineLeft) * currentRatioBottomHalf
                 val hTopOffset = -ratioHorizontalPosition * cardWidth / 1.1f * (1f - currentRatioTopHalf)
                 val vOffset = ((card.bottom - lineBottomOffset - lineHeight) - lineTop) * currentRatioBottomHalf
                 line.x = lineLeft + hBottomOffset + hTopOffset
-                line.y = lineTop + vOffset + horizontalTopOffset / 2 * (1f - currentRatioTopHalf)
+                line.y = lineTop + vOffset
                 line.alpha = if (currentRatioTopHalf == 1f) lineAlpha else alphaTitle
             }
 
