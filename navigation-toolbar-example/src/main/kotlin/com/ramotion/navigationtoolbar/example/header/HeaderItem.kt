@@ -24,6 +24,7 @@ class HeaderItem(view: View) : HeaderLayout.ViewHolder(view) {
         overlayTitle = title?.also {
             it.setTag(position)
             it.setText(content.title)
+            it.setVisibility(View.VISIBLE)
         }
 
         overlayLine = line
@@ -35,7 +36,7 @@ class HeaderItem(view: View) : HeaderLayout.ViewHolder(view) {
 
     fun clearContent() {
         overlayTitle?.also {
-            it.setText("unused")
+            it.setVisibility(View.GONE)
             it.setTag(null)
         }
 
