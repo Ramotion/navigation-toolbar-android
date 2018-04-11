@@ -23,12 +23,8 @@ import kotlin.math.max
 
 
 class MainActivity : AppCompatActivity() {
-
     private val itemCount = 40
     private val dataSet = ExampleDataSet()
-
-    private lateinit var viewPager: ViewPager
-    private lateinit var header: NavigationToolBarLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,9 +35,12 @@ class MainActivity : AppCompatActivity() {
                     .setAction("Action", null).show()
         }
 
+        val header = findViewById<NavigationToolBarLayout>(R.id.navigation_toolbar_layout)
+        val viewPager = findViewById<ViewPager>(R.id.pager)
+
         initActionBar()
-        initViewPager()
-        initHeader()
+        initViewPager(header, viewPager)
+        initHeader(header, viewPager)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -70,8 +69,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun initViewPager() {
-        viewPager = findViewById(R.id.pager)
+    private fun initViewPager(header: NavigationToolBarLayout, viewPager: ViewPager) {
         viewPager.adapter = ViewPagerAdapter(itemCount, dataSet.viewPagerDataSet)
         viewPager.addOnPageChangeListener(object : ViewPager.SimpleOnPageChangeListener() {
             override fun onPageSelected(position: Int) {
@@ -80,27 +78,14 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    private fun initHeader() {
+    private fun initHeader(header: NavigationToolBarLayout, viewPager: ViewPager) {
         val titleLeftOffset = resources.getDimensionPixelSize(R.dimen.title_left_offset)
         val lineRightOffset = resources.getDimensionPixelSize(R.dimen.line_right_offset)
         val lineBottomOffset = resources.getDimensionPixelSize(R.dimen.line_bottom_offset)
         val lineTitleOffset = resources.getDimensionPixelSize(R.dimen.line_title_offset)
 
-        header = findViewById(R.id.navigation_toolbar_layout)
-
-        val overlay = findViewById<FrameLayout>(R.id.header_overlay)
-        header.setItemTransformer(
-                HeaderItemTransformer(
-                        titleLeftOffset = titleLeftOffset,
-                        lineRightOffset = lineRightOffset,
-                        lineBottomOffset = lineBottomOffset,
-                        lineTitleOffset = lineTitleOffset))
-
-        header.setAdapter(
-                HeaderAdapter(
-                        itemCount,
-                        dataSet.headerDataSet,
-                        overlay))
+        header.setItemTransformer(HeaderItemTransformer(titleLeftOffset, lineRightOffset, lineBottomOffset, lineTitleOffset))
+        header.setAdapter(HeaderAdapter(itemCount, dataSet.headerDataSet, findViewById<FrameLayout>(R.id.header_overlay)))
 
         header.addItemChangeListener(object : HeaderLayoutManager.ItemChangeListener {
             override fun onItemChanged(position: Int) {
@@ -114,9 +99,15 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
-        // TODO: move to setupDrawerArrow
+        SimpleSnapHelper().attach(header)
+        initDrawerArrow(header)
+        initHeaderDecorator(header)
+    }
+
+    private fun initDrawerArrow(header: NavigationToolBarLayout) {
         val drawerArrow = DrawerArrowDrawable(this)
         drawerArrow.color = resources.getColor(android.R.color.white)
+
         header.toolBar.navigationIcon = drawerArrow
         header.addHeaderChangeStateListener(object : HeaderLayoutManager.HeaderChangeStateListener() {
             override fun onCollapsed() {
@@ -127,8 +118,9 @@ class MainActivity : AppCompatActivity() {
                 ObjectAnimator.ofFloat(drawerArrow, "progress", 0f).start()
             }
         })
+    }
 
-        // TODO: move to setupDecorator
+    private fun initHeaderDecorator(header: NavigationToolBarLayout) {
         val decorator = object :
                 HeaderLayoutManager.ItemDecoration,
                 HeaderLayoutManager.HeaderChangeListener {
@@ -149,8 +141,5 @@ class MainActivity : AppCompatActivity() {
 
         header.addItemDecoration(decorator)
         header.addHeaderChangeListener(decorator)
-
-        SimpleSnapHelper().attach(header)
     }
-
 }
