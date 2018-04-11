@@ -25,7 +25,7 @@ class HeaderLayout : FrameLayout {
     internal interface ScrollListener {
         fun onItemClick(header: HeaderLayout, viewHolder: ViewHolder): Boolean
         fun onHeaderDown(header: HeaderLayout): Boolean
-        fun onHeaderUp(header: HeaderLayout): Unit
+        fun onHeaderUp(header: HeaderLayout)
         fun onHeaderHorizontalScroll(header: HeaderLayout, distance: Float): Boolean
         fun onHeaderVerticalScroll(header: HeaderLayout, distance: Float): Boolean
         fun onHeaderHorizontalFling(header: HeaderLayout, velocity: Float): Boolean

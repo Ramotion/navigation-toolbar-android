@@ -172,8 +172,8 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     private var prevOffset: Int = Int.MAX_VALUE
     private var restoredAnchorPosition: Int? = null
 
-    var hPoint: Point? = null
-    var vPoint: Point? = null
+    private var hPoint: Point? = null
+    private var vPoint: Point? = null
 
     internal inner class AppBarBehavior : AppBarLayout.Behavior() {
         init {
@@ -653,7 +653,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         return true
     }
 
-    private fun onHeaderUp(header: HeaderLayout): Unit {
+    private fun onHeaderUp(header: HeaderLayout) {
         if (scrollState != ScrollState.FLING) {
             setScrollState(ScrollState.IDLE)
         }

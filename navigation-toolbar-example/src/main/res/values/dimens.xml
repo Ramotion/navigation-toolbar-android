@@ -1,7 +1,5 @@
 <resources>
-    <dimen name="app_bar_height">180dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
-    <dimen name="text_margin">16dp</dimen>
     <dimen name="decor_bottom">5dp</dimen>
     <dimen name="title_left_offset">-20dp</dimen>
     <dimen name="line_right_offset">20dp</dimen>

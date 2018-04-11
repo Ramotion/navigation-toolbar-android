@@ -27,7 +27,7 @@ class ItemUser(view: View) : PageItem(view) {
 }
 
 class ItemImage(view: View) : PageItem(view) {
-    val imageView = view.findViewById<ImageView>(R.id.page_image)
+    private val imageView = view.findViewById<ImageView>(R.id.page_image)
 
     fun setImage(imgId: Int) {
         Glide.with(imageView).load(imgId).into(imageView)
