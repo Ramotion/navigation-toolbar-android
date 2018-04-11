@@ -119,7 +119,7 @@ class HeaderItemTransformer(
             if (currentRatioBottomHalf != 0f) {
                 background.translationX = 0f
                 background.alpha = 1f
-                card.outlineProvider = ViewOutlineProvider.BACKGROUND
+                card.outlineProvider = ViewOutlineProvider.BOUNDS
             } else {
                 card.outlineProvider = null
                 if (ratioHorizontalPosition <= -1f || ratioHorizontalPosition >= 1f) {
