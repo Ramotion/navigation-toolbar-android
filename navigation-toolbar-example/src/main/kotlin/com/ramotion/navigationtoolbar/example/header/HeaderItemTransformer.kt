@@ -1,6 +1,8 @@
 package com.ramotion.navigationtoolbar.example.header
 
 import android.view.ViewOutlineProvider
+import android.view.ViewTreeObserver
+import android.widget.FrameLayout
 import com.ramotion.navigationtoolbar.DefaultItemTransformer
 import com.ramotion.navigationtoolbar.HeaderLayout
 import com.ramotion.navigationtoolbar.HeaderLayoutManager
@@ -10,6 +12,7 @@ import kotlin.math.min
 import kotlin.math.pow
 
 class HeaderItemTransformer(
+        private val headerOverlay: FrameLayout,
         private val titleLeftOffset: Int,
         private val lineRightOffset: Int,
         private val lineBottomOffset: Int,
@@ -20,8 +23,21 @@ class HeaderItemTransformer(
     private var prevVScrollOffset = Int.MIN_VALUE
     private var prevHeaderBottom = Int.MIN_VALUE
 
+    private var isOverlayLaidout = false
+
     override fun transform(lm: HeaderLayoutManager, header: HeaderLayout, headerBottom: Int) {
         super.transform(lm, header, headerBottom)
+
+        if (!isOverlayLaidout) {
+            headerOverlay.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+                override fun onGlobalLayout() {
+                    headerOverlay.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                    isOverlayLaidout = true
+                    transformOverlay(header)
+                }
+            })
+            return
+        }
 
         if (!checkForChanges(header, headerBottom)) {
             return
@@ -107,13 +123,13 @@ class HeaderItemTransformer(
             } else {
                 card.outlineProvider = null
                 if (ratioHorizontalPosition <= -1f || ratioHorizontalPosition >= 1f) {
-                    background.translationX = card.width * ratioHorizontalPosition
+                    background.translationX = cardWidth * ratioHorizontalPosition
                     background.alpha = 0f
                 } else if (ratioHorizontalPosition == 0f) {
-                    background.translationX = card.width * ratioHorizontalPosition
+                    background.translationX = cardWidth * ratioHorizontalPosition
                     background.alpha = 1f
                 } else {
-                    background.translationX = card.width * -ratioHorizontalPosition
+                    background.translationX = cardWidth * -ratioHorizontalPosition
                     background.alpha = 1f - abs(ratioHorizontalPosition)
                 }
             }

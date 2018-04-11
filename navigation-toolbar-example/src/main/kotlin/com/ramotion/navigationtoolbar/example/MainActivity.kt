@@ -84,8 +84,10 @@ class MainActivity : AppCompatActivity() {
         val lineBottomOffset = resources.getDimensionPixelSize(R.dimen.line_bottom_offset)
         val lineTitleOffset = resources.getDimensionPixelSize(R.dimen.line_title_offset)
 
-        header.setItemTransformer(HeaderItemTransformer(titleLeftOffset, lineRightOffset, lineBottomOffset, lineTitleOffset))
-        header.setAdapter(HeaderAdapter(itemCount, dataSet.headerDataSet, findViewById(R.id.header_overlay)))
+        val headerOverlay = findViewById<FrameLayout>(R.id.header_overlay)
+        header.setItemTransformer(HeaderItemTransformer(headerOverlay,
+                titleLeftOffset, lineRightOffset, lineBottomOffset, lineTitleOffset))
+        header.setAdapter(HeaderAdapter(itemCount, dataSet.headerDataSet, headerOverlay))
 
         header.addItemChangeListener(object : HeaderLayoutManager.ItemChangeListener {
             override fun onItemChanged(position: Int) {
