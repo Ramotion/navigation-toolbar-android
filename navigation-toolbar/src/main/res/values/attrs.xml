@@ -2,7 +2,7 @@
 <resources>
     <declare-styleable name="NavigationToolBarr">
         <attr name="headerBackgroundLayout" format="reference"/>
-        <attr name="headerItemsCount" format="integer"/>
+        <attr name="headerOnScreenItemCount" format="integer"/>
         <attr name="headerCollapsingBySelectDuration" format="integer"/>
         <attr name="headerTopBorderAtSystemBar" format="boolean"/>
         <attr name="headerVerticalItemWidth" format="dimension">

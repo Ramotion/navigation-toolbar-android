@@ -287,7 +287,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         attrs?.also {
             val a = context.theme.obtainStyledAttributes(attrs, R.styleable.NavigationToolBarr, 0, 0)
             try {
-                itemCount = a.getInteger(R.styleable.NavigationToolBarr_headerItemsCount, -1)
+                itemCount = a.getInteger(R.styleable.NavigationToolBarr_headerOnScreenItemCount, -1)
                         .let { if (it <= 0) TAB_ON_SCREEN_COUNT else it }
                 gravity = VerticalGravity.fromInt(a.getInteger(R.styleable.NavigationToolBarr_headerVerticalGravity, VerticalGravity.RIGHT.value))
                 collapsingDuration = a.getInteger(R.styleable.NavigationToolBarr_headerCollapsingBySelectDuration, COLLAPSING_BY_SELECT_DURATION)
