@@ -23,15 +23,35 @@ import kotlin.math.min
 
 
 /**
- * Moves header's views
+ * Responsible from moving and placing HeaderLayout's cards.
  */
 class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     : CoordinatorLayout.Behavior<HeaderLayout>(context, attrs), AppBarLayout.OnOffsetChangedListener {
 
+    /**
+     * Defines header orientation states.
+     * HORIZONTAL - horizontal orientation, when cards placed horizontally.
+     * VERTICAL - vertical orientation, when cards placed vertically.
+     * TRANSITIONAL - state when when header is changing from vertical to horizontal and vice versa.
+     */
     enum class Orientation {
-        HORIZONTAL, VERTICAL, TRANSITIONAL
+        /**
+         * Horizontal orientation, when cards placed horizontally.
+         */
+        HORIZONTAL,
+        /**
+         * Vertical orientation, when cards placed vertically.
+         */
+        VERTICAL,
+        /**
+         * state when when header is changing from vertical to horizontal and vice versa.
+         */
+        TRANSITIONAL
     }
 
+    /**
+     * Defines header scroll states.
+     */
     enum class ScrollState {
         IDLE, DRAGGING, FLING
     }
@@ -86,14 +106,29 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         const val MAX_SCROLL_DURATION = 600L
     }
 
+    /**
+     * Observes header's change (expand / collapse).
+     */
     interface HeaderChangeListener {
+        /**
+         * Invoked whenever header is changed (expanded / collapsed).
+         */
         fun onHeaderChanged(lm: HeaderLayoutManager, header: HeaderLayout, headerBottom: Int)
     }
 
+    /**
+     * Observes header's update (redraw).
+     */
     interface HeaderUpdateListener {
+        /**
+         * Invoked whenever header is updated (filled / redrawn).
+         */
         fun onHeaderUpdated(lm: HeaderLayoutManager, header: HeaderLayout, headerBottom: Int)
     }
 
+    /**
+     * Enhanced HeaderChangeListener which observes header's position states: collapsed, middle, expanded.
+     */
     abstract class HeaderChangeStateListener : HeaderChangeListener {
         final override fun onHeaderChanged(lm: HeaderLayoutManager, header: HeaderLayout, headerBottom: Int) {
             when (headerBottom) {
@@ -103,24 +138,61 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
             }
         }
 
+        /**
+         * Invoked when header is collapsed.
+         */
         open fun onCollapsed() {}
+
+        /**
+         * Invoked when header passed or stopped in the middle.
+         */
         open fun onMiddle() {}
+
+        /**
+         * Invoked when header is expanded.
+         */
         open fun onExpanded() {}
     }
 
+    /**
+     * Observes card's click events.
+     */
     interface ItemClickListener {
+        /**
+         * Invoked when header card is clicked.
+         */
         fun onItemClicked(viewHolder: HeaderLayout.ViewHolder)
     }
 
+    /**
+     * Observes card's position change.
+     */
     interface ItemChangeListener {
+        /**
+         * Invoked when header card position is changed.
+         */
         fun onItemChanged(position: Int)
     }
 
+    /**
+     * Observes header scroll states
+     */
     interface ScrollStateListener {
+        /**
+         * Invoked when scroll state is changed.
+         */
         fun onScrollStateChanged(state: HeaderLayoutManager.ScrollState)
     }
 
+    /**
+     * Used for cards decoration.
+     */
     interface ItemDecoration {
+        /**
+         * Retrieve any offsets for the given item. Each field of outRect specifies the number of pixels that the item view should be inset by, similar to padding or margin.
+         * @param outRect Rect to receive the output.
+         * @param viewHolder Card ViewHolder.
+         */
         fun getItemOffsets(outRect: Rect, viewHolder: HeaderLayout.ViewHolder)
     }
 
@@ -143,12 +215,24 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
 
     val workBottom = context.resources.displayMetrics.heightPixels
     val workMiddle = workBottom / 2
-    val horizontalTabWidth = screenWidth
-    val horizontalTabHeight = workMiddle
-
     val workTop: Int
     val workHeight: Int
+
+    /**
+     * Width of card in horizontal orientation.
+     */
+    val horizontalTabWidth = screenWidth
+    /**
+     * Height of card in horizontal orientation.
+     */
+    val horizontalTabHeight = workMiddle
+    /**
+     * Width of card in vertical orientation.
+     */
     val verticalTabWidth: Int
+    /**
+     * Height of card in vertical orientation.
+     */
     val verticalTabHeight: Int
 
     internal val appBarBehavior = AppBarBehavior()
@@ -384,6 +468,10 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
 
     // TODO: fun scroll(distance)
 
+    /**
+     * Scroll header to specified position.
+     * @param pos Position where to scroll.
+     */
     fun scrollToPosition(pos: Int) {
         scrollToPosition(pos, { header, _, offset, horizontal ->
             when(horizontal) {
@@ -393,6 +481,10 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         })
     }
 
+    /**
+     * Smooth scroll header to specified position.
+     * @param pos Position where to scroll.
+     */
     fun smoothScrollToPosition(pos: Int) {
         scrollToPosition(pos, {_, anchorView, offset, horizontal ->
             if (horizontal) {
@@ -409,14 +501,30 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         })
     }
 
+    /**
+     * Returns point of left top corner where clicked card get placed when header change orientation
+     * from vertical to horizontal.
+     * @return Point(x, y) of left top corner where card get placed when header change orientation
+     * from vertical to horizontal.
+     */
     fun getHorizontalPoint(): Point {
         return hPoint ?: throw RuntimeException("Layout manager not initialized yet")
     }
 
+    /**
+     * Returns point of left top corner where anchor card get placed when header change orientation
+     * from horizontal to vertical.
+     * @return Point(x, y) of left top corner where anchor card get placed when header change orientation
+     * from horizontal to vertical.
+     */
     fun getVerticalPoint(): Point {
         return vPoint ?: throw RuntimeException("Layout manager not initialized yet")
     }
 
+    /**
+     * Returns horizontal center card.
+     * @return View or null if card not found.
+     */
     fun getHorizontalAnchorView(header: HeaderLayout): View? {
         val centerLeft = hPoint?.x ?: return null
 
@@ -435,6 +543,10 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         return result
     }
 
+    /**
+     * Returns vertical center card.
+     * @return View or null if card not found.
+     */
     fun getVerticalAnchorView(header: HeaderLayout): View? {
         val centerTop = vPoint?.y ?: return null
 
@@ -453,6 +565,14 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         return result
     }
 
+    /**
+     * Lays out view at specified position.
+     * @param child View to lay out.
+     * @param x Left position, relative to parent.
+     * @param y Top position, relative to parent.
+     * @param w View width.
+     * @param h View height.
+     */
     fun layoutChild(child: View, x: Int, y: Int, w: Int, h: Int) {
         val inset = getDecorInsetsForChild(child)
 
@@ -470,6 +590,10 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         child.layout(l, t, l + pw, t + ph)
     }
 
+    /**
+     * Fill and redraws all cards in header.
+     * @param header HeaderLayout.
+     */
     fun fill(header: HeaderLayout) {
         val orientation = getOrientation(::getPositionRatio)
         if (orientation == Orientation.TRANSITIONAL) {
@@ -505,6 +629,11 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         updateListener.forEach { it.onHeaderUpdated(this, header, headerBottom) }
     }
 
+    /**
+     * Returns current center card, of current orientation.
+     * @param header HeaderLayout.
+     * @return View or null if card not found.
+     */
     fun getAnchorView(header: HeaderLayout): View? {
         val orientation = getOrientation(::getPositionRatio)
         return when (orientation) {
@@ -514,6 +643,12 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         }
     }
 
+    /**
+     * Returns current center card, adapter position.
+     * @param header HeaderLayout.
+     * @return Current center card, adapter position or HeaderLayout.INVALID_POSITION if card not found.
+     * @see HeaderLayout.INVALID_POSITION
+     */
     fun getAnchorPos(header: HeaderLayout): Int {
         return restoredAnchorPosition
                 ?.also { restoredAnchorPosition = null }
@@ -522,30 +657,66 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
                 ?: HeaderLayout.INVALID_POSITION
     }
 
+    /**
+     * Returns child (card) decorated width.
+     * @param child Header's card which decorated width needed.
+     * @return child width + decorators width offsets.
+     * @link ItemDecoration
+     */
     fun getDecoratedWidth(child: View): Int {
         val width = child.width
         val inset = getDecorInsetsForChild(child)
         return width + inset.left + inset.right
     }
 
+    /**
+     * Returns child (card) decorated height.
+     * @param child Header's card which decorated width needed.
+     * @return child height + decorators height offsets.
+     * @link ItemDecoration
+     */
     fun getDecoratedHeight(child: View): Int {
         val height = child.height
         val inset = getDecorInsetsForChild(child)
         return height + inset.top + inset.bottom
     }
 
+    /**
+     * Returns child (card) decorated left position.
+     * @param child Header's card which decorated left position needed.
+     * @return child left - decorators left offsets.
+     * @link ItemDecoration
+     */
     fun getDecoratedLeft(child: View): Int {
         return child.left - getDecorInsetsForChild(child).left
     }
 
+    /**
+     * Returns child (card) decorated right position.
+     * @param child Header's card which decorated right position needed.
+     * @return child right + decorators right offsets.
+     * @link ItemDecoration
+     */
     fun getDecoratedRight(child: View): Int {
         return child.right + getDecorInsetsForChild(child).right
     }
 
+    /**
+     * Returns child (card) decorated top position.
+     * @param child Header's card which decorated top position needed.
+     * @return child top - decorators top offsets.
+     * @link ItemDecoration
+     */
     fun getDecoratedTop(child: View): Int {
         return child.top - getDecorInsetsForChild(child).top
     }
 
+    /**
+     * Returns child (card) decorated bottom position.
+     * @param child Header's card which decorated bottom position needed.
+     * @return child bottom + decorators bottom offsets.
+     * @link ItemDecoration
+     */
     fun getDecoratedBottom(child: View): Int {
         return child.bottom + getDecorInsetsForChild(child).bottom
     }
