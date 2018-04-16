@@ -4,6 +4,11 @@ import com.ramotion.navigationtoolbar.HeaderLayoutManager.Point
 import kotlin.math.max
 import kotlin.math.min
 
+/**
+ * DefaultItemTransformer - default implementation if ItemTransformer interface.
+ * @see NavigationToolBarLayout.ItemTransformer
+ * @see NavigationToolBarLayout.setItemTransformer
+ */
 open class DefaultItemTransformer
     : NavigationToolBarLayout.ItemTransformer(), HeaderLayoutManager.ItemClickListener {
 
@@ -17,9 +22,21 @@ open class DefaultItemTransformer
     private var clickedItemIndex: Int? = null
     private var prevItemCount: Int? = null
 
+    /**
+     * Current HeaderLayout bottom position form 1f (bottom) to 0.11f (top). -1f if not computed yet.
+     */
     protected var currentRatio = -1f; private set
+    /**
+     * Current HeaderLayout bottom position from 1f (bottom) to 0f (top, bellow ToolBar). -1f if not computed yet.
+     */
     protected var currentRatioWork = -1f; private set
+    /**
+     * Current HeaderLayout bottom position from 1f (middle) to 0f (top, bellow ToolBar). -1f if not computed yet.
+     */
     protected var currentRatioTopHalf = -1f; private set
+    /**
+     * Current HeaderLayout bottom position from 1f (bottom) to 0f (middle). -1f if not computed yet.
+     */
     protected var currentRatioBottomHalf = -1f; private set
 
     override fun onAttach(ntl: NavigationToolBarLayout) {
