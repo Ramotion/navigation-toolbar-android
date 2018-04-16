@@ -1,8 +1,8 @@
 ## Basic usage
 
-NavigationToolBarLayout является наследником CoordinatorLayout. Поэтому NavigationToolBarLayout
-должен быть корневым элементом вашего лэйаута. Отображаемый контент, должен находится внутри
-NavigationToolBarLayout, как показано ниже:
+NavigationToolBarLayout is the successor of CoordinatorLayout. Therefore NavigationToolBarLayout
+must be the root element of your layout. Displayed content must be inside
+NavigationToolBarLayout, as shown below:
 
 ```xml
 <com.ramotion.navigationtoolbar.NavigationToolBarLayout
@@ -22,25 +22,25 @@ NavigationToolBarLayout, как показано ниже:
 </com.ramotion.navigationtoolbar.NavigationToolBarLayout>
 ```
 
-Далее необходимо указать адаптер для NavigationToolBarLayout, из которого,
-NavigationToolBarLayout будет получать отображаемые View.
+Next, you must specify an adapter for NavigationToolBarLayout, from which,
+NavigationToolBarLayout will receive the displayed View.
 
-NavigationToolBarLayout содержит в себе `android.support.v7.widget.Toolbar` и
-`android.support.design.widget.AppBarLayout`, доступ к которым можно получить через
-соотвествующие идентификаторы:
+NavigationToolBarLayout contains `android.support.v7.widget.Toolbar` and
+`android.support.design.widget.AppBarLayout`, access to which can be obtained through
+the appropriate identifiers:
 ``` xml
-@id/com_ramotion_toolbar <!-- идентификатор Toolbar -->
-@id/com_ramotion_app_bar <!-- идентификатор AppBarLayout -->
+@id/com_ramotion_toolbar <!-- identifier of Toolbar -->
+@id/com_ramotion_app_bar <!-- identifier of AppBarLayout -->
 ```
-Либо через соотвествующие свойства класса NavigationToolBarLayout:
+Either through the appropriate properties of the NavigationToolBarLayout class:
 ```kotlin
 val toolBar: Toolbar
 val appBarLayout: AppBarLayout
 ```
 
 Here are the attributes you can specify through XML or related setters:
-* `headerOnScreenItemCount` - максимально количество одновременно показываемых карточек в вертикальном положении
-* `headerCollapsingBySelectDuration` - время анимации сворачивания заголовка, при нажатии на карточку
-* `headerTopBorderAtSystemBar` - вырвнивать верхнюю карточку по систембару или нет
-* `headerVerticalItemWidth` - задает ширину вертикально карточки. Может быть равен `match_parent`, тогда ширина карточки будет равно ширине NavigationToolBarLayout
-* `headerVerticalGravity` - задает вырванивание карточек в вертикальном положение. Может принимать значение: left, center, right
+* `headerOnScreenItemCount` - The maximum number of simultaneously displayed cards (items) in vertical orientation.
+* `headerCollapsingBySelectDuration` - Collapsing animation duration of header (HeaderLayout), when you click on the card in vertical orientation.
+* `headerTopBorderAtSystemBar` - Align the top card on the systembar or not.
+* `headerVerticalItemWidth` - Specifies the width of the vertical card. It can be equal to `match_parent`, then the width of the card will be equal to the width of NavigationToolBarLayout.
+* `headerVerticalGravity` - Specifies the alignment of the vertical card. Can take the value: left, center, right.
