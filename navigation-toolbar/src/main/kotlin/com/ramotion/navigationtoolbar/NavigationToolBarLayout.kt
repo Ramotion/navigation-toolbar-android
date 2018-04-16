@@ -10,31 +10,56 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import com.ramotion.navigationtoolbar.HeaderLayoutManager.*
 
-
+/**
+ * The main class that combines two other main classes: HeaderLayoutManager and HeaderLayout.
+ * @see HeaderLayoutManager
+ * @see HeaderLayout
+ */
 class NavigationToolBarLayout : CoordinatorLayout {
 
     private companion object {
         const val HEADER_HIDE_START = 0.5f
     }
 
+    /**
+     * ItemTransformer abstract class can be used as parent for class that will be responsible
+     * for transformation of HeaderLayout child, during HeaderLayout change (expand / collapse)
+     * or update (redraw / fill).
+     * @see DefaultItemTransformer
+     * @see setItemTransformer
+     */
     abstract class ItemTransformer : HeaderChangeListener, HeaderUpdateListener {
         protected var navigationToolBarLayout: NavigationToolBarLayout? = null
             private set
 
+        /**
+         * Called on HeaderLayout change (expand / collapse) or update (redraw / fill).
+         * @param lm HeaderLayoutManager
+         * @param header HeaderLayout
+         * @param headerBottom HeaderLayout bottom position.
+         */
         abstract fun transform(lm: HeaderLayoutManager, header: HeaderLayout, headerBottom: Int)
 
+        /**
+         * Called on attach ot NavigationToolBarLayout.
+         * @see setItemTransformer
+         */
         abstract fun onAttach(ntl: NavigationToolBarLayout)
 
+        /**
+         * Called on detach from NavigationToolBarLayout.
+         * @see setItemTransformer
+         */
         abstract fun onDetach()
 
-        fun attach(ntl: NavigationToolBarLayout) {
+        internal fun attach(ntl: NavigationToolBarLayout) {
             navigationToolBarLayout = ntl
             ntl.addHeaderChangeListener(this)
             ntl.addHeaderUpdateListener(this)
             onAttach(ntl)
         }
 
-        fun detach() {
+        internal fun detach() {
             onDetach()
             navigationToolBarLayout?.also {
                 it.removeHeaderChangeListener(this)
@@ -50,10 +75,24 @@ class NavigationToolBarLayout : CoordinatorLayout {
                 transform(lm, header, headerBottom)
     }
 
+    /**
+     * Toolbar layout with id `@id/com_ramotion_toolbar`.
+     */
     val toolBar: Toolbar
-    val headerLayout: HeaderLayout
-    val layoutManager: HeaderLayoutManager
+    /**
+     * AppBarLayout with id `@id/com_ramotion_app_bar`.
+     */
     val appBarLayout: AppBarLayout
+    /**
+     * HeaderLayout.
+     * @see HeaderLayout
+     */
+    val headerLayout: HeaderLayout
+    /**
+     * HeaderLayoutManager.
+     * @see HeaderLayoutManager
+     */
+    val layoutManager: HeaderLayoutManager
 
     private var itemTransformer: ItemTransformer? = null
 
@@ -87,70 +126,167 @@ class NavigationToolBarLayout : CoordinatorLayout {
         setItemTransformer(null)
     }
 
+    /**
+     * Sets HeaderLayout Adapter.
+     * @see HeaderLayout
+     * @see HeaderLayout.Adapter
+     */
     fun setAdapter(adapter: HeaderLayout.Adapter<out HeaderLayout.ViewHolder>) = headerLayout.setAdapter(adapter)
 
+    /**
+     * Scroll header to specified position.
+     * @param pos Position where to scroll
+     * @see HeaderLayoutManager.scrollToPosition
+     */
     fun scrollToPosition(pos: Int) = layoutManager.scrollToPosition(pos)
 
+    /**
+     * Smooth scroll header to specified position.
+     * @param pos Position where to scroll.
+     * @see HeaderLayoutManager.smoothScrollToPosition
+     */
     fun smoothScrollToPosition(pos: Int) = layoutManager.smoothScrollToPosition(pos)
 
+    /**
+     * Returns current center card, adapter position.
+     * @param header HeaderLayout.
+     * @return Current center card, adapter position or HeaderLayout.INVALID_POSITION if card not found.
+     * @see HeaderLayout.INVALID_POSITION
+     * @see HeaderLayoutManager.getAnchorPos
+     */
     fun getAnchorPos(): Int = layoutManager.getAnchorPos(headerLayout)
 
+    /**
+     * Adds ItemChangeListener.
+     * @param listener ItemChangeListener to add.
+     * @see ItemChangeListener
+     */
     fun addItemChangeListener(listener: ItemChangeListener) {
         layoutManager.itemChangeListeners += listener
     }
 
+    /**
+     * Removes ItemChangeListener.
+     * @param listener ItemChangeListener to remove.
+     * @see ItemChangeListener
+     */
     fun removeItemChangeListener(listener: ItemChangeListener) {
         layoutManager.itemChangeListeners -= listener
     }
 
+    /**
+     * Adds ScrollStateListener.
+     * @param listener ScrollStateListener to add.
+     * @see ScrollStateListener
+     */
     fun addScrollStateListener(listener: ScrollStateListener) {
         layoutManager.scrollStateListeners += listener
     }
 
+    /**
+     * Removes ScrollStateListener.
+     * @param listener ScrollStateListener to remove.
+     * @see ScrollStateListener
+     */
     fun removeScrollStateListener(listener: ScrollStateListener) {
         layoutManager.scrollStateListeners -= listener
     }
 
-    fun addItemClickListener(listener: HeaderLayoutManager.ItemClickListener) {
+    /**
+     * Adds ItemClickListener.
+     * @param listener ItemClickListener to add.
+     * @see ItemChangeListener
+     */
+    fun addItemClickListener(listener: ItemClickListener) {
         layoutManager.itemClickListeners += listener
     }
 
-    fun removeItemClickListener(listener: HeaderLayoutManager.ItemClickListener) {
+    /**
+     * Removes ItemClickListener.
+     * @param listener ItemClickListener to remove.
+     * @see ItemClickListener
+     */
+    fun removeItemClickListener(listener: ItemClickListener) {
         layoutManager.itemClickListeners -= listener
     }
 
+    /**
+     * Adds HeaderChangeListener
+     * @param listener HeaderChangeListener to add.
+     * @see HeaderChangeListener
+     */
     fun addHeaderChangeListener(listener: HeaderChangeListener) {
         layoutManager.changeListener += listener
     }
 
+    /**
+     * Removes HeaderChangeListener
+     * @param listener HeaderChangeListener to remove.
+     * @see HeaderChangeListener
+     */
     fun removeHeaderChangeListener(listener: HeaderChangeListener) {
         layoutManager.changeListener -= listener
     }
 
+    /**
+     * Adds HeaderUpdateListener.
+     * @param listener HeaderUpdateListener to add.
+     * @see HeaderUpdateListener
+     */
     fun addHeaderUpdateListener(listener: HeaderUpdateListener) {
         layoutManager.updateListener += listener
     }
 
+    /**
+     * Removes HeaderUpdateListener.
+     * @param listener HeaderUpdateListener to remove.
+     * @see HeaderUpdateListener
+     */
     fun removeHeaderUpdateListener(listener: HeaderUpdateListener) {
         layoutManager.updateListener -= listener
     }
 
+    /**
+     * Adds ItemDecoration.
+     * @param decoration ItemDecoration to add.
+     * @see ItemDecoration
+     */
     fun addItemDecoration(decoration: ItemDecoration) {
         layoutManager.addItemDecoration(decoration)
     }
 
+    /**
+     * Removes ItemDecoration.
+     * @param decoration ItemDecoration to remove.
+     * @see ItemDecoration
+     */
     fun removeItemDecoration(decoration: ItemDecoration) {
         layoutManager.removeItemDecoration(decoration)
     }
 
+    /**
+     * Adds HeaderChangeStateListener.
+     * @param listener HeaderChangeStateListener to add.
+     * @see HeaderChangeStateListener
+     */
     fun addHeaderChangeStateListener(listener: HeaderChangeStateListener) {
         layoutManager.changeListener += listener
     }
 
+    /**
+     * Removes HeaderChangeStateListener.
+     * @param listener HeaderChangeStateListener to remove.
+     * @see HeaderChangeStateListener
+     */
     fun removeHeaderChangeStateListener(listener: HeaderChangeStateListener) {
         layoutManager.changeListener -= listener
     }
 
+    /**
+     * Sets ItemTransformer.
+     * @param newTransformer New transformer. Can be null. If null, then DefaultItemTransformer will be used.
+     * @see ItemTransformer
+     */
     fun setItemTransformer(newTransformer: ItemTransformer?) {
         itemTransformer?.also { it.detach() }
 
