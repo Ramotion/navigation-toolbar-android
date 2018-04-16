@@ -13,12 +13,35 @@ import android.widget.FrameLayout
 class HeaderLayout : FrameLayout {
 
     companion object {
+        /**
+         * Defines invalid adapter position constant.
+         * @see Adapter
+         */
         const val INVALID_POSITION = -1
 
+        /**
+         * Returns header's child HeaderLayout.LayoutParams
+         * @param child Header's view
+         * @return HeaderLayout.LayoutParams or null.
+         * @see LayoutParams
+         */
         fun getChildLayoutParams(child: View) = child.layoutParams as? LayoutParams
 
+        /**
+         * Returns header's child ViewHolder.
+         * @param child Header's view.
+         * @return Header's child ViewHolder or null.
+         * @see ViewHolder
+         */
         fun getChildViewHolder(child: View) = getChildLayoutParams(child)?.viewHolder
 
+        /**
+         * Returns header's child adapter position.
+         * @param child Header's view.
+         * @return child adapter position or INVALID_POSITION.
+         * @see INVALID_POSITION
+         * @see Adapter
+         */
         fun getChildPosition(child: View) = getChildViewHolder(child)?.position ?: INVALID_POSITION
     }
 
@@ -46,6 +69,11 @@ class HeaderLayout : FrameLayout {
     internal var scrollListener: ScrollListener? = null
     internal var adapterChangeListener: AdapterChangeListener? = null
 
+    /**
+     * HeaderLayout's adapter.
+     * @see Adapter
+     * @see ViewHolder
+     */
     var adapter: Adapter<ViewHolder>? = null; private set
 
     private inner class TouchGestureListener : GestureDetector.SimpleOnGestureListener() {
@@ -97,11 +125,24 @@ class HeaderLayout : FrameLayout {
         }
     }
 
+    /**
+     * ViewHolder of HeaderLayout's child.
+     * @param view ViewHolder's view,
+     */
     open class ViewHolder(val view: View) {
+        /**
+         * ViewHolder's current adapter position.
+         * @return Current adapter position or INVALID_POSITION if ViewHolder not bound.
+         * @see INVALID_POSITION
+         * @see Adapter
+         */
         var position: Int = INVALID_POSITION
             internal set
     }
 
+    /**
+     * LayoutParams of HeaderLayout's child.
+     */
     open class LayoutParams : FrameLayout.LayoutParams {
         internal val decorRect = Rect()
 
@@ -119,13 +160,34 @@ class HeaderLayout : FrameLayout {
         constructor(source: LayoutParams) : super(source as ViewGroup.LayoutParams)
     }
 
+    /**
+     * Adapter that produce ViewHolders for HeaderLayout.
+     * @see ViewHolder
+     */
     abstract class Adapter<VH : ViewHolder> {
+        /**
+         * Must return max item count.
+         */
         abstract fun getItemCount(): Int
 
+        /**
+         * Called on creating new ViewHolder. Must return new ViewHolder.
+         * @param parent Parent of ViewHolder's view.
+         * @see ViewHolder
+         */
         abstract fun onCreateViewHolder(parent: ViewGroup): VH
 
+        /**
+         * Called on binding ViewHolder to specified position.
+         * @param holder ViewHolder to bind.
+         * @param position Position to which ViewHolder will be bound.
+         */
         abstract fun onBindViewHolder(holder: VH, position: Int)
 
+        /**
+         * Called before ViewHolder recycling.
+         * @param holder ViewHolder that will be recycled.
+         */
         open fun onViewRecycled(holder: VH) {}
 
         fun createViewHolder(parent: ViewGroup): VH {
