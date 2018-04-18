@@ -26,6 +26,9 @@ class MainActivity : AppCompatActivity() {
     private val itemCount = 40
     private val dataSet = ExampleDataSet()
 
+    private var isExpanded = true
+    private var prevAnchorPosition = 0
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -90,6 +93,10 @@ class MainActivity : AppCompatActivity() {
         header.setAdapter(HeaderAdapter(itemCount, dataSet.headerDataSet, headerOverlay))
 
         header.addItemChangeListener(object : HeaderLayoutManager.ItemChangeListener {
+            override fun onItemChangeStarted(position: Int) {
+                prevAnchorPosition = position
+            }
+
             override fun onItemChanged(position: Int) {
                 viewPager.currentItem = position
             }
@@ -109,17 +116,38 @@ class MainActivity : AppCompatActivity() {
     private fun initDrawerArrow(header: NavigationToolBarLayout) {
         val drawerArrow = DrawerArrowDrawable(this)
         drawerArrow.color = resources.getColor(android.R.color.white)
+        drawerArrow.progress = 1f
 
-        header.toolBar.navigationIcon = drawerArrow
         header.addHeaderChangeStateListener(object : HeaderLayoutManager.HeaderChangeStateListener() {
-            override fun onCollapsed() {
-                ObjectAnimator.ofFloat(drawerArrow, "progress", 1f).start()
+            private fun changeIcon(progress: Float) {
+                ObjectAnimator.ofFloat(drawerArrow, "progress", progress).start()
+                isExpanded = progress == 1f
+                if (isExpanded) {
+                    prevAnchorPosition = header.getAnchorPos()
+                }
             }
 
-            override fun onExpanded() {
-                ObjectAnimator.ofFloat(drawerArrow, "progress", 0f).start()
-            }
+            override fun onMiddle() = changeIcon(0f)
+            override fun onExpanded() = changeIcon(1f)
         })
+
+        val toolbar = header.toolBar
+        toolbar.navigationIcon = drawerArrow
+        toolbar.setNavigationOnClickListener {
+            if (!isExpanded) {
+                return@setNavigationOnClickListener
+            }
+            val anchorPos = header.getAnchorPos()
+            if (anchorPos == HeaderLayout.INVALID_POSITION) {
+                return@setNavigationOnClickListener
+            }
+
+            if (anchorPos == prevAnchorPosition) {
+                header.collapse()
+            } else {
+                header.smoothScrollToPosition(prevAnchorPosition)
+            }
+        }
     }
 
     private fun initHeaderDecorator(header: NavigationToolBarLayout) {

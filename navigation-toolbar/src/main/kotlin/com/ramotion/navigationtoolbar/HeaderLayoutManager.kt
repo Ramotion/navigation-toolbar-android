@@ -165,11 +165,20 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     }
 
     /**
-     * Observes card's position change.
+     * Observes header scrolling.
      */
     interface ItemChangeListener {
         /**
-         * Invoked when header card position is changed.
+         * Invoked when header scroll started
+         * @param position Current anchor position.
+         * @see getAnchorPos
+         */
+        fun onItemChangeStarted(position: Int) {}
+
+        /**
+         * Invoked when header item (card) position is changed.
+         * @param position new anchor position.
+         * @see getAnchorPos
          */
         fun onItemChanged(position: Int)
     }
@@ -203,7 +212,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     private val verticalGravity: VerticalGravity
     private val tempDecorRect = Rect()
     private val itemDecorations = mutableListOf<ItemDecoration>()
-    private val scrollListener = HeaderScrollListener()
+    private val scrollListener = HeaderLayoutScrollListener()
     private val adapterChangeListener = AdapterChangeListener()
 
     private val verticalScrollTopBorder: Int
@@ -267,7 +276,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         }
     }
 
-    private inner class HeaderScrollListener : HeaderLayout.ScrollListener {
+    private inner class HeaderLayoutScrollListener : HeaderLayout.ScrollListener {
         override fun onItemClick(header: HeaderLayout, viewHolder: HeaderLayout.ViewHolder) =
                 this@HeaderLayoutManager.onHeaderItemClick(header, viewHolder)
 
@@ -731,6 +740,22 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
         markItemDecorInsetsDirty()
     }
 
+    internal fun onHeaderItemClick(header: HeaderLayout, viewHolder: HeaderLayout.ViewHolder): Boolean {
+        return when {
+            header.isHorizontalScrollEnabled -> {
+                smoothScrollToPosition(viewHolder.position)
+                itemClickListeners.forEach { it.onItemClicked(viewHolder) }
+                true
+            }
+            header.isVerticalScrollEnabled -> {
+                smoothOffset(workMiddle)
+                itemClickListeners.forEach { it.onItemClicked(viewHolder) }
+                true
+            }
+            else -> false
+        }
+    }
+
     private fun scrollToPosition(pos: Int,
                                  task: (header: HeaderLayout,
                                         anchorView: View,
@@ -796,22 +821,6 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
                         ?.let { it.decorRectValid = false }
             }
             header.recycler.markItemDecorInsetsDirty()
-        }
-    }
-
-    private fun onHeaderItemClick(header: HeaderLayout, viewHolder: HeaderLayout.ViewHolder): Boolean {
-        return when {
-            header.isHorizontalScrollEnabled -> {
-                smoothScrollToPosition(viewHolder.position)
-                itemClickListeners.forEach { it.onItemClicked(viewHolder) }
-                true
-            }
-            header.isVerticalScrollEnabled -> {
-                smoothOffset(workMiddle)
-                itemClickListeners.forEach { it.onItemClicked(viewHolder) }
-                true
-            }
-            else -> false
         }
     }
 

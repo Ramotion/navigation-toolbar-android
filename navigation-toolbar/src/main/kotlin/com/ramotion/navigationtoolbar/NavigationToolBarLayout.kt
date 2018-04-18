@@ -296,6 +296,14 @@ class NavigationToolBarLayout : CoordinatorLayout {
         }
     }
 
+    fun collapse() {
+        layoutManager.getAnchorView(headerLayout)
+                ?.let { HeaderLayout.getChildViewHolder(it) }
+                ?.also { layoutManager.onHeaderItemClick(headerLayout, it) }
+    }
+
+    fun expand(animate: Boolean) = appBarLayout.setExpanded(true, animate)
+
     private fun initBackgroundLayout(context: Context, layoutId: Int) {
         val ctl = findViewById<CollapsingToolbarLayout>(R.id.com_ramotion_toolbar_layout)
         val background = LayoutInflater.from(context).inflate(layoutId, ctl, true)
