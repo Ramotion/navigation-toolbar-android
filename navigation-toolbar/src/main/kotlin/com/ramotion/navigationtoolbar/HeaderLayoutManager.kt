@@ -112,6 +112,11 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     interface HeaderChangeListener {
         /**
          * Invoked whenever header is changed (expanded / collapsed).
+         * @param lm HeaderLayoutManager.
+         * @param header HeaderLayout.
+         * @param headerBottom HeaderLayout bottom position.
+         * @see HeaderLayoutManager
+         * @see HeaderLayout
          */
         fun onHeaderChanged(lm: HeaderLayoutManager, header: HeaderLayout, headerBottom: Int)
     }
@@ -122,12 +127,22 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     interface HeaderUpdateListener {
         /**
          * Invoked whenever header is updated (filled / redrawn).
+         * @param lm HeaderLayoutManager.
+         * @param header HeaderLayout.
+         * @param headerBottom HeaderLayout bottom position.
+         * @see HeaderLayoutManager
+         * @see HeaderLayout
          */
         fun onHeaderUpdated(lm: HeaderLayoutManager, header: HeaderLayout, headerBottom: Int)
     }
 
     /**
      * Enhanced HeaderChangeListener which observes header's position states: collapsed, middle, expanded.
+     * @param lm HeaderLayoutManager.
+     * @param header HeaderLayout.
+     * @param headerBottom HeaderLayout bottom position.
+     * @see HeaderLayoutManager
+     * @see HeaderLayout
      */
     abstract class HeaderChangeStateListener : HeaderChangeListener {
         final override fun onHeaderChanged(lm: HeaderLayoutManager, header: HeaderLayout, headerBottom: Int) {
@@ -160,6 +175,8 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     interface ItemClickListener {
         /**
          * Invoked when header card is clicked.
+         * @param viewHolder ViewHolder of clicked card.
+         * @see HeaderLayout.ViewHolder
          */
         fun onItemClicked(viewHolder: HeaderLayout.ViewHolder)
     }
@@ -189,6 +206,8 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     interface ScrollStateListener {
         /**
          * Invoked when scroll state is changed.
+         * @param state Current scroll state.
+         * @see HeaderLayoutManager.ScrollState
          */
         fun onScrollStateChanged(state: HeaderLayoutManager.ScrollState)
     }
