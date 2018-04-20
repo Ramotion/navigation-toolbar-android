@@ -1,6 +1,6 @@
 ## Basic usage
 
-NavigationToolBarLayout is the successor of CoordinatorLayout. Therefore NavigationToolBarLayout
+NavigationToolBarLayout is the successor to CoordinatorLayout. Therefore, NavigationToolBarLayout
 must be the root element of your layout. Displayed content must be inside
 NavigationToolBarLayout, as shown below:
 
@@ -22,7 +22,7 @@ NavigationToolBarLayout, as shown below:
 </com.ramotion.navigationtoolbar.NavigationToolBarLayout>
 ```
 
-Next, you must specify an adapter for NavigationToolBarLayout, from which,
+Next, you must specify an adapter for NavigationToolBarLayout, from which
 NavigationToolBarLayout will receive the displayed View.
 
 NavigationToolBarLayout contains `android.support.v7.widget.Toolbar` and
@@ -32,7 +32,7 @@ the appropriate identifiers:
 @id/com_ramotion_toolbar <!-- identifier of Toolbar -->
 @id/com_ramotion_app_bar <!-- identifier of AppBarLayout -->
 ```
-Either through the appropriate properties of the NavigationToolBarLayout class:
+or through the appropriate properties of the NavigationToolBarLayout class:
 ```kotlin
 val toolBar: Toolbar
 val appBarLayout: AppBarLayout
@@ -43,4 +43,4 @@ Here are the attributes you can specify through XML or related setters:
 * `headerCollapsingBySelectDuration` - Collapsing animation duration of header (HeaderLayout), when you click on the card in vertical orientation.
 * `headerTopBorderAtSystemBar` - Align the top card on the systembar or not.
 * `headerVerticalItemWidth` - Specifies the width of the vertical card. It can be equal to `match_parent`, then the width of the card will be equal to the width of NavigationToolBarLayout.
-* `headerVerticalGravity` - Specifies the alignment of the vertical card. Can take the value: left, center, right.
+* `headerVerticalGravity` - Specifies the alignment of the vertical card. Can take the values: left, center, or right.
