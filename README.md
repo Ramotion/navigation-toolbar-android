@@ -1,3 +1,21 @@
+
+![animation](./Navigation-toolbar.gif)
+
+# Navigation Toolbar for Android
+[![Twitter](https://img.shields.io/badge/Twitter-@Ramotion-blue.svg?style=flat)](http://twitter.com/Ramotion)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/92bd2e49f7e543cd8748c670b9e52ca7)](https://app.codacy.com/app/dvg4000/navigation-toolbar-android/dashboard)
+[![Donate](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://paypal.me/Ramotion)
+
+Inspired by [Aurélien Salomon](https://dribbble.com/aureliensalomon) [shot](https://dribbble.com/shots/2940231-Google-Newsstand-Navigation-Pattern)
+
+**Looking for developers for your project?**<br>
+This project is maintained by Ramotion, Inc. We specialize in the designing and coding of custom UI for Mobile Apps and Websites.
+
+<a href="https://dev.ramotion.com/?utm_source=gthb&utm_medium=special&utm_campaign=fluid-slider-contact-us">
+<img src="https://github.com/ramotion/gliding-collection/raw/master/contact_our_team@2x.png" width="187" height="34"></a> <br>
+
+The [Android mockup](https://store.ramotion.com/product/samsung-galaxy-s7-edge-mockups) available [here](https://store.ramotion.com/product/samsung-galaxy-s7-edge-mockups).
+
 ## Basic usage
 
 NavigationToolBarLayout is the successor to CoordinatorLayout. Therefore, NavigationToolBarLayout
@@ -44,3 +62,23 @@ Here are the attributes you can specify through XML or related setters:
 * `headerTopBorderAtSystemBar` - Align the top card on the systembar or not.
 * `headerVerticalItemWidth` - Specifies the width of the vertical card. It can be equal to `match_parent`, then the width of the card will be equal to the width of NavigationToolBarLayout.
 * `headerVerticalGravity` - Specifies the alignment of the vertical card. Can take the values: left, center, or right.
+
+## License
+​
+Navigation Toolbar for Android is released under the MIT license.
+See [LICENSE](./LICENSE) for details.
+
+# Get the Showroom App for Android to give it a try
+Try our UI components in our mobile app. Contact us if interested.
+
+<a href="https://play.google.com/store/apps/details?id=com.ramotion.showroom" >
+<img src="https://raw.githubusercontent.com/Ramotion/react-native-circle-menu/master/google_play@2x.png" width="104" height="34"></a>
+<a href="https://dev.ramotion.com/?utm_source=gthb&utm_medium=special&utm_campaign=fluid-slider-android-contact-us">
+<img src="https://github.com/ramotion/gliding-collection/raw/master/contact_our_team@2x.png" width="187" height="34"></a>
+<br>
+<br>
+
+Follow us for the latest updates:<br>
+<a href="https://goo.gl/rPFpid" >
+<img src="https://i.imgur.com/ziSqeSo.png/" width="156" height="28"></a>
+
