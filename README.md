@@ -27,7 +27,7 @@ Just download the package from [here](http://central.maven.org/maven2/com/ramoti
 
 Gradle:
 ```groovy
-implementation 'com.ramotion.fluidslider:navigation-toolbar:0.1.0'
+implementation 'com.ramotion.navigationtoolbar:navigation-toolbar:0.1.0'
 ```
 SBT:
 ```scala
