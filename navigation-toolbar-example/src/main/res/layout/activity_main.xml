@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.ramotion.navigationtoolbar.NavigationToolBarLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/navigation_toolbar_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    app:headerBackgroundLayout="@layout/header_background"
+    app:headerTopBorderAtSystemBar="true">
+
+    <include layout="@layout/header_overlay"/>
+
+    <include layout="@layout/content_layout"/>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/fab_margin"
+        android:layout_gravity="end|bottom"
+        app:layout_behavior="com.ramotion.navigationtoolbar.example.FABBehavior"
+        app:srcCompat="@android:drawable/ic_dialog_email" />
+
+</com.ramotion.navigationtoolbar.NavigationToolBarLayout>

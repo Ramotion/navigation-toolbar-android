@@ -1,0 +1,8 @@
+<resources>
+    <dimen name="fab_margin">16dp</dimen>
+    <dimen name="decor_bottom">5dp</dimen>
+    <dimen name="title_left_offset">-20dp</dimen>
+    <dimen name="line_right_offset">20dp</dimen>
+    <dimen name="line_bottom_offset">20dp</dimen>
+    <dimen name="line_title_offset">10dp</dimen>
+</resources>

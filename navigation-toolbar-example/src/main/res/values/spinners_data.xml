@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="left_spinner">
+        <item>Popular</item>
+        <item>New</item>
+    </string-array>
+    <string-array name="right_spinner">
+        <item>This week</item>
+        <item>This month</item>
+    </string-array>
+</resources>

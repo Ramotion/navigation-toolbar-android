@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:fitsSystemWindows="true"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/header_background_gradient"/>
+
+    <ImageView
+        android:alpha="0.08"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/header_background"
+        android:scaleType="centerCrop"/>
+
+</FrameLayout>
+
