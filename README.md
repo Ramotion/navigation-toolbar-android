@@ -16,6 +16,33 @@ This project is maintained by Ramotion, Inc. We specialize in the designing and 
 
 The [Android mockup](https://store.ramotion.com/product/samsung-galaxy-s7-edge-mockups) available [here](https://store.ramotion.com/product/samsung-galaxy-s7-edge-mockups).
 
+## Requirements
+
+- Android 4.1 Jelly Bean (API lvl 16) or greater
+- Your favorite IDE
+
+## Installation
+​
+Just download the package from [here](http://central.maven.org/maven2/com/ramotion/navigationtoolbar/navigation-toolbar/0.1.0/navigation-toolbar-0.1.0.aar) and add it to your project classpath, or just use the maven repo:
+
+Gradle:
+```groovy
+implementation 'com.ramotion.fluidslider:navigation-toolbar:0.1.0'
+```
+SBT:
+```scala
+libraryDependencies += "com.ramotion.navigationtoolbar" % "navitagiton-toolbar" % "0.1.0"
+```
+Maven:
+```xml
+<dependency>
+  <groupId>com.ramotion.navigationtoolbar</groupId>
+  <artifactId>navigation-toolbar</artifactId>
+  <version>0.1.0</version>
+  <type>aar</type>
+</dependency>
+```
+
 ## Basic usage
 
 NavigationToolBarLayout is the successor to CoordinatorLayout. Therefore, NavigationToolBarLayout
