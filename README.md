@@ -57,7 +57,7 @@ NavigationToolBarLayout, as shown below:
 
     <include layout="@layout/content_layout"/>
 
-    <android.support.design.widget.FloatingActionButdddton
+    <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
