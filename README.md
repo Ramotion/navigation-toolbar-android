@@ -19,7 +19,7 @@ The [Android mockup](https://store.ramotion.com/product/samsung-galaxy-s7-edge-m
 
 ## Requirements
 
-- Android 4.1 Jelly Bean (API lvl 16) or greater
+- Android 5.0 Lollipop (API lvl 21) or greater
 - Your favorite IDE
 
 ## Installation
