@@ -34,8 +34,9 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-
     implementation 'com.android.support:appcompat-v7:27.1.1'
+    implementation 'com.android.support:design:27.1.1'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
@@ -78,5 +79,8 @@ nexus {
     sign = true
     repositoryUrl = 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
     snapshotRepositoryUrl = 'https://oss.sonatype.org/content/repositories/snapshots/'
+}
+repositories {
+    mavenCentral()
 }
 
