@@ -4,6 +4,7 @@ import android.animation.ObjectAnimator
 import android.graphics.Rect
 import android.os.Bundle
 import android.support.design.widget.Snackbar
+import android.support.v4.content.ContextCompat
 import android.support.v4.view.ViewPager
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.graphics.drawable.DrawerArrowDrawable
@@ -115,7 +116,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun initDrawerArrow(header: NavigationToolBarLayout) {
         val drawerArrow = DrawerArrowDrawable(this)
-        drawerArrow.color = resources.getColor(android.R.color.white)
+        drawerArrow.color = ContextCompat.getColor(this, android.R.color.white);
         drawerArrow.progress = 1f
 
         header.addHeaderChangeStateListener(object : HeaderLayoutManager.HeaderChangeStateListener() {
