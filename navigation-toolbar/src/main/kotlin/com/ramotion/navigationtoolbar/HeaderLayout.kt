@@ -229,7 +229,7 @@ class HeaderLayout : FrameLayout {
 
         fun recycleView(view: View, cache: Boolean = true) {
             val adapter = adapter ?: throw RuntimeException("No adapter set")
-            val lp = getChildLayoutParams(view) ?: throw RuntimeException("Invalid layout paramsr")
+            val lp = getChildLayoutParams(view) ?: throw RuntimeException("Invalid layout params")
             val holder = lp.viewHolder ?: throw RuntimeException("No view holder")
             adapter.recycleView(holder)
             this@HeaderLayout.removeView(view)

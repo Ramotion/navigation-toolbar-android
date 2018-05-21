@@ -15,7 +15,7 @@ class FABBehavior(context: Context, attrs: AttributeSet) : CoordinatorLayout.Beh
     }
 
     override fun onDependentViewChanged(parent: CoordinatorLayout, child: FloatingActionButton, dependency: View): Boolean {
-        updateFABVisibilty(dependency, child)
+        updateFABVisibility(dependency, child)
         return false
     }
 
@@ -24,14 +24,14 @@ class FABBehavior(context: Context, attrs: AttributeSet) : CoordinatorLayout.Beh
         for (i in 0 until dependencies.size) {
             val dependency = dependencies[i]
             if (dependency is AppBarLayout) {
-                updateFABVisibilty(dependency, child)
+                updateFABVisibility(dependency, child)
                 break
             }
         }
         return super.onLayoutChild(parent, child, layoutDirection)
     }
 
-    private fun updateFABVisibilty(dependency: View, child: FloatingActionButton) {
+    private fun updateFABVisibility(dependency: View, child: FloatingActionButton) {
         val show = dependency.bottom <= hideBorder
         if (show) child.show() else child.hide()
     }

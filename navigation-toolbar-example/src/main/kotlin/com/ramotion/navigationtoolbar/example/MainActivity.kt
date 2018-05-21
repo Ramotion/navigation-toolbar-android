@@ -116,7 +116,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun initDrawerArrow(header: NavigationToolBarLayout) {
         val drawerArrow = DrawerArrowDrawable(this)
-        drawerArrow.color = ContextCompat.getColor(this, android.R.color.white);
+        drawerArrow.color = ContextCompat.getColor(this, android.R.color.white)
         drawerArrow.progress = 1f
 
         header.addHeaderChangeStateListener(object : HeaderLayoutManager.HeaderChangeStateListener() {

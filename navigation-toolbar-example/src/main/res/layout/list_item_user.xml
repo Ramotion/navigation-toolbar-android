@@ -15,7 +15,8 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@android:drawable/ic_menu_gallery" />
+        app:srcCompat="@android:drawable/ic_menu_gallery"
+        android:contentDescription="@string/cd_avatar" />
 
     <TextView
         android:id="@+id/user_name"

@@ -20,7 +20,8 @@
             android:alpha="0.1"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:scaleType="centerCrop"/>
+            android:scaleType="centerCrop"
+            android:contentDescription="@string/cd_header_item_background" />
 
     </FrameLayout>
 
