@@ -138,13 +138,16 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
 
     /**
      * Enhanced HeaderChangeListener which observes header's position states: collapsed, middle, expanded.
-     * @param lm HeaderLayoutManager.
-     * @param header HeaderLayout.
-     * @param headerBottom HeaderLayout bottom position.
-     * @see HeaderLayoutManager
-     * @see HeaderLayout
      */
     abstract class HeaderChangeStateListener : HeaderChangeListener {
+        /**
+         * Invoked on header's position state change to: collapsed, middle, expanded.
+         * @param lm HeaderLayoutManager.
+         * @param header HeaderLayout.
+         * @param headerBottom HeaderLayout bottom position.
+         * @see HeaderLayoutManager
+         * @see HeaderLayout
+         */
         final override fun onHeaderChanged(lm: HeaderLayoutManager, header: HeaderLayout, headerBottom: Int) {
             when (headerBottom) {
                 lm.workTop -> onCollapsed()

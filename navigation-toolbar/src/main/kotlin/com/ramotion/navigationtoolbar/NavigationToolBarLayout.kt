@@ -149,7 +149,6 @@ class NavigationToolBarLayout : CoordinatorLayout {
 
     /**
      * Returns current center card, adapter position.
-     * @param header HeaderLayout.
      * @return Current center card, adapter position or HeaderLayout.INVALID_POSITION if card not found.
      * @see HeaderLayout.INVALID_POSITION
      * @see HeaderLayoutManager.getAnchorPos
