@@ -12,7 +12,7 @@ Inspired by [Aurélien Salomon](https://dribbble.com/aureliensalomon) [shot](htt
 **Looking for developers for your project?**<br>
 This project is maintained by Ramotion, Inc. We specialize in the designing and coding of custom UI for Mobile Apps and Websites.
 
-<a href="https://dev.ramotion.com/?utm_source=gthb&utm_medium=special&utm_campaign=navigation-toolbar-contact-us">
+<a href="mailto:alex.a@ramotion.com?subject=Project%20inquiry%20from%20Github">
 <img src="https://github.com/ramotion/gliding-collection/raw/master/contact_our_team@2x.png" width="187" height="34"></a> <br>
 
 The [Android mockup](https://store.ramotion.com/product/samsung-galaxy-s7-edge-mockups) available [here](https://store.ramotion.com/product/samsung-galaxy-s7-edge-mockups).
@@ -91,6 +91,9 @@ Here are the attributes you can specify through XML or related setters:
 * `headerVerticalItemWidth` - Specifies the width of the vertical card. It can be equal to `match_parent`, then the width of the card will be equal to the width of NavigationToolBarLayout.
 * `headerVerticalGravity` - Specifies the alignment of the vertical card. Can take the values: left, center, or right.
 
+
+This library is a part of a <a href="https://github.com/Ramotion/android-ui-animation-components-and-libraries"><b>selection of our best UI open-source projects.</b></a>
+
 ## License
 ​
 Navigation Toolbar for Android is released under the MIT license.
@@ -101,7 +104,7 @@ Try our UI components in our mobile app. Contact us if interested.
 
 <a href="https://play.google.com/store/apps/details?id=com.ramotion.showroom" >
 <img src="https://raw.githubusercontent.com/Ramotion/react-native-circle-menu/master/google_play@2x.png" width="104" height="34"></a>
-<a href="https://dev.ramotion.com/?utm_source=gthb&utm_medium=special&utm_campaign=navigation-toolbar-android-contact-us">
+<a href="mailto:alex.a@ramotion.com?subject=Project%20inquiry%20from%20Github">
 <img src="https://github.com/ramotion/gliding-collection/raw/master/contact_our_team@2x.png" width="187" height="34"></a>
 <br>
 <br>
