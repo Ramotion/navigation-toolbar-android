@@ -63,7 +63,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
 
         companion object {
             private val map = VerticalGravity.values().associateBy(VerticalGravity::value)
-            fun fromInt(type: Int, defaultValue: VerticalGravity = RIGHT) = map.getOrElse(type, {defaultValue})
+            fun fromInt(type: Int, defaultValue: VerticalGravity = RIGHT) = map.getOrElse(type) {defaultValue}
         }
     }
 
@@ -504,12 +504,12 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
      * @param pos Position where to scroll.
      */
     fun scrollToPosition(pos: Int) {
-        scrollToPosition(pos, { header, _, offset, horizontal ->
+        scrollToPosition(pos) { header, _, offset, horizontal ->
             when(horizontal) {
                 true -> onHeaderHorizontalScroll(header, offset.toFloat())
                 else -> onHeaderVerticalScroll(header, offset.toFloat())
             }
-        })
+        }
     }
 
     /**
@@ -517,7 +517,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
      * @param pos Position where to scroll.
      */
     fun smoothScrollToPosition(pos: Int) {
-        scrollToPosition(pos, {_, anchorView, offset, horizontal ->
+        scrollToPosition(pos) { _, anchorView, offset, horizontal ->
             if (horizontal) {
                 val startX = getStartX(anchorView)
                 val delta = abs(offset) / horizontalTabWidth
@@ -529,7 +529,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
                 val duration = min((delta + 1) * 100, MAX_SCROLL_DURATION.toInt())
                 viewFlinger.startScroll(0, startY, 0, -offset, duration)
             }
-        })
+        }
     }
 
     /**

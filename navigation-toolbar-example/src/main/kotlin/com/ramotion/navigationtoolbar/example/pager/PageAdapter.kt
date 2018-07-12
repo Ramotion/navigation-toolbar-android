@@ -16,7 +16,7 @@ class PageAdapter(private val count: Int,
 
         companion object {
             private val map = ItemType.values().associateBy(ItemType::value)
-            fun fromInt(type: Int, defaultValue: ItemType = USER) = map.getOrElse(type, {defaultValue})
+            fun fromInt(type: Int, defaultValue: ItemType = USER) = map.getOrElse(type) {defaultValue}
         }
     }
 
