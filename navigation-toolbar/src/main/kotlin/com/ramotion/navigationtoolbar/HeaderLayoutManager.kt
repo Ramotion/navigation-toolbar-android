@@ -809,14 +809,16 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
 
         itemChangeListeners.forEach { it.onItemChanged(pos) }
 
-        val offset = if (header.isHorizontalScrollEnabled) {
-            val childWidth = getDecoratedWidth(anchorView)
-            (pos - anchorPos) * childWidth + (getDecoratedLeft(anchorView) - hx)
-        } else if (header.isVerticalScrollEnabled) {
-            val childHeight = getDecoratedHeight(anchorView)
-            (pos - anchorPos) * childHeight + (getDecoratedTop(anchorView) - vy)
-        } else {
-            0
+        val offset = when {
+            header.isHorizontalScrollEnabled -> {
+                val childWidth = getDecoratedWidth(anchorView)
+                (pos - anchorPos) * childWidth + (getDecoratedLeft(anchorView) - hx)
+            }
+            header.isVerticalScrollEnabled -> {
+                val childHeight = getDecoratedHeight(anchorView)
+                (pos - anchorPos) * childHeight + (getDecoratedTop(anchorView) - vy)
+            }
+            else -> 0
         }
 
         if (offset == 0) {
