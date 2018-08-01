@@ -22,27 +22,27 @@ class HeaderItem(view: View) : HeaderLayout.ViewHolder(view) {
         Glide.with(background).load(content.background).into(background)
 
         overlayTitle = title?.also {
-            it.setTag(position)
-            it.setText(content.title)
-            it.setVisibility(View.VISIBLE)
+            it.tag = position
+            it.text = content.title
+            it.visibility = View.VISIBLE
         }
 
         overlayLine = line
         overlayLine?.also {
-            it.setTag(position)
-            it.setVisibility(View.VISIBLE)
+            it.tag = position
+            it.visibility = View.VISIBLE
         }
     }
 
     fun clearContent() {
         overlayTitle?.also {
-            it.setVisibility(View.GONE)
-            it.setTag(null)
+            it.visibility = View.GONE
+            it.tag = null
         }
 
         overlayLine?.also {
-            it.setTag(null)
-            it.setVisibility(View.GONE)
+            it.tag = null
+            it.visibility = View.GONE
         }
 
         overlayTitle = null
