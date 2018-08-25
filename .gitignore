@@ -10,8 +10,6 @@
 *.iml
 *.ipr
 .idea/
-.idea/tasks.xml
-.idea/dictionaries
 
 # Build directory #
 target/
