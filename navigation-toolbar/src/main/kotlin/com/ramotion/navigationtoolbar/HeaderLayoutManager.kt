@@ -364,7 +364,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
             setScrollState(ScrollState.FLING)
             scroller.forceFinished(true)
             scroller.fling(startX, startY, velocityX, velocityY, minX, maxX, minY, maxY)
-            ViewCompat.postOnAnimation(headerLayout, this)
+            ViewCompat.postOnAnimation(headerLayout!!, this)
         }
 
         fun startScroll(startX: Int, startY: Int, dx: Int, dy: Int, duration: Int) {
@@ -374,7 +374,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
             if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.LOLLIPOP_MR1) {
                 scroller.computeScrollOffset()
             }
-            ViewCompat.postOnAnimation(headerLayout, this)
+            ViewCompat.postOnAnimation(headerLayout!!, this)
         }
 
         fun stop() {
@@ -487,10 +487,10 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     override fun onSaveInstanceState(parent: CoordinatorLayout, header: HeaderLayout): Parcelable {
         val anchorPos = getAnchorPos(header)
         val superParcel = super.onSaveInstanceState(parent, header)
-        return State(superParcel, anchorPos)
+        return State(superParcel!!, anchorPos)
     }
 
-    override fun onRestoreInstanceState(parent: CoordinatorLayout, child: HeaderLayout, state: Parcelable?) {
+    override fun onRestoreInstanceState(parent: CoordinatorLayout, child: HeaderLayout, state: Parcelable) {
         super.onRestoreInstanceState(parent, child, state)
         if (state is State) {
             restoredAnchorPosition = state.anchorPos
