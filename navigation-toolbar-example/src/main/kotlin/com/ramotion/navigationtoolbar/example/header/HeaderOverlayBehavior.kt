@@ -1,11 +1,11 @@
 package com.ramotion.navigationtoolbar.example.header
 
 import android.content.Context
-import android.support.design.widget.AppBarLayout
-import android.support.design.widget.CoordinatorLayout
 import android.util.AttributeSet
 import android.view.View
 import android.widget.FrameLayout
+import androidx.coordinatorlayout.widget.CoordinatorLayout
+import com.google.android.material.appbar.AppBarLayout
 
 class HeaderOverlayBehavior(context: Context, attrs: AttributeSet) :
         CoordinatorLayout.Behavior<FrameLayout>(context, attrs) {

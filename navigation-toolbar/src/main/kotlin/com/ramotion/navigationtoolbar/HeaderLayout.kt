@@ -3,10 +3,10 @@ package com.ramotion.navigationtoolbar
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Rect
-import android.support.v4.view.GestureDetectorCompat
 import android.util.AttributeSet
 import android.view.*
 import android.widget.FrameLayout
+import androidx.core.view.GestureDetectorCompat
 
 /**
  * Header views container and producer with cache (recycler).

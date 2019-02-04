@@ -9,15 +9,15 @@ import android.os.Build
 import android.os.Looper
 import android.os.Parcel
 import android.os.Parcelable
-import android.support.design.widget.AppBarLayout
-import android.support.design.widget.CoordinatorLayout
-import android.support.v4.view.ViewCompat
 import android.util.AttributeSet
 import android.util.SparseArray
 import android.util.TypedValue
 import android.view.View
 import android.view.animation.LinearInterpolator
 import android.widget.OverScroller
+import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.view.ViewCompat
+import com.google.android.material.appbar.AppBarLayout
 import kotlin.math.abs
 import kotlin.math.min
 
@@ -364,7 +364,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
             setScrollState(ScrollState.FLING)
             scroller.forceFinished(true)
             scroller.fling(startX, startY, velocityX, velocityY, minX, maxX, minY, maxY)
-            ViewCompat.postOnAnimation(headerLayout, this)
+            ViewCompat.postOnAnimation(headerLayout!!, this)
         }
 
         fun startScroll(startX: Int, startY: Int, dx: Int, dy: Int, duration: Int) {
@@ -374,7 +374,7 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
             if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.LOLLIPOP_MR1) {
                 scroller.computeScrollOffset()
             }
-            ViewCompat.postOnAnimation(headerLayout, this)
+            ViewCompat.postOnAnimation(headerLayout!!, this)
         }
 
         fun stop() {
@@ -487,10 +487,10 @@ class HeaderLayoutManager(context: Context, attrs: AttributeSet?)
     override fun onSaveInstanceState(parent: CoordinatorLayout, header: HeaderLayout): Parcelable {
         val anchorPos = getAnchorPos(header)
         val superParcel = super.onSaveInstanceState(parent, header)
-        return State(superParcel, anchorPos)
+        return State(superParcel!!, anchorPos)
     }
 
-    override fun onRestoreInstanceState(parent: CoordinatorLayout, child: HeaderLayout, state: Parcelable?) {
+    override fun onRestoreInstanceState(parent: CoordinatorLayout, child: HeaderLayout, state: Parcelable) {
         super.onRestoreInstanceState(parent, child, state)
         if (state is State) {
             restoredAnchorPosition = state.anchorPos
