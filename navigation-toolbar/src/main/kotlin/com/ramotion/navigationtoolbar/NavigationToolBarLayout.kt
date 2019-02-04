@@ -1,13 +1,13 @@
 package com.ramotion.navigationtoolbar
 
 import android.content.Context
-import android.support.annotation.AttrRes
-import android.support.design.widget.AppBarLayout
-import android.support.design.widget.CollapsingToolbarLayout
-import android.support.design.widget.CoordinatorLayout
-import android.support.v7.widget.Toolbar
 import android.util.AttributeSet
 import android.view.LayoutInflater
+import androidx.annotation.AttrRes
+import androidx.appcompat.widget.Toolbar
+import androidx.coordinatorlayout.widget.CoordinatorLayout
+import com.google.android.material.appbar.AppBarLayout
+import com.google.android.material.appbar.CollapsingToolbarLayout
 import com.ramotion.navigationtoolbar.HeaderLayoutManager.*
 
 /**

@@ -1,10 +1,10 @@
 package com.ramotion.navigationtoolbar.example.pager
 
-import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import com.ramotion.navigationtoolbar.example.R
+import androidx.recyclerview.widget.RecyclerView
 import com.ramotion.navigationtoolbar.example.PageDataSet
+import com.ramotion.navigationtoolbar.example.R
 
 
 class PageAdapter(private val count: Int,

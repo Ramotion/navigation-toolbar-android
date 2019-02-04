@@ -9,15 +9,15 @@ import android.os.Build
 import android.os.Looper
 import android.os.Parcel
 import android.os.Parcelable
-import android.support.design.widget.AppBarLayout
-import android.support.design.widget.CoordinatorLayout
-import android.support.v4.view.ViewCompat
 import android.util.AttributeSet
 import android.util.SparseArray
 import android.util.TypedValue
 import android.view.View
 import android.view.animation.LinearInterpolator
 import android.widget.OverScroller
+import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.view.ViewCompat
+import com.google.android.material.appbar.AppBarLayout
 import kotlin.math.abs
 import kotlin.math.min
 

@@ -1,10 +1,10 @@
 package com.ramotion.navigationtoolbar.example.pager
 
-import android.support.v4.view.PagerAdapter
-import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager.widget.PagerAdapter
 import com.ramotion.navigationtoolbar.example.R
 import com.ramotion.navigationtoolbar.example.ViewPagerDataSet
 import java.util.*
