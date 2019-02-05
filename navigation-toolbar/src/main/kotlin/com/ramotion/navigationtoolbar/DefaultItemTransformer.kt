@@ -87,25 +87,27 @@ open class DefaultItemTransformer
                 transformBottomHalf(lm, header)
                 clearPoints()
                 transformed = true
-        } else {
-            // On scroll from bottom to top
-            val collapsedToTopOfBottomHalf = currentRatioBottomHalf == 0f
-                    && prevRatioBottomHalf > currentRatioBottomHalf
-            if (collapsedToTopOfBottomHalf) {
-                transformBottomHalf(lm, header)
-                transformTopHalf(lm, header, headerBottom)
-                lm.fill(header)
-                clearPoints()
-                transformed = true
-        } else {
-            val collapsedToTopOfTopHalf = currentRatioTopHalf == 0f
-                    && prevRatioTopHalf > currentRatioTopHalf && prevRatioTopHalf != -1f
-            if (collapsedToTopOfTopHalf) {
-                transformTopHalf(lm, header, headerBottom)
-                clearPoints()
-                transformed = true
+            } else {
+                // On scroll from bottom to top
+                val collapsedToTopOfBottomHalf = currentRatioBottomHalf == 0f
+                        && prevRatioBottomHalf > currentRatioBottomHalf
+                if (collapsedToTopOfBottomHalf) {
+                    transformBottomHalf(lm, header)
+                    transformTopHalf(lm, header, headerBottom)
+                    lm.fill(header)
+                    clearPoints()
+                    transformed = true
+                } else {
+                    val collapsedToTopOfTopHalf = currentRatioTopHalf == 0f
+                            && prevRatioTopHalf > currentRatioTopHalf && prevRatioTopHalf != -1f
+                    if (collapsedToTopOfTopHalf) {
+                        transformTopHalf(lm, header, headerBottom)
+                        clearPoints()
+                        transformed = true
+                    }
+                }
             }
-        }}}
+        }
 
         if (!transformed) {
             val isAtBottomHalf = currentRatioBottomHalf > 0f && currentRatioBottomHalf < 1f
@@ -131,6 +133,10 @@ open class DefaultItemTransformer
     }
 
     private fun updateRatios(lm: HeaderLayoutManager, headerBottom: Int) {
+        val oldWorkBottom = lm.workBottom
+        if (headerBottom > oldWorkBottom)
+            lm.initBaseSizeValues(headerBottom)
+
         currentRatio = max(0f, headerBottom / lm.workBottom.toFloat())
         currentRatioWork = max(0f, (headerBottom - lm.workTop) / lm.workHeight.toFloat())
         currentRatioTopHalf = max(0f, 1 - (ratioBottomHalf - min(max(currentRatio, ratioTopHalf), ratioBottomHalf)) / (ratioBottomHalf - ratioTopHalf))
