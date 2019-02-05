@@ -1,6 +1,5 @@
 package com.ramotion.navigationtoolbar.example.header
 
-import android.util.Log
 import android.view.View
 import android.view.ViewOutlineProvider
 import android.view.ViewTreeObserver
