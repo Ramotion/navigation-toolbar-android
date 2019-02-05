@@ -89,7 +89,7 @@ class HeaderItemTransformer(
             val ratioHorizontalOffset = (1f - min(headerCenter, abs(headerCenter - cardCenterX)) / headerCenter * invertedBottomRatio)
             val alphaTitle = 0.7f + 0.3f * ratioHorizontalOffset
 
-            if (holder.overlayTitle?.text!!.isNotEmpty() && holder.overlayLine?.width == 0)
+            if (holder.overlayTitle?.text?.isNotEmpty() == true && holder.overlayLine?.width == 0)
                 holder.overlayTitle?.requestLayout()
             transformTitle(holder, card, cardCenterX, cardCenterY, ratioHorizontalPosition, invertedBottomRatio, ratioHorizontalOffset, alphaTitle)
 
@@ -123,10 +123,11 @@ class HeaderItemTransformer(
                                ratioHorizontalPosition: Float, invertedBottomRatio: Float,
                                ratioHorizontalOffset: Float, alphaTitle: Float) {
 
-        if (holder.overlayTitle?.text!!.isNotEmpty() && holder.overlayLine?.width == 0) {
+        if (holder.overlayTitle?.text?.isNotEmpty() == true && holder.overlayLine?.width == 0) {
             holder.overlayTitle?.postDelayed({
                 transformTitle(holder, card, cardCenterX, cardCenterY, ratioHorizontalPosition, invertedBottomRatio, ratioHorizontalOffset, alphaTitle)
             }, 100)
+            return
         }
 
         holder.overlayTitle?.also { title ->
@@ -153,6 +154,7 @@ class HeaderItemTransformer(
             holder.overlayLine?.postDelayed({
                 transformLine(holder, card, cardCenterX, cardCenterY, ratioHorizontalPosition, lineAlpha, alphaTitle)
             }, 100)
+            return
         }
 
         holder.overlayLine?.also { line ->
