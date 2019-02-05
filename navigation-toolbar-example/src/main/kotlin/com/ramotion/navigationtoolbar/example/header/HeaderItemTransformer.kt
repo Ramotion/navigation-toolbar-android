@@ -1,5 +1,6 @@
 package com.ramotion.navigationtoolbar.example.header
 
+import android.view.View
 import android.view.ViewOutlineProvider
 import android.view.ViewTreeObserver
 import android.widget.FrameLayout
@@ -55,8 +56,8 @@ class HeaderItemTransformer(
         val (hs, vs) = header.getChildAt(0).let { it.left to it.top }
         val nothingChanged =
                 hs == prevHScrollOffset && vs == prevVScrollOffset
-                && childCount == prevChildCount
-                && prevHeaderBottom == headerBottom
+                        && childCount == prevChildCount
+                        && prevHeaderBottom == headerBottom
         if (nothingChanged) {
             return false
         }
@@ -88,32 +89,13 @@ class HeaderItemTransformer(
             val ratioHorizontalOffset = (1f - min(headerCenter, abs(headerCenter - cardCenterX)) / headerCenter * invertedBottomRatio)
             val alphaTitle = 0.7f + 0.3f * ratioHorizontalOffset
 
-            holder.overlayTitle?.also { title ->
-                val titleLeft = card.x + titleLeftOffset
-                val titleCenter = cardCenterX - title.width / 2
-                val titleCurrentLeft = titleLeft + (titleCenter - titleLeft) * invertedBottomRatio
-                val titleTop = cardCenterY - title.height / 2
-                val titleOffset = (-ratioHorizontalPosition * cardWidth / 2) * currentRatioTopHalf
+            if (holder.overlayTitle?.text!!.isNotEmpty() && holder.overlayLine?.width == 0)
+                holder.overlayTitle?.requestLayout()
+            transformTitle(holder, card, cardCenterX, cardCenterY, ratioHorizontalPosition, invertedBottomRatio, ratioHorizontalOffset, alphaTitle)
 
-                title.x = titleCurrentLeft + titleOffset
-                title.y = titleTop
-                title.alpha = alphaTitle
-                title.scaleX = min(1f, 0.8f + 0.2f * ratioHorizontalOffset)
-                title.scaleY = title.scaleX
-            }
-
-            holder.overlayLine?.also { line ->
-                val lineWidth = line.width
-                val lineHeight = line.height
-                val lineLeft = cardCenterX - lineWidth / 2
-                val lineTop = cardCenterY + (holder.overlayTitle?.let { it.height / 2 + lineTitleOffset } ?: 0)
-                val hBottomOffset = ((card.right - lineRightOffset - lineWidth) - lineLeft) * currentRatioBottomHalf
-                val hTopOffset = -ratioHorizontalPosition * cardWidth / 1.1f * (1f - currentRatioTopHalf)
-                val vOffset = ((card.bottom - lineBottomOffset - lineHeight) - lineTop) * currentRatioBottomHalf
-                line.x = lineLeft + hBottomOffset + hTopOffset
-                line.y = lineTop + vOffset
-                line.alpha = if (currentRatioTopHalf == 1f) lineAlpha else alphaTitle
-            }
+            if (holder.overlayLine?.width == 0 || holder.overlayLine?.height == 0)
+                holder.overlayLine?.requestLayout()
+            transformLine(holder, card, cardCenterX, cardCenterY, ratioHorizontalPosition, lineAlpha, alphaTitle)
 
             val background = holder.backgroundLayout
             if (currentRatioBottomHalf != 0f) {
@@ -133,6 +115,57 @@ class HeaderItemTransformer(
                     background.alpha = 1f - abs(ratioHorizontalPosition)
                 }
             }
+        }
+    }
+
+    private fun transformTitle(holder: HeaderItem, card: View,
+                               cardCenterX: Float, cardCenterY: Float,
+                               ratioHorizontalPosition: Float, invertedBottomRatio: Float,
+                               ratioHorizontalOffset: Float, alphaTitle: Float) {
+
+        if (holder.overlayTitle?.text!!.isNotEmpty() && holder.overlayLine?.width == 0) {
+            holder.overlayTitle?.postDelayed({
+                transformTitle(holder, card, cardCenterX, cardCenterY, ratioHorizontalPosition, invertedBottomRatio, ratioHorizontalOffset, alphaTitle)
+            }, 100)
+        }
+
+        holder.overlayTitle?.also { title ->
+            val titleLeft = card.x + titleLeftOffset
+            val titleCenter = cardCenterX - title.width / 2
+            val titleCurrentLeft = titleLeft + (titleCenter - titleLeft) * invertedBottomRatio
+            val titleTop = cardCenterY - title.height / 2
+            val titleOffset = (-ratioHorizontalPosition * card.width / 2) * currentRatioTopHalf
+
+            title.x = titleCurrentLeft + titleOffset
+            title.y = titleTop
+            title.alpha = alphaTitle
+            title.scaleX = min(1f, 0.8f + 0.2f * ratioHorizontalOffset)
+            title.scaleY = title.scaleX
+        }
+    }
+
+    private fun transformLine(holder: HeaderItem, card: View,
+                              cardCenterX: Float, cardCenterY: Float,
+                              ratioHorizontalPosition: Float,
+                              lineAlpha: Float, alphaTitle: Float) {
+
+        if (holder.overlayLine?.width == 0 || holder.overlayLine?.height == 0) {
+            holder.overlayLine?.postDelayed({
+                transformLine(holder, card, cardCenterX, cardCenterY, ratioHorizontalPosition, lineAlpha, alphaTitle)
+            }, 100)
+        }
+
+        holder.overlayLine?.also { line ->
+            val lineWidth = line.width
+            val lineHeight = line.height
+            val lineLeft = cardCenterX - lineWidth / 2
+            val lineTop = cardCenterY + (holder.overlayTitle?.let { it.height / 2 + lineTitleOffset } ?: 0)
+            val hBottomOffset = ((card.right - lineRightOffset - lineWidth) - lineLeft) * currentRatioBottomHalf
+            val hTopOffset = -ratioHorizontalPosition * card.width / 1.1f * (1f - currentRatioTopHalf)
+            val vOffset = ((card.bottom - lineBottomOffset - lineHeight) - lineTop) * currentRatioBottomHalf
+            line.x = lineLeft + hBottomOffset + hTopOffset
+            line.y = lineTop + vOffset
+            line.alpha = if (currentRatioTopHalf == 1f) lineAlpha else alphaTitle
         }
     }
 }
