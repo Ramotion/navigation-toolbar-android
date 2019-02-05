@@ -39,18 +39,18 @@ Just download the package from [here](http://central.maven.org/maven2/com/ramoti
 
 Gradle:
 ```groovy
-implementation 'com.ramotion.navigationtoolbar:navigation-toolbar:0.1.0'
+implementation 'com.ramotion.navigationtoolbar:navigation-toolbar:0.1.1'
 ```
 SBT:
 ```scala
-libraryDependencies += "com.ramotion.navigationtoolbar" % "navitagiton-toolbar" % "0.1.0"
+libraryDependencies += "com.ramotion.navigationtoolbar" % "navitagiton-toolbar" % "0.1.1"
 ```
 Maven:
 ```xml
 <dependency>
   <groupId>com.ramotion.navigationtoolbar</groupId>
   <artifactId>navigation-toolbar</artifactId>
-  <version>0.1.0</version>
+  <version>0.1.1</version>
   <type>aar</type>
 </dependency>
 ```
