@@ -35,22 +35,22 @@ Inspired by [Aurélien Salomon](https://dribbble.com/aureliensalomon) [shot](htt
 
 ## Installation
 ​
-Just download the package from [here](http://central.maven.org/maven2/com/ramotion/navigationtoolbar/navigation-toolbar/0.1.1/navigation-toolbar-0.1.1.aar) and add it to your project classpath, or just use the maven repo:
+Just download the package from [here](http://central.maven.org/maven2/com/ramotion/navigationtoolbar/navigation-toolbar/0.1.2/navigation-toolbar-0.1.2.aar) and add it to your project classpath, or just use the maven repo:
 
 Gradle:
 ```groovy
-implementation 'com.ramotion.navigationtoolbar:navigation-toolbar:0.1.1'
+implementation 'com.ramotion.navigationtoolbar:navigation-toolbar:0.1.2'
 ```
 SBT:
 ```scala
-libraryDependencies += "com.ramotion.navigationtoolbar" % "navitagiton-toolbar" % "0.1.1"
+libraryDependencies += "com.ramotion.navigationtoolbar" % "navitagiton-toolbar" % "0.1.2"
 ```
 Maven:
 ```xml
 <dependency>
   <groupId>com.ramotion.navigationtoolbar</groupId>
   <artifactId>navigation-toolbar</artifactId>
-  <version>0.1.1</version>
+  <version>0.1.2</version>
   <type>aar</type>
 </dependency>
 ```
