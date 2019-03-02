@@ -124,13 +124,15 @@ class HeaderItemTransformer(
                                ratioHorizontalOffset: Float, alphaTitle: Float) {
 
         if (holder.overlayTitle?.text?.isNotEmpty() == true && holder.overlayLine?.width == 0) {
+            holder.overlayTitle?.visibility = View.INVISIBLE
             holder.overlayTitle?.postDelayed({
                 transformTitle(holder, card, cardCenterX, cardCenterY, ratioHorizontalPosition, invertedBottomRatio, ratioHorizontalOffset, alphaTitle)
-            }, 100)
+            }, 50)
             return
         }
 
         holder.overlayTitle?.also { title ->
+            holder.overlayTitle?.visibility = View.VISIBLE
             val titleLeft = card.x + titleLeftOffset
             val titleCenter = cardCenterX - title.width / 2
             val titleCurrentLeft = titleLeft + (titleCenter - titleLeft) * invertedBottomRatio
@@ -151,13 +153,15 @@ class HeaderItemTransformer(
                               lineAlpha: Float, alphaTitle: Float) {
 
         if (holder.overlayLine?.width == 0 || holder.overlayLine?.height == 0) {
+            holder.overlayLine?.visibility = View.INVISIBLE
             holder.overlayLine?.postDelayed({
                 transformLine(holder, card, cardCenterX, cardCenterY, ratioHorizontalPosition, lineAlpha, alphaTitle)
-            }, 100)
+            }, 50)
             return
         }
 
         holder.overlayLine?.also { line ->
+            holder.overlayLine?.visibility = View.VISIBLE
             val lineWidth = line.width
             val lineHeight = line.height
             val lineLeft = cardCenterX - lineWidth / 2
