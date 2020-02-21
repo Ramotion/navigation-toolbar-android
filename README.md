@@ -34,7 +34,7 @@ Inspired by [Aurélien Salomon](https://dribbble.com/aureliensalomon) [shot](htt
 
 ## Installation
 ​
-Just download the package from [here](http://central.maven.org/maven2/com/ramotion/navigationtoolbar/navigation-toolbar/0.1.3/navigation-toolbar-0.1.3.aar) and add it to your project classpath, or just use the maven repo:
+Just download the package from [here](https://repo1.maven.org/maven2/com/ramotion/navigationtoolbar/navigation-toolbar/0.1.3/navigation-toolbar-0.1.3.aar) and add it to your project classpath, or just use the maven repo:
 
 Gradle:
 ```groovy
