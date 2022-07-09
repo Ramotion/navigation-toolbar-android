@@ -140,7 +140,7 @@ open class DefaultItemTransformer
         currentRatio = max(0f, headerBottom / lm.workBottom.toFloat())
         currentRatioWork = max(0f, (headerBottom - lm.workTop) / lm.workHeight.toFloat())
         currentRatioTopHalf = max(0f, 1 - (ratioBottomHalf - min(max(currentRatio, ratioTopHalf), ratioBottomHalf)) / (ratioBottomHalf - ratioTopHalf))
-        currentRatioBottomHalf = max(0f, (currentRatio - ratioBottomHalf) / ratioBottomHalf)
+        currentRatioBottomHalf = max(0f, min(1f,(currentRatio - ratioBottomHalf) / ratioBottomHalf))
     }
 
     private fun updatePoints(lm: HeaderLayoutManager, header: HeaderLayout, up: Boolean) {
